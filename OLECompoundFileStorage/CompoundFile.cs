@@ -1,15 +1,4 @@
-﻿#define FLAT_WRITE
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using BinaryTrees;
-using System.Collections;
-using System.Security.AccessControl;
-using System.Threading;
-
-/*
+﻿/*
      The contents of this file are subject to the Mozilla Public License
      Version 1.1 (the "License"); you may not use this file except in
      compliance with the License. You may obtain a copy of the License at
@@ -25,7 +14,18 @@ using System.Threading;
      The Initial Developer of the Original Code is Federico Blaseotto.
 */
 
-namespace OleCompoundFileStorage
+#define FLAT_WRITE // No optimization on the number of write operations
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using BinaryTrees;
+using System.Collections;
+using System.Security.AccessControl;
+using System.Threading;
+
+namespace OpenMcdf
 {
     internal class DirEntryComparer : IComparer<IDirectoryEntry>
     {
@@ -37,8 +37,6 @@ namespace OleCompoundFileStorage
             //Compare X < Y --> -1
         }
     }
-
-
 
     /// <summary>
     /// Binary File Format Version. Sector size  is 512 byte for version 3,
@@ -72,7 +70,7 @@ namespace OleCompoundFileStorage
         /// <summary>
         /// Update mode allows subsequent data changing operations
         /// to be persisted directly on the opened file or stream
-        /// using the <see cref="M:OleCompoundFileStorage.CompoundFile.Commit">Commit</see>
+        /// using the <see cref="M:OpenMcdf.CompoundFile.Commit">Commit</see>
         /// method when required. Warning: this option may cause existing data loss if misused.
         /// </summary>
         Update
@@ -153,9 +151,9 @@ namespace OleCompoundFileStorage
 
 
         /// <summary>
-        /// Create a new, blank, standard compound file.
-        /// Version of created compound file is setted to 3 and sector recycle is turned off
-        /// to achieve the best reading/writing performance in most common scenarios.
+        /// Create a blank, version 3 compound file.
+        /// Sector recycle is turned off to achieve the best reading/writing 
+        /// performance in most common scenarios.
         /// </summary>
         /// <example>
         /// <code>
@@ -182,7 +180,7 @@ namespace OleCompoundFileStorage
             this.header = new Header();
             this.sectorRecycle = false;
 
-            this.sectors.OnSizeLimitReached += new SizeLimitReached(OnSizeLimitReached);
+            this.sectors.OnVer3SizeLimitReached += new Ver3SizeLimitReached(OnSizeLimitReached);
 
             DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
             FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
@@ -242,7 +240,7 @@ namespace OleCompoundFileStorage
         {
             this.header = new Header((ushort)cfsVersion);
             this.sectorRecycle = sectorRecycle;
-            this.updateMode = UpdateMode.Update;
+            
 
             DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
             FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
@@ -342,22 +340,23 @@ namespace OleCompoundFileStorage
         /// <param name="eraseFreeSectors">If true, overwrite with zeros unallocated sectors</param>
         /// <example>
         /// <code>
-        /// String srcFilename = "data_YOU_CAN_CHANGE.xls";
         /// 
-        /// CompoundFile cf = new CompoundFile(srcFilename, UpdateMode.Update, true, true);
+        /// String filename = "reportREAD.xls";
+        ///   
+        /// FileStream fs = new FileStream(filename, FileMode.Open);
+        /// CompoundFile cf = new CompoundFile(fs, UpdateMode.ReadOnly, false, false);
+        /// CFStream foundStream = cf.RootStorage.GetStream("Workbook");
         ///
-        /// Random r = new Random();
+        /// byte[] temp = foundStream.GetData();
         ///
-        /// byte[] buffer = GetBuffer(r.Next(3, 4095), 0x0A);
+        /// Assert.IsNotNull(temp);
         ///
-        /// cf.RootStorage.AddStream("MyStream").SetData(buffer);
-        /// 
-        /// //This will persist data to the underlying media.
-        /// cf.Commit();
         /// cf.Close();
         ///
         /// </code>
         /// </example>
+        /// <exception cref="T:OpenMcdf.CFException">Raised when trying to open a non-seekable stream</exception>
+        /// <exception cref="T:OpenMcdf.CFException">Raised stream is null</exception>
         public CompoundFile(Stream stream, UpdateMode updateMode, bool sectorRecycle, bool eraseFreeSectors)
         {
             this.sectorRecycle = sectorRecycle;
@@ -378,10 +377,11 @@ namespace OleCompoundFileStorage
         /// <param name="stream">Streamed compound file</param>
         /// <example>
         /// <code>
-        /// //A xls file should have a Workbook stream
-        /// String filename = "report.xls";
-        ///
-        /// CompoundFile cf = new CompoundFile(filename);
+        /// 
+        /// String filename = "reportREAD.xls";
+        ///   
+        /// FileStream fs = new FileStream(filename, FileMode.Open);
+        /// CompoundFile cf = new CompoundFile(fs);
         /// CFStream foundStream = cf.RootStorage.GetStream("Workbook");
         ///
         /// byte[] temp = foundStream.GetData();
@@ -389,11 +389,13 @@ namespace OleCompoundFileStorage
         /// Assert.IsNotNull(temp);
         ///
         /// cf.Close();
+        ///
         /// </code>
         /// </example>
+        /// <exception cref="T:OpenMcdf.CFException">Raised when trying to open a non-seekable stream</exception>
+        /// <exception cref="T:OpenMcdf.CFException">Raised stream is null</exception>
         public CompoundFile(Stream stream)
         {
-
             LoadStream(stream);
 
             DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
@@ -412,16 +414,17 @@ namespace OleCompoundFileStorage
         /// <remarks>
         /// This method can be used
         /// only if the supporting stream has been opened in 
-        /// <see cref="T:OleCompoundFileStorage.UpdateMode">Update mode</see>.
+        /// <see cref="T:OpenMcdf.UpdateMode">Update mode</see>.
         /// </remarks>
         public void Commit()
         {
             Commit(false);
         }
 
-
+#if !FLAT_WRITE
         private byte[] buffer = new byte[FLUSHING_BUFFER_MAX_SIZE];
         private Queue<Sector> flushingQueue = new Queue<Sector>(FLUSHING_QUEUE_SIZE);
+#endif
 
 
         /// <summary>
@@ -432,7 +435,7 @@ namespace OleCompoundFileStorage
         /// <remarks>
         /// This method can be used only if 
         /// the supporting stream has been opened in 
-        /// <see cref="T:OleCompoundFileStorage.UpdateMode">Update mode</see>.
+        /// <see cref="T:OpenMcdf.UpdateMode">Update mode</see>.
         /// </remarks>
         public void Commit(bool releaseMemory)
         {
@@ -864,13 +867,6 @@ namespace OleCompoundFileStorage
             {
                 if (s.Id == -1)
                 {
-                    //int freeId =fatScan.GetFreeSectorID();
-
-                    //if (freeId != Sector.ENDOFCHAIN)
-                    //{
-                    //}
-
-
                     sectors.Add(s);
                     s.Id = sectors.Count - 1;
                 }
@@ -984,7 +980,7 @@ namespace OleCompoundFileStorage
                 nCurrentSectors++;
 
                 //... so, adding a FAT sector may induce DIFAT sectors to increase by one
-                // and consequently this may induce ANOTHER FAT sector (TO-THINK: Could this condition occure ?)
+                // and consequently this may induce ANOTHER FAT sector (TO-THINK: May this condition occure ?)
                 if (nDIFATSectors * DIFAT_SECTOR_FAT_ENTRIES_COUNT <
                     (header.FATSectorsNumber > HEADER_DIFAT_ENTRIES_COUNT ?
                     header.FATSectorsNumber - HEADER_DIFAT_ENTRIES_COUNT :
@@ -1113,7 +1109,6 @@ namespace OleCompoundFileStorage
                     s = new Sector(GetSectorSize(), sourceStream);
                     s.Type = SectorType.DIFAT;
                     s.Id = header.FirstDIFATSectorID;
-                    //header.FirstDIFATSectorID = s.Id;  ?
                     sectors[header.FirstDIFATSectorID] = s;
                 }
 
@@ -1511,10 +1506,10 @@ namespace OleCompoundFileStorage
                 DirectoryEntry de
                 = new DirectoryEntry(StgType.StgInvalid);
 
+                //We are not inserting dirs. Do not use 'InsertNewDirectoryEntry'
                 de.Read(dirReader);
                 directoryEntries.Add(de);
                 de.SID = directoryEntries.Count - 1;
-                //this.AddDirectoryEntry(de);
             }
         }
 
@@ -1601,7 +1596,7 @@ namespace OleCompoundFileStorage
         /// Saves the in-memory image of Compound File to a file.
         /// </summary>
         /// <param name="fileName">File name to write the compound file to</param>
-        /// <exception cref="T:OleCompoundFileStorage.CFException">Raised if destination file is not seekable</exception>
+        /// <exception cref="T:OpenMcdf.CFException">Raised if destination file is not seekable</exception>
 
         public void Save(String fileName)
         {
@@ -1637,8 +1632,8 @@ namespace OleCompoundFileStorage
         /// Destination Stream must be seekable.
         /// </remarks>
         /// <param name="stream">The stream to save compound File to</param>
-        /// <exception cref="T:OleCompoundFileStorage.CFException">Raised if destination stream is not seekable</exception>
-        /// <exception cref="T:OleCompoundFileStorage.CFDisposedException">Raised if Compound File Storage has been already disposed</exception>
+        /// <exception cref="T:OpenMcdf.CFException">Raised if destination stream is not seekable</exception>
+        /// <exception cref="T:OpenMcdf.CFDisposedException">Raised if Compound File Storage has been already disposed</exception>
         /// <example>
         /// <code>
         ///    MemoryStream ms = new MemoryStream(size);
@@ -2068,18 +2063,21 @@ namespace OleCompoundFileStorage
 
             if (directoryEntries[sid].StgType == StgType.StgStream)
             {
-                // Clear the associated stream (or ministream)
-                if (directoryEntries[sid].Size < header.MinSizeStandardStream)
+                // Clear the associated stream (or ministream) if required
+                if (directoryEntries[sid].Size > 0) //thanks to Mark Bosold for this !
                 {
-                    List<Sector> miniChain
-                        = GetSectorChain(directoryEntries[sid].StartSetc, SectorType.Mini);
-                    FreeMiniChain(miniChain, this.eraseFreeSectors);
-                }
-                else
-                {
-                    List<Sector> chain
-                        = GetSectorChain(directoryEntries[sid].StartSetc, SectorType.Normal);
-                    FreeChain(chain, this.eraseFreeSectors);
+                    if (directoryEntries[sid].Size < header.MinSizeStandardStream)
+                    {
+                        List<Sector> miniChain
+                            = GetSectorChain(directoryEntries[sid].StartSetc, SectorType.Mini);
+                        FreeMiniChain(miniChain, this.eraseFreeSectors);
+                    }
+                    else
+                    {
+                        List<Sector> chain
+                            = GetSectorChain(directoryEntries[sid].StartSetc, SectorType.Normal);
+                        FreeChain(chain, this.eraseFreeSectors);
+                    }
                 }
             }
 
@@ -2090,12 +2088,12 @@ namespace OleCompoundFileStorage
         }
 
         /// <summary>
-        /// Close the Compound File object <see cref="T:OLECompoundFileStorage.CompoundFile">CompoundFile</see> and
+        /// Close the Compound File object <see cref="T:OpenMcdf.CompoundFile">CompoundFile</see> and
         /// free all associated resources (e.g. open file handle and allocated memory).
         /// <remarks>
-        /// When the <see cref="T:OLECompoundFileStorage.CompoundFile.Close()">Close</see> method is called,
+        /// When the <see cref="T:OpenMcdf.CompoundFile.Close()">Close</see> method is called,
         /// all the associated stream and storage objects are invalidated:
-        /// any operation invoked on them will produce a <see cref="T:OLECompoundFileStorage.CFDisposedException">CFDisposedException</see>.
+        /// any operation invoked on them will produce a <see cref="T:OpenMcdf.CFDisposedException">CFDisposedException</see>.
         /// </remarks>
         /// </summary>
         /// <example>
@@ -2174,7 +2172,9 @@ namespace OleCompoundFileStorage
                             this.directoryEntries = null;
                             this.fileName = null;
                             this.lockObject = null;
+#if !FLAT_WRITE
                             this.buffer = null;
+#endif
                         }
 
                         if (this.sourceStream != null && closeStream)

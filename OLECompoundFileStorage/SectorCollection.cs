@@ -4,9 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-namespace OleCompoundFileStorage
+namespace OpenMcdf
 {
-    public delegate void SizeLimitReached();
+    /// <summary>
+    /// Action to implement when transaction support - sector
+    /// has to be written to the underlying stream (see specs).
+    /// </summary>
+    public delegate void Ver3SizeLimitReached();
 
     /// <summary>
     /// Ad-hoc Heap Friendly sector collection to avoid using 
@@ -20,7 +24,7 @@ namespace OleCompoundFileStorage
 
         private int count = 0;
 
-        public event SizeLimitReached OnSizeLimitReached;
+        public event Ver3SizeLimitReached OnVer3SizeLimitReached;
 
         private List<ArrayList> largeArraySlices = new List<ArrayList>();
 
@@ -30,12 +34,12 @@ namespace OleCompoundFileStorage
         }
 
         private bool sizeLimitReached = false;
-        private void DoSizeLimitReached()
+        private void DoCheckSizeLimitReached()
         {
             if (!sizeLimitReached && (count - 1 > MAX_SECTOR_V4_COUNT_LOCK_RANGE))
             {
-                if (OnSizeLimitReached != null)
-                    OnSizeLimitReached();
+                if (OnVer3SizeLimitReached != null)
+                    OnVer3SizeLimitReached();
 
                 sizeLimitReached = true;
             }
@@ -113,7 +117,7 @@ namespace OleCompoundFileStorage
 
         public void Add(Sector item)
         {
-            DoSizeLimitReached();
+            DoCheckSizeLimitReached();
 
             add(item);
 

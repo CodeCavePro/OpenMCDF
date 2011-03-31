@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using OleCompoundFileStorage;
+using OpenMcdf;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
 
 //This project is used for profiling memory and performances of OpenMCDF .
 
-namespace OleCfsMemoryTest
+namespace OpenMcdfMemTest
 {
     class Program
     {
@@ -60,7 +60,7 @@ namespace OleCfsMemoryTest
             cf.Save("8_Streams.cfs");
 
             cf.Close();
-
+         
             File.Copy("8_Streams.cfs", "6_Streams.cfs", true);
 
             cf = new CompoundFile("6_Streams.cfs", UpdateMode.Update, true, true);

@@ -5,7 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using OleCompoundFileStorage;
+using OpenMcdf;
 using System.IO;
 using System.Resources;
 using System.Globalization;
@@ -33,7 +33,8 @@ namespace StructuredStorageExplorer
             saveAsToolStripMenuItem.Enabled = false;
         }
 
-        private byte[] inMemoryFileImage;
+        private CompoundFile cf;
+        private FileStream fs;
 
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
@@ -41,65 +42,80 @@ namespace StructuredStorageExplorer
             {
                 try
                 {
-                    OpenFile(openFileDialog1.FileName);
-                    saveAsToolStripMenuItem.Enabled = true;
+                    OpenFile();
                 }
                 catch
                 {
 
                 }
-
-                //
             }
         }
 
-        private void OpenFile(string fileName)
+        private void OpenFile()
         {
-            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-            BinaryReader bre = new BinaryReader(fs);
-            MemoryStream ms = new MemoryStream(bre.ReadBytes((int)fs.Length));
-            fs.Flush();
-            fs.Close();
-            inMemoryFileImage = ms.ToArray();
-            ms.Close();
+            if (!String.IsNullOrEmpty(openFileDialog1.FileName))
+            {
+                if (cf != null)
+                    cf.Close();
 
-            LoadFromMemory();
-            tbFileName.Text = openFileDialog1.FileName;
+                if (fs != null)
+                    fs.Close();
+
+                treeView1.Nodes.Clear();
+                tbFileName.Text = openFileDialog1.FileName;
+                LoadFile(openFileDialog1.FileName, tmCommitEnabled.Checked);
+                saveAsToolStripMenuItem.Enabled = true;
+            }
         }
 
-        private void LoadFromMemory()
+        private void RefreshTree()
         {
             treeView1.Nodes.Clear();
 
-            CompoundFile cf = null;
+            TreeNode root = null;
+            root = treeView1.Nodes.Add("Root Entry", "Root");
+
+            //Recursive function to get all storage and streams
+            AddNodes(root, cf.RootStorage);
+        }
+
+        private void LoadFile(string fileName, bool enableCommit)
+        {
+
+            fs = new FileStream(
+                fileName,
+                FileMode.Open,
+                enableCommit ?
+                    FileAccess.ReadWrite
+                    : FileAccess.Read
+                );
 
             try
             {
+                if (cf != null)
+                {
+                    cf.Close();
+                    cf = null;
+                }
+
                 //Load file
+                if (enableCommit)
+                {
+                    cf = new CompoundFile(fs, UpdateMode.Update, true, true);
+                }
+                else
+                {
+                    cf = new CompoundFile(fs);
 
-                cf = new CompoundFile(new MemoryStream(inMemoryFileImage));
+                }
 
-                TreeNode root = null;
-                root = treeView1.Nodes.Add("Root Entry", "Root");
-
-                //Recursive function to get all storage and streams
-                AddNodes(root, cf.RootStorage);
+                RefreshTree();
             }
             catch (Exception ex)
             {
                 treeView1.Nodes.Clear();
                 MessageBox.Show("Internal error: " + ex.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-
-
-                inMemoryFileImage = null;
             }
-            finally
-            {
-                if (cf != null)
-                    cf.Close();
-            }
-
         }
 
         /// <summary>
@@ -216,15 +232,23 @@ namespace StructuredStorageExplorer
             }
         }
 
-        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+        private String SelectedItemName()
         {
-            //No export if storage
-            //if (treeView1.SelectedNode == null || treeView1.SelectedNode.ImageIndex < 1)
-            //{
-            //    MessageBox.Show("Only stream data can be exported", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //Remove size indicator from node path
+            string path = treeView1.SelectedNode.FullPath;
+            int index = treeView1.SelectedNode.FullPath.IndexOf(" (", 0);
 
-            //    return;
-            //}
+            if (index != -1)
+                path = path.Remove(index);
+
+            // Get the parts to navigate
+            string[] pathParts = path.Split('\\');
+            return pathParts[pathParts.Length - 1];
+
+        }
+        private CFItem SelectedPathToStorage()
+        {
+            CFItem result = null;
 
             //Remove size indicator from node path
             string path = treeView1.SelectedNode.FullPath;
@@ -235,53 +259,148 @@ namespace StructuredStorageExplorer
 
             // Get the parts to navigate
             string[] pathParts = path.Split('\\');
-            CompoundFile cf = null;
+
             try
             {
-                cf = new CompoundFile(new MemoryStream(inMemoryFileImage));
-                CFStorage r = cf.RootStorage;
+                result = cf.RootStorage;
 
                 //Navigate into the storage, following path parts
-                for (int i = 1; i < pathParts.Length - 1; i++)
+                for (int i = 1; i < pathParts.Length; i++)
                 {
-                    r = r.GetStorage(pathParts[i]);
+                    if (result.IsStorage || result.IsRoot)
+                        result = ((CFStorage)result).GetStorage(pathParts[i]);
                 }
-
-                r.Delete(pathParts[pathParts.Length - 1]);
-
-                //cf.Save("C:\\backlogOLECFS.tmp.cfs");
-                MemoryStream ms = new MemoryStream();
-                cf.Save(ms);
-                cf.Close();
-                inMemoryFileImage = ms.ToArray();
-                ms.Close();
-
-                LoadFromMemory();
-
             }
-            catch
+            catch (Exception ex)
             {
+                result = null;
             }
-            finally
+
+            return result;
+        }
+
+        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!tmCommitEnabled.Checked)
             {
-                //cf.Close();
+                MessageBox.Show("Removal is supported only in update mode", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
+
+            //No export if storage
+            //if (treeView1.SelectedNode == null || treeView1.SelectedNode.ImageIndex < 1)
+            //{
+            //    MessageBox.Show("Only stream data can be exported", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            //    return;
+            //}
+
+            CFItem selectedStorage = SelectedPathToStorage();
+            if (selectedStorage.IsStorage)
+                ((CFStorage)selectedStorage).Delete(SelectedItemName());
+
+            RefreshTree();
+
+
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                CompoundFile cf = new CompoundFile(new MemoryStream(inMemoryFileImage));
                 cf.Save(saveFileDialog1.FileName);
-                cf.Close();
-
-                openFileDialog1.FileName = saveFileDialog1.FileName;
-
-                OpenFile(saveFileDialog1.FileName);
-
             }
 
         }
+
+        private bool firstTimeChecked = true;
+
+        private void tmCommitEnabled_Click(object sender, EventArgs e)
+        {
+            if (firstTimeChecked)
+            {
+                if (MessageBox.Show("Enabling update mode could lead to unwanted loss of data. Are you sure to continue ?", "Update mode is going to be enabled", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                {
+                    this.updateCurrentFileToolStripMenuItem.Enabled = tmCommitEnabled.Checked;
+                    OpenFile();
+                }
+                else
+                {
+                    firstTimeChecked = false;
+                    tmCommitEnabled.CheckState = CheckState.Unchecked;
+
+                }
+            }
+        }
+
+        private void updateCurrentFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cf.Commit();
+        }
+
+        private void addStreamToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string streamName = String.Empty;
+            if (Utils.InputBox("Add stream", "Insert stream name", ref streamName) == DialogResult.OK)
+            {
+                CFItem cfs = SelectedPathToStorage();
+                if (cfs != null && (cfs.IsStorage || cfs.IsRoot))
+                {
+                    ((CFStorage)cfs).AddStream(streamName);
+                }
+
+                RefreshTree();
+            }
+        }
+
+        private void importDataStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            string fileName = String.Empty;
+            if (openDataFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                CFItem cfs = SelectedPathToStorage();
+                CFStream s = ((CFStorage)cfs).GetStream(SelectedItemName());
+
+
+                if (cfs != null)
+                {
+
+
+                    FileStream f = new FileStream(openDataFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    byte[] data = new byte[f.Length];
+                    f.Read(data, 0, (int)f.Length);
+                    f.Flush();
+                    f.Close();
+                    s.SetData(data);
+                }
+
+                RefreshTree();
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (cf != null)
+                cf.Close();
+        }
+
+        private void addStorageStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            string storage = String.Empty;
+            if (Utils.InputBox("Add storage", "Insert storage name", ref storage) == DialogResult.OK)
+            {
+                CFItem cfs = SelectedPathToStorage();
+                if (cfs != null && (cfs.IsStorage || cfs.IsRoot))
+                {
+                    ((CFStorage)cfs).AddStorage(storage);
+                }
+
+                RefreshTree();
+            }
+        }
+
+
+
+
     }
 }
