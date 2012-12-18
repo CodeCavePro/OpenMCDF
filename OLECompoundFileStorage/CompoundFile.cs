@@ -754,7 +754,7 @@ namespace OpenMcdf
                 Load(fs);
 
             }
-            catch (Exception ex)
+            catch 
             {
                 if (fs != null)
                     fs.Close();

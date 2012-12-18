@@ -39,7 +39,7 @@ namespace OpenMcdf
         Black = 1
     }
 
-    internal class DirectoryEntry : IComparable, IDirectoryEntry
+    internal class DirectoryEntry :  IDirectoryEntry
     {
 
         private int sid = -1;

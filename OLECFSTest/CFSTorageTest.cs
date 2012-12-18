@@ -122,7 +122,7 @@ namespace OpenMcdfTest
             {
                 f = new CompoundFile("CorruptedDoc_bug3547815.doc", UpdateMode.ReadOnly, false, false, false);
             }
-            catch (Exception ex)
+            catch 
             {
                 Assert.Fail("No exception has to be fired on creation due to lazy loading");
             }
@@ -171,7 +171,7 @@ namespace OpenMcdfTest
                 //Corrupted file has invalid children item sid reference
                 f = new CompoundFile("CorruptedDoc_bug3547815_B.doc", UpdateMode.ReadOnly, false, false, true);
             }
-            catch (Exception ex)
+            catch 
             {
                 Assert.Fail("No exception has to be fired on creation due to lazy loading");
             }
@@ -195,7 +195,7 @@ namespace OpenMcdfTest
                     tw.Flush();
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 Assert.Fail("Fail is corrupted but it has to be loaded anyway by test design");
             }

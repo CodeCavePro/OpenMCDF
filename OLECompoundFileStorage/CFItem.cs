@@ -88,11 +88,6 @@ namespace OpenMcdf
         }
 
 
-
-    
-
-
-
         #endregion
 
         #region IComparable Members

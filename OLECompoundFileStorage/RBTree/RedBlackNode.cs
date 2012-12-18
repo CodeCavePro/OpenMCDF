@@ -1,121 +1,103 @@
 using System;
 using System.Text;
+using OpenMcdf;
 
 namespace RBTree
 {
     ///<summary>
     /// The RedBlackNode class encapsulates a node in the tree
     ///</summary>
-	public class RedBlackNode
-	{
-        // tree node colors
-		public static int	RED		= 0;
-		public static int	BLACK	= 1;
+    public class RedBlackNode
+    {
+        // the data or value associated with the key
+        private CFItem data;
 
-		// key provided by the calling class
-		private IComparable ordKey;
-		// the data or value associated with the key
-		private object objData;
-		// color - used to balance the tree
-		private int intColor;
-		// left node 
-		private RedBlackNode rbnLeft;
-		// right node 
-		private RedBlackNode rbnRight;
+        // left node 
+        private RedBlackNode rbnLeft;
+        // right node 
+        private RedBlackNode rbnRight;
         // parent node 
         private RedBlackNode rbnParent;
-		
-		///<summary>
-		///Key
-		///</summary>
-		public IComparable Key
-		{
-			get
+
+        ///<summary>
+        ///Data
+        ///</summary>
+        public CFItem Data
+        {
+            get
             {
-				return ordKey;
-			}
-			
-			set
-			{
-				ordKey = value;
-			}
-		}
-		///<summary>
-		///Data
-		///</summary>
-		public object Data
-		{
-			get
+                return data;
+            }
+
+            set
             {
-				return objData;
-			}
-			
-			set
-			{
-				objData = value;
-			}
-		}
-		///<summary>
-		///Color
-		///</summary>
-		public int Color
-		{
-			get
+                data = value;
+            }
+        }
+        ///<summary>
+        ///Color
+        ///</summary>
+        public StgColor Color
+        {
+            get
             {
-				return intColor;
-			}
-			
-			set
-			{
-				intColor = value;
-			}
-		}
-		///<summary>
-		///Left
-		///</summary>
-		public RedBlackNode Left
-		{
-			get
+                return data != null ? data.DirEntry.StgColor : StgColor.Black;
+            }
+
+            set
             {
-				return rbnLeft;
-			}
-			
-			set
-			{
-				rbnLeft = value;
-			}
-		}
-		///<summary>
-		/// Right
-		///</summary>
-		public RedBlackNode Right
-		{
-			get
+                if (data != null)
+                    data.DirEntry.StgColor = value;
+            }
+        }
+        ///<summary>
+        ///Left
+        ///</summary>
+        public RedBlackNode Left
+        {
+            get
             {
-				return rbnRight;
-			}
-			
-			set
-			{
-				rbnRight = value;
-			}
-		}
+                return rbnLeft;
+            }
+
+            set
+            {
+                rbnLeft = value;
+            }
+        }
+        ///<summary>
+        /// Right
+        ///</summary>
+        public RedBlackNode Right
+        {
+            get
+            {
+                return rbnRight;
+            }
+
+            set
+            {
+                rbnRight = value;
+            }
+        }
         public RedBlackNode Parent
         {
             get
             {
                 return rbnParent;
             }
-			
+
             set
             {
                 rbnParent = value;
             }
         }
 
-		public RedBlackNode()
-		{
-			Color = RED;
-		}
-	}
+        public RedBlackNode(CFItem item)
+        {
+            this.data = item;
+            if (item != null)
+                Color = (int)StgColor.Red;
+        }
+    }
 }
