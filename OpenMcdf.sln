@@ -1,30 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6C619B4F-100F-4D60-BEF1-60B770D24E5E}"
-	ProjectSection(SolutionItems) = preProject
-		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
-		OpenMcdf.vsmdi = OpenMcdf.vsmdi
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{8DC8730A-F254-4848-B272-BDFFCB5FDC00}"
 	ProjectSection(SolutionItems) = preProject
-		sources\TestFiles\2_MB-W.ppt = sources\TestFiles\2_MB-W.ppt
-		sources\TestFiles\_thumbs_bug_24.db = sources\TestFiles\_thumbs_bug_24.db
-		sources\TestFiles\BUG_16_.xls = sources\TestFiles\BUG_16_.xls
-		sources\TestFiles\CorruptedDoc_bug3547815.doc = sources\TestFiles\CorruptedDoc_bug3547815.doc
-		sources\TestFiles\CorruptedDoc_bug3547815_B.doc = sources\TestFiles\CorruptedDoc_bug3547815_B.doc
-		sources\TestFiles\CyclicFAT.cfs = sources\TestFiles\CyclicFAT.cfs
-		sources\TestFiles\MultipleStorage.cfs = sources\TestFiles\MultipleStorage.cfs
-		sources\TestFiles\MultipleStorage2.cfs = sources\TestFiles\MultipleStorage2.cfs
-		sources\TestFiles\MultipleStorage3.cfs = sources\TestFiles\MultipleStorage3.cfs
-		sources\TestFiles\MultipleStorage4.cfs = sources\TestFiles\MultipleStorage4.cfs
-		sources\TestFiles\report.xls = sources\TestFiles\report.xls
-		sources\TestFiles\report_name_fix.xls = sources\TestFiles\report_name_fix.xls
-		sources\TestFiles\reportREAD.xls = sources\TestFiles\reportREAD.xls
-		sources\TestFiles\testbad.ole = sources\TestFiles\testbad.ole
+		test\TestFiles\2_MB-W.ppt = test\TestFiles\2_MB-W.ppt
+		test\TestFiles\_thumbs_bug_24.db = test\TestFiles\_thumbs_bug_24.db
+		test\TestFiles\BUG_16_.xls = test\TestFiles\BUG_16_.xls
+		test\TestFiles\CorruptedDoc_bug3547815.doc = test\TestFiles\CorruptedDoc_bug3547815.doc
+		test\TestFiles\CorruptedDoc_bug3547815_B.doc = test\TestFiles\CorruptedDoc_bug3547815_B.doc
+		test\TestFiles\CyclicFAT.cfs = test\TestFiles\CyclicFAT.cfs
+		test\TestFiles\MultipleStorage.cfs = test\TestFiles\MultipleStorage.cfs
+		test\TestFiles\MultipleStorage2.cfs = test\TestFiles\MultipleStorage2.cfs
+		test\TestFiles\MultipleStorage3.cfs = test\TestFiles\MultipleStorage3.cfs
+		test\TestFiles\MultipleStorage4.cfs = test\TestFiles\MultipleStorage4.cfs
+		test\TestFiles\report.xls = test\TestFiles\report.xls
+		test\TestFiles\report_name_fix.xls = test\TestFiles\report_name_fix.xls
+		test\TestFiles\reportREAD.xls = test\TestFiles\reportREAD.xls
+		test\TestFiles\testbad.ole = test\TestFiles\testbad.ole
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf", "sources\OpenMcdf\OpenMcdf.csproj", "{56E15D4A-8A37-4C7C-BB44-FD59AFF220C1}"
@@ -33,15 +29,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions", "sour
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructuredStorageExplorer", "sources\Structured Storage Explorer\StructuredStorageExplorer.csproj", "{4F6323A8-9C06-4D94-808F-EBD69B8370D7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{73814657-FC73-4066-AABD-86062F2A132E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{73814657-FC73-4066-AABD-86062F2A132E}"
+	ProjectSection(SolutionItems) = preProject
+		test\OpenMcdf.testrunconfig = test\OpenMcdf.testrunconfig
+		test\OpenMcdf.vsmdi = test\OpenMcdf.vsmdi
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions.Test", "sources\Test\OpenMcdf.Extensions.Test\OpenMcdf.Extensions.Test.csproj", "{B9CB103F-0AA3-486D-9C9C-672924B6169C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions.Test", "test\OpenMcdf.Extensions.Test\OpenMcdf.Extensions.Test.csproj", "{B9CB103F-0AA3-486D-9C9C-672924B6169C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.MemTest", "sources\Test\OpenMcdf.MemTest\OpenMcdf.MemTest.csproj", "{E2BAD82D-3040-462B-BAA2-6E608A9054F4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.MemTest", "test\OpenMcdf.MemTest\OpenMcdf.MemTest.csproj", "{E2BAD82D-3040-462B-BAA2-6E608A9054F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.PerfTest", "sources\Test\OpenMcdf.PerfTest\OpenMcdf.PerfTest.csproj", "{7077508F-B313-4DF6-8855-4764911BE161}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.PerfTest", "test\OpenMcdf.PerfTest\OpenMcdf.PerfTest.csproj", "{7077508F-B313-4DF6-8855-4764911BE161}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Test", "sources\Test\OpenMcdf.Test\OpenMcdf.Test.csproj", "{FD339266-8842-40B4-9230-F8E84FC42AC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Test", "test\OpenMcdf.Test\OpenMcdf.Test.csproj", "{FD339266-8842-40B4-9230-F8E84FC42AC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
