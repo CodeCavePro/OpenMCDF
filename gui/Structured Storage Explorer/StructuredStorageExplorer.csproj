@@ -37,23 +37,23 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\Debug\StructuredStorageXplorer\</OutputPath>
+    <OutputPath>..\..\bin\net40\Debug\StructuredStorageXplorer\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>..\..\bin\Debug\StructuredStorageXplorer\StucturedStorageExplorer.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\net40\Debug\StructuredStorageXplorer\StucturedStorageExplorer.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\Release\StructuredStorageXplorer\</OutputPath>
+    <OutputPath>..\..\bin\net40\Release\StructuredStorageXplorer\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\..\bin\Release\StructuredStorageXplorer\StucturedStorageExplorer.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\net40\Release\StructuredStorageXplorer\StucturedStorageExplorer.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

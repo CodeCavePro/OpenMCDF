@@ -45,7 +45,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Test", "test\OpenM
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gui", "gui", "{0CD4F076-FFBA-41D9-9B31-CD1CE4C3EF80}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf.Shared", "src\OpenMcdf.Shared\OpenMcdf.Shared.shproj", "{E8C5B9B6-6AA3-4284-A4CF-0F2F788B8360}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf.Extensions.Shared", "src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.shproj", "{2AA71E5F-404E-42CE-A681-CF32693D079B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions.Portable", "src\OpenMcdf.Extensions.Portable\OpenMcdf.Extensions.Portable.csproj", "{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Portable", "src\OpenMcdf.Portable\OpenMcdf.Portable.csproj", "{2CA16F2C-820B-43F1-83B4-1DACABBD4513}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.projitems*{2aa71e5f-404e-42ce-a681-cf32693d079b}*SharedItemsImports = 13
+		src\OpenMcdf.Shared\OpenMcdf.Shared.projitems*{2ca16f2c-820b-43f1-83b4-1dacabbd4513}*SharedItemsImports = 4
+		src\OpenMcdf.Shared\OpenMcdf.Shared.projitems*{56e15d4a-8a37-4c7c-bb44-fd59aff220c1}*SharedItemsImports = 4
+		src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.projitems*{da2b58d7-7496-48a0-94eb-a248d2c7fb35}*SharedItemsImports = 4
+		src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.projitems*{db748c1d-d71c-442b-832d-2e33be816cbb}*SharedItemsImports = 4
+		src\OpenMcdf.Shared\OpenMcdf.Shared.projitems*{e8c5b9b6-6aa3-4284-a4cf-0f2f788b8360}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -79,6 +95,14 @@ Global
 		{FD339266-8842-40B4-9230-F8E84FC42AC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD339266-8842-40B4-9230-F8E84FC42AC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD339266-8842-40B4-9230-F8E84FC42AC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
