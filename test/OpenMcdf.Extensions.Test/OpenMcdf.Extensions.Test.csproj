@@ -54,11 +54,11 @@
     <Content Include="lib\NMock3.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\sources\OpenMcdf.Extensions\OpenMcdf.Extensions.csproj">
+    <ProjectReference Include="..\..\src\OpenMcdf.Extensions\OpenMcdf.Extensions.csproj">
       <Project>{db748c1d-d71c-442b-832d-2e33be816cbb}</Project>
       <Name>OpenMcdf.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\sources\OpenMcdf\OpenMcdf.csproj">
+    <ProjectReference Include="..\..\src\OpenMcdf\OpenMcdf.csproj">
       <Project>{56e15d4a-8a37-4c7c-bb44-fd59aff220c1}</Project>
       <Name>OpenMcdf</Name>
     </ProjectReference>
