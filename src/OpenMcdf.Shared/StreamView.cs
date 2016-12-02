@@ -14,6 +14,7 @@ using System.Collections;
 using System.IO;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Linq;
 
 namespace OpenMcdf
 {
@@ -182,7 +183,7 @@ namespace OpenMcdf
                 if (nToRead != 0)
                 {
                     Buffer.BlockCopy(
-                        sectorChain[secIndex].GetData(),
+                        sectorChain.Last().GetData(),
                         0,
                         buffer,
                         offset + nRead,
