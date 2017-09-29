@@ -56,9 +56,11 @@
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
@@ -67,8 +69,9 @@
             // openFileDialog1
             // 
             this.openFileDialog1.Filter = "Office files (*.xls *.doc *.ppt)|*.xls;*.doc;*.ppt|Thumbs db files (Thumbs.db)|*." +
-                "db|MSI Setup files (*.msi)|*.msi|All files (*.*)|*.*";
-            this.openFileDialog1.Title = "Open OLE Structured Storae file";
+    "db|MSI Setup files (*.msi)|*.msi|Outlook msg files (*.msg)|*.msg|All files (*.*)" +
+    "|*.*";
+            this.openFileDialog1.Title = "Open OLE Structured Storage file";
             // 
             // treeView1
             // 
@@ -79,6 +82,7 @@
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(241, 240);
             this.treeView1.TabIndex = 4;
+            this.treeView1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeView1_KeyUp);
             this.treeView1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.treeView1_MouseUp);
             // 
             // contextMenuStrip1
@@ -90,41 +94,41 @@
             this.addStreamToolStripMenuItem,
             this.removeToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(157, 114);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(148, 114);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // importDataStripMenuItem1
             // 
             this.importDataStripMenuItem1.Name = "importDataStripMenuItem1";
-            this.importDataStripMenuItem1.Size = new System.Drawing.Size(156, 22);
+            this.importDataStripMenuItem1.Size = new System.Drawing.Size(147, 22);
             this.importDataStripMenuItem1.Text = "Import data...";
             this.importDataStripMenuItem1.Click += new System.EventHandler(this.importDataStripMenuItem1_Click);
             // 
             // exportDataToolStripMenuItem
             // 
             this.exportDataToolStripMenuItem.Name = "exportDataToolStripMenuItem";
-            this.exportDataToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.exportDataToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.exportDataToolStripMenuItem.Text = "Export data...";
             this.exportDataToolStripMenuItem.Click += new System.EventHandler(this.exportDataToolStripMenuItem_Click);
             // 
             // addStorageStripMenuItem1
             // 
             this.addStorageStripMenuItem1.Name = "addStorageStripMenuItem1";
-            this.addStorageStripMenuItem1.Size = new System.Drawing.Size(156, 22);
+            this.addStorageStripMenuItem1.Size = new System.Drawing.Size(147, 22);
             this.addStorageStripMenuItem1.Text = "Add storage...";
             this.addStorageStripMenuItem1.Click += new System.EventHandler(this.addStorageStripMenuItem1_Click);
             // 
             // addStreamToolStripMenuItem
             // 
             this.addStreamToolStripMenuItem.Name = "addStreamToolStripMenuItem";
-            this.addStreamToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.addStreamToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.addStreamToolStripMenuItem.Text = "Add stream...";
             this.addStreamToolStripMenuItem.Click += new System.EventHandler(this.addStreamToolStripMenuItem_Click);
             // 
             // removeToolStripMenuItem
             // 
             this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            this.removeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.removeToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.removeToolStripMenuItem.Text = "Remove";
             this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
             // 
@@ -153,14 +157,14 @@
             this.updateCurrentFileToolStripMenuItem,
             this.saveAsToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openFileMenuItem
             // 
             this.openFileMenuItem.Image = global::StructuredStorageExplorer.Properties.Resources.folder;
             this.openFileMenuItem.Name = "openFileMenuItem";
-            this.openFileMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.openFileMenuItem.Size = new System.Drawing.Size(183, 22);
             this.openFileMenuItem.Text = "Open...";
             this.openFileMenuItem.Click += new System.EventHandler(this.openFileMenuItem_Click);
             // 
@@ -168,34 +172,34 @@
             // 
             this.newStripMenuItem1.Image = global::StructuredStorageExplorer.Properties.Resources.page_white;
             this.newStripMenuItem1.Name = "newStripMenuItem1";
-            this.newStripMenuItem1.Size = new System.Drawing.Size(179, 22);
+            this.newStripMenuItem1.Size = new System.Drawing.Size(183, 22);
             this.newStripMenuItem1.Text = "New Compound File";
             this.newStripMenuItem1.Click += new System.EventHandler(this.newStripMenuItem1_Click);
             // 
             // closeStripMenuItem1
             // 
             this.closeStripMenuItem1.Name = "closeStripMenuItem1";
-            this.closeStripMenuItem1.Size = new System.Drawing.Size(179, 22);
+            this.closeStripMenuItem1.Size = new System.Drawing.Size(183, 22);
             this.closeStripMenuItem1.Text = "Close file";
             this.closeStripMenuItem1.Click += new System.EventHandler(this.closeStripMenuItem1_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(176, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(180, 6);
             // 
             // updateCurrentFileToolStripMenuItem
             // 
             this.updateCurrentFileToolStripMenuItem.Image = global::StructuredStorageExplorer.Properties.Resources.disk;
             this.updateCurrentFileToolStripMenuItem.Name = "updateCurrentFileToolStripMenuItem";
-            this.updateCurrentFileToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.updateCurrentFileToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.updateCurrentFileToolStripMenuItem.Text = "Save";
             this.updateCurrentFileToolStripMenuItem.Click += new System.EventHandler(this.updateCurrentFileToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.saveAsToolStripMenuItem.Text = "Save As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
@@ -236,6 +240,7 @@
             // propertyGrid1
             // 
             this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGrid1.LineColor = System.Drawing.SystemColors.ControlDark;
             this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.propertyGrid1.Name = "propertyGrid1";
             this.propertyGrid1.Size = new System.Drawing.Size(241, 237);
@@ -294,9 +299,11 @@
             this.statusStrip1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

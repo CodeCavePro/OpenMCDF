@@ -386,52 +386,7 @@ namespace StructuredStorageExplorer
             // and set the selected treenode according.
 
             TreeNode n = treeView1.GetNodeAt(e.X, e.Y);
-
-            if (n != null)
-            {
-                if (this.hexEditor.ByteProvider != null && this.hexEditor.ByteProvider.HasChanges())
-                {
-                    if (MessageBox.Show("Do you want to save pending changes ?", "Save changes", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-                    {
-                        this.hexEditor.ByteProvider.ApplyChanges();
-                    }
-                }
-
-                treeView1.SelectedNode = n;
-
-
-                // The tag property contains the underlying CFItem.
-                CFItem target = (CFItem)n.Tag;
-
-                if (target.IsStream)
-                {
-                    addStorageStripMenuItem1.Enabled = false;
-                    addStreamToolStripMenuItem.Enabled = false;
-                    importDataStripMenuItem1.Enabled = true;
-                    exportDataToolStripMenuItem.Enabled = true;
-                }
-                else
-                {
-                    addStorageStripMenuItem1.Enabled = true;
-                    addStreamToolStripMenuItem.Enabled = true;
-                    importDataStripMenuItem1.Enabled = false;
-                    exportDataToolStripMenuItem.Enabled = false;
-                }
-
-                propertyGrid1.SelectedObject = n.Tag;
-
-
-
-                CFStream targetStream = n.Tag as CFStream;
-                if (targetStream != null)
-                {
-                    this.hexEditor.ByteProvider = new StreamDataProvider(targetStream);
-                }
-                else
-                {
-                    this.hexEditor.ByteProvider = null;
-                }
-            }
+            ChangeTreeViewNode(n);
         }
 
         void hexEditor_ByteProviderChanged(object sender, EventArgs e)
@@ -452,6 +407,65 @@ namespace StructuredStorageExplorer
             CloseCurrentFile();
         }
 
+        private void ChangeTreeViewNode(TreeNode newNode)
+        {
+            if (newNode == null)
+                return;
 
+            if (hexEditor.ByteProvider != null && hexEditor.ByteProvider.HasChanges())
+            {
+                if (MessageBox.Show("Do you want to save pending changes ?", "Save changes", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                {
+                    hexEditor.ByteProvider.ApplyChanges();
+                }
+            }
+
+            treeView1.SelectedNode = newNode;
+            
+            // The tag property contains the underlying CFItem.
+            CFItem target = (CFItem)newNode.Tag;
+
+            if (target.IsStream)
+            {
+                addStorageStripMenuItem1.Enabled = false;
+                addStreamToolStripMenuItem.Enabled = false;
+                importDataStripMenuItem1.Enabled = true;
+                exportDataToolStripMenuItem.Enabled = true;
+            }
+            else
+            {
+                addStorageStripMenuItem1.Enabled = true;
+                addStreamToolStripMenuItem.Enabled = true;
+                importDataStripMenuItem1.Enabled = false;
+                exportDataToolStripMenuItem.Enabled = false;
+            }
+
+            propertyGrid1.SelectedObject = newNode.Tag;
+
+            CFStream targetStream = newNode.Tag as CFStream;
+            hexEditor.ByteProvider = targetStream != null ? new StreamDataProvider(targetStream) : null;
+        }
+
+
+        private void treeView1_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Left:
+                    if (treeView1.SelectedNode != null && !treeView1.SelectedNode.IsExpanded)
+                        treeView1.SelectedNode.Collapse();
+                    break;
+                case Keys.Right:
+                    if (treeView1.SelectedNode != null && treeView1.SelectedNode.IsExpanded)
+                        treeView1.SelectedNode.Expand();
+                    break;
+                case Keys.Up:
+                    ChangeTreeViewNode(treeView1.SelectedNode?.PrevVisibleNode);
+                    break;
+                case Keys.Down:
+                    ChangeTreeViewNode(treeView1.SelectedNode?.NextVisibleNode);
+                    break;
+            }
+        }
     }
 }
