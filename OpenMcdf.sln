@@ -48,8 +48,6 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf.Shared", "src\Open
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf.Extensions.Shared", "src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.shproj", "{2AA71E5F-404E-42CE-A681-CF32693D079B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{63D28B53-A452-4B54-848C-F4DC853B9BDF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Extensions.Standard", "src\OpenMcdf.Extensions.Standard\OpenMcdf.Extensions.Standard.csproj", "{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Standard", "src\OpenMcdf.Standard\OpenMcdf.Standard.csproj", "{AA9ABAB9-5FB5-40B5-9C67-2E5CD19868DC}"
@@ -57,10 +55,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Portable", "..\..\..\..\Documents\Visual Studio 2017\Projects\CodeCave\OpenMCDF\src\OpenMcdf.Portable\OpenMcdf.Portable.csproj", "{2CA16F2C-820B-43F1-83B4-1DACABBD4513}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions.Portable", "..\..\..\..\Documents\Visual Studio 2017\Projects\CodeCave\OpenMCDF\src\OpenMcdf.Extensions.Portable\OpenMcdf.Extensions.Portable.csproj", "{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Nuget.Standard", "packaging\OpenMcdf.Nuget.Standard\OpenMcdf.Nuget.Standard.csproj", "{A79ECA70-15FB-4AF2-8B59-3287F372414F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.NuGet.Net40", "packaging\OpenMcdf.NuGet.Net40\OpenMcdf.NuGet.Net40.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -116,14 +110,6 @@ Global
 		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -134,8 +120,6 @@ Global
 		{E2BAD82D-3040-462B-BAA2-6E608A9054F4} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{7077508F-B313-4DF6-8855-4764911BE161} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{FD339266-8842-40B4-9230-F8E84FC42AC2} = {73814657-FC73-4066-AABD-86062F2A132E}
-		{A79ECA70-15FB-4AF2-8B59-3287F372414F} = {63D28B53-A452-4B54-848C-F4DC853B9BDF}
-		{0451BAEF-DF2E-4B98-8644-94EE9415E389} = {63D28B53-A452-4B54-848C-F4DC853B9BDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C391C94D-1FBE-4F24-9E09-AB72A6FE9F7B}
