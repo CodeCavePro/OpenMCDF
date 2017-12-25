@@ -1,4 +1,4 @@
-﻿#define ASSERT
+#define ASSERT
 
 using System;
 using System.Collections.Generic;

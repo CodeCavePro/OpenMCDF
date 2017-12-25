@@ -62,6 +62,33 @@
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyInfoText>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\Properties\AssemblyInfo.cs'))</AssemblyInfoText>
+    <PatternDescription>\[assembly: AssemblyDescription\("(?&lt;Description&gt;.*)"\)\]</PatternDescription>
+    <AssemblyDescription>$([System.Text.RegularExpressions.Regex]::Match($(AssemblyInfoText), $(PatternDescription)).Groups["Description"].Value)</AssemblyDescription>
+    <PatternCompany>\[assembly: AssemblyCompany\("(?&lt;Company&gt;.*)"\)\]</PatternCompany>
+    <AssemblyCompany>$([System.Text.RegularExpressions.Regex]::Match($(AssemblyInfoText), $(PatternCompany)).Groups["Company"].Value)</AssemblyCompany>
+    <PatternCopyright>\[assembly: AssemblyCompany\("(?&lt;Copyright&gt;.*)"\)\]</PatternCopyright>
+    <AssemblyCopyright>$([System.Text.RegularExpressions.Regex]::Match($(AssemblyInfoText), $(PatternCopyright)).Groups["Copyright"].Value)</AssemblyCopyright>
+    <PatternVersion>\[assembly: AssemblyInformationalVersion\("(?&lt;Version&gt;.*)"\)\]</PatternVersion>
+    <AssemblyInformationalVersion>$([System.Text.RegularExpressions.Regex]::Match($(AssemblyInfoText), $(PatternVersion)).Groups["Version"].Value)</AssemblyInformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>$(AssemblyName)-2</PackageId>
+    <PackageOutputPath>$(OutputPath)\..\</PackageOutputPath>
+    <Version>$(AssemblyInformationalVersion)</Version>
+    <Authors>$(AssemblyCompany)</Authors>
+    <Copyright>$(AssemblyCopyright)</Copyright>
+    <Description>$(AssemblyDescription)</Description>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageTags>Revit, Metadata, Thumbnail, Parameters, PartAtom, OLE</PackageTags>
+    <PackageLicenseUrl>https://github.com/CodeCavePro/revit-toolkit/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/CodeCavePro/revit-toolkit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CodeCavePro/revit-toolkit</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
@@ -95,4 +122,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <!-- RestoreProjectStyle is required to be set to PackageReference to use msbuild restore/pack targets -->
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <Import Project="$(MSBuildSDKsPath)\NuGet.Build.Tasks.Pack\build\NuGet.Build.Tasks.Pack.targets" />
 </Project>

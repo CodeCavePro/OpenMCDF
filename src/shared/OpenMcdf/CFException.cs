@@ -22,7 +22,7 @@ namespace OpenMcdf
         {
         }
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         protected CFException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -56,7 +56,7 @@ namespace OpenMcdf
         {
         }
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         protected CFDisposedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -89,7 +89,7 @@ namespace OpenMcdf
         {
         }
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         protected CFFileFormatException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -117,7 +117,7 @@ namespace OpenMcdf
     public class CFItemNotFound : CFException
     {
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         protected CFItemNotFound(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -154,7 +154,7 @@ namespace OpenMcdf
         {
         }
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         protected CFInvalidOperation(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -191,7 +191,7 @@ namespace OpenMcdf
         {
         }
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         protected CFDuplicatedItemException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -225,7 +225,7 @@ namespace OpenMcdf
         {
         }
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         protected CFCorruptedFileException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

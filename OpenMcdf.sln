@@ -52,22 +52,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf", "src\netstandard
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Extensions", "src\netstandard20\OpenMcdf.Extensions\OpenMcdf.Extensions.csproj", "{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf", "src\portable\OpenMcdf\OpenMcdf.csproj", "{2CA16F2C-820B-43F1-83B4-1DACABBD4513}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions", "src\portable\OpenMcdf.Extensions\OpenMcdf.Extensions.csproj", "{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netstandard", "netstandard", "{29569C63-54A4-4942-B00F-72E10B3D9BC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net40", "net40", "{99956FD6-A1B3-4228-A689-37459E8877F2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "portable", "portable", "{739A1EFE-7CCA-4B3E-A76B-5FDB424B208F}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\shared\OpenMcdf.Extensions\OpenMcdf.Extensions.projitems*{2aa71e5f-404e-42ce-a681-cf32693d079b}*SharedItemsImports = 13
-		src\shared\OpenMcdf\OpenMcdf.projitems*{2ca16f2c-820b-43f1-83b4-1dacabbd4513}*SharedItemsImports = 4
 		src\shared\OpenMcdf\OpenMcdf.projitems*{56e15d4a-8a37-4c7c-bb44-fd59aff220c1}*SharedItemsImports = 4
-		src\shared\OpenMcdf.Extensions\OpenMcdf.Extensions.projitems*{da2b58d7-7496-48a0-94eb-a248d2c7fb35}*SharedItemsImports = 4
 		src\shared\OpenMcdf.Extensions\OpenMcdf.Extensions.projitems*{db748c1d-d71c-442b-832d-2e33be816cbb}*SharedItemsImports = 4
 		src\shared\OpenMcdf\OpenMcdf.projitems*{e8c5b9b6-6aa3-4284-a4cf-0f2f788b8360}*SharedItemsImports = 13
 	EndGlobalSection
@@ -108,14 +100,6 @@ Global
 		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,8 +114,6 @@ Global
 		{FD339266-8842-40B4-9230-F8E84FC42AC2} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{3FC91B43-E065-4479-8C4A-1C8EA6411BD4} = {29569C63-54A4-4942-B00F-72E10B3D9BC8}
 		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00} = {29569C63-54A4-4942-B00F-72E10B3D9BC8}
-		{2CA16F2C-820B-43F1-83B4-1DACABBD4513} = {739A1EFE-7CCA-4B3E-A76B-5FDB424B208F}
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35} = {739A1EFE-7CCA-4B3E-A76B-5FDB424B208F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C391C94D-1FBE-4F24-9E09-AB72A6FE9F7B}

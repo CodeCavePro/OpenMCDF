@@ -113,7 +113,7 @@ namespace OpenMcdf
             }
         }
 
-#if !PORTABLE
+#if !NETSTANDARD1_6 && !NETSTANDARD2_0
         public override void Close()
         {
             base.Close();

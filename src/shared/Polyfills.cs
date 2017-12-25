@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace OpenMcdf
 {
+#if NETSTANDARD1_6
     public static class StreamExtension
     {
         public static void Close(this Stream stream)
@@ -20,4 +21,5 @@ namespace OpenMcdf
     public class SerializableAttribute : Attribute
     {
     }
+#endif
 }
