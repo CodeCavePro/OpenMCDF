@@ -62,6 +62,7 @@ namespace OpenMcdf
         {
         }
 #endif
+
         public CFDisposedException(string message)
             : base(message, null)
         {
@@ -94,7 +95,6 @@ namespace OpenMcdf
         {
         }
 #endif
-
         public CFFileFormatException(string message)
             : base(message, null)
         {
