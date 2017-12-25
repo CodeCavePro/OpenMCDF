@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
@@ -399,34 +399,34 @@ namespace OpenMcdf
         {
             CheckDisposed();
 
-            if (action != null)
+            if (action == null)
+                return;
+            List<IRBNode> subStorages = new List<IRBNode>();
+
+            Action<IRBNode> internalAction =
+                delegate(IRBNode targetNode)
+                {
+                    IDirectoryEntry d = targetNode as IDirectoryEntry;
+                    if (d.StgType == StgType.StgStream)
+                        action(new CFStream(this.CompoundFile, d));
+                    else
+                        action(new CFStorage(this.CompoundFile, d));
+
+                    if (d.Child != DirectoryEntry.NOSTREAM)
+                        subStorages.Add(targetNode);
+
+                    return;
+                };
+
+            this.Children.VisitTreeNodes(internalAction);
+
+            if (!recursive || subStorages.Count <= 0)
+                return;
+
+            foreach (IRBNode n in subStorages)
             {
-                List<IRBNode> subStorages
-                    = new List<IRBNode>();
-
-                Action<IRBNode> internalAction =
-                    delegate(IRBNode targetNode)
-                    {
-                        IDirectoryEntry d = targetNode as IDirectoryEntry;
-                        if (d.StgType == StgType.StgStream)
-                            action(new CFStream(this.CompoundFile, d));
-                        else
-                            action(new CFStorage(this.CompoundFile, d));
-
-                        if (d.Child != DirectoryEntry.NOSTREAM)
-                            subStorages.Add(targetNode);
-
-                        return;
-                    };
-
-                this.Children.VisitTreeNodes(internalAction);
-
-                if (recursive && subStorages.Count > 0)
-                    foreach (IRBNode n in subStorages)
-                    {
-                        IDirectoryEntry d = n as IDirectoryEntry;
-                        (new CFStorage(this.CompoundFile, d)).VisitEntries(action, recursive);
-                    }
+                IDirectoryEntry d = n as IDirectoryEntry;
+                (new CFStorage(this.CompoundFile, d)).VisitEntries(action, recursive);
             }
         }
 
