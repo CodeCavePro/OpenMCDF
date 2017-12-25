@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System;
 
 namespace OpenMcdf.PerfTest
 {
@@ -46,6 +44,19 @@ namespace OpenMcdf.PerfTest
             }
 
             return true;
+        }
+
+        internal static void CreateFile(string fileName)
+        {
+            const int MAX_STREAM_COUNT = 5000;
+
+            CompoundFile cf = new CompoundFile();
+            for (int i = 0; i < MAX_STREAM_COUNT; i++)
+            {
+                cf.RootStorage.AddStream("Test" + i.ToString()).SetData(Helpers.GetBuffer(300));
+            }
+            cf.Save(fileName);
+            cf.Close();
         }
     }
 }
