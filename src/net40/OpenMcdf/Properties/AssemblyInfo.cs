@@ -8,12 +8,9 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("OpenMcdf")]
 [assembly: AssemblyDescription("MS Compound File Storage .NET Implementation")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Federico Blaseotto")]
+[assembly: AssemblyCompany("Federico Blaseotto, Zhmayev Yaroslav")]
 [assembly: AssemblyProduct("OpenMcdf 2.0")]
-[assembly: AssemblyCopyright("Copyright © 2010-2015, Federico Blaseotto")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCopyright("Copyright © 2010-2015, Federico Blaseotto; 2016-2017 Zhmayev Yaroslav")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from

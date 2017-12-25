@@ -1,27 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>OpenMcdf-2.Extensions</PackageId>
+    <Product>OpenMcdf-2</Product>
     <TargetFrameworks>netstandard1.6;netstandard2.0;net461</TargetFrameworks>
     <RuntimeFrameworkVersion>2.0.3</RuntimeFrameworkVersion>
     <RootNamespace>OpenMcdf.Extensions</RootNamespace>
     <AssemblyName>OpenMcdf.Extensions</AssemblyName>
     <Description>MS Compound File Storage .NET Implementation</Description>
     <Company>Federico Blaseotto</Company>
-    <Copyright>Copyright © 2010-2015, Federico Blaseotto; 2016-2017 Zhmayev Yaroslav</Copyright>
-    <Version>2.0.4</Version>
     <Authors>Federico Blaseotto, Zhmayev Yaroslav</Authors>
-    <AssemblyVersion>2.0.4.0</AssemblyVersion>
-    <FileVersion>2.0.4.0</FileVersion>
+    <Copyright>Copyright © 2010-2015, Federico Blaseotto; 2016-2017 Zhmayev Yaroslav</Copyright>
+    <Version>2.0.7</Version>
+    <AssemblyVersion>2.0.7.0</AssemblyVersion>
+    <FileVersion>2.0.7.0</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/CodeCavePro/OpenMCDF/master/LICENSE.md</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/CodeCavePro/OpenMCDF</PackageProjectUrl>
     <RepositoryUrl>https://github.com/CodeCavePro/OpenMCDF</RepositoryUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/CodeCavePro/OpenMCDF/master/LICENSE.md</PackageLicenseUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>Structured Storage Compound file Mono</PackageTags>
+    <PackageTags>Structured Storage, Compound file, Mono, OLE</PackageTags>
     <ApplicationIcon />
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

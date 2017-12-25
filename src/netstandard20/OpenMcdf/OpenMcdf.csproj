@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>OpenMcdf-2.NetStandard</PackageId>
+    <Product>OpenMcdf-2</Product>
     <TargetFrameworks>netstandard1.6;netstandard2.0;net461</TargetFrameworks>
     <RuntimeFrameworkVersion>2.0.3</RuntimeFrameworkVersion>
     <RootNamespace>OpenMcdf</RootNamespace>
@@ -9,15 +12,19 @@
     <Company>Federico Blaseotto</Company>
     <Authors>Federico Blaseotto, Zhmayev Yaroslav</Authors>
     <Copyright>Copyright © 2010-2015, Federico Blaseotto; 2016-2017 Zhmayev Yaroslav</Copyright>
-    <Version>2.0.5</Version>
-    <AssemblyVersion>2.0.5.0</AssemblyVersion>
-    <FileVersion>2.0.5.0</FileVersion>
+    <Version>2.0.7</Version>
+    <AssemblyVersion>2.0.7.0</AssemblyVersion>
+    <FileVersion>2.0.7.0</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageLicenseUrl>https://raw.githubusercontent.com/CodeCavePro/OpenMCDF/master/LICENSE.md</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/CodeCavePro/OpenMCDF</PackageProjectUrl>
     <RepositoryUrl>https://github.com/CodeCavePro/OpenMCDF</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>Structured Storage Compound file Mono</PackageTags>
+    <PackageTags>Structured Storage, Compound file, Mono, OLE</PackageTags>
+    <ApplicationIcon />
+    <OutputTypeEx>library</OutputTypeEx>
+    <StartupObject />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

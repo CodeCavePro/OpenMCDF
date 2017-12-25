@@ -82,11 +82,11 @@
     <Copyright>$(AssemblyCopyright)</Copyright>
     <Description>$(AssemblyDescription)</Description>
     <NeutralLanguage>en</NeutralLanguage>
-    <PackageTags>Revit, Metadata, Thumbnail, Parameters, PartAtom, OLE</PackageTags>
-    <PackageLicenseUrl>https://github.com/CodeCavePro/revit-toolkit/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageTags>Structured Storage, Compound file, Mono, OLE</PackageTags>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/CodeCavePro/OpenMCDF/master/LICENSE.md</PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <PackageProjectUrl>https://github.com/CodeCavePro/revit-toolkit</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/CodeCavePro/revit-toolkit</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/codecavepro/OpenMcdf</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/codecavepro/OpenMcdf</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>

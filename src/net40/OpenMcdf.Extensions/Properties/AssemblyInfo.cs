@@ -7,13 +7,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("OpenMcdf.Extensions")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("-")]
-[assembly: AssemblyProduct("OpenMcdf.Extensions")]
-[assembly: AssemblyCopyright("Copyright © Federico Blaseotto, 2015")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyDescription("MS Compound File Storage .NET Implementation")]
+[assembly: AssemblyCompany("Federico Blaseotto, Zhmayev Yaroslav")]
+[assembly: AssemblyProduct("OpenMcdf 2.0")]
+[assembly: AssemblyCopyright("Copyright © 2010-2015, Federico Blaseotto; 2016-2017 Zhmayev Yaroslav")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
