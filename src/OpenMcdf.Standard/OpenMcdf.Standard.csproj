@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>OpenMcdf</RootNamespace>
+    <AssemblyName>OpenMcdf</AssemblyName>
+    <Description>MS Compound File Storage .NET Implementation</Description>
+    <Company>Federico Blaseotto</Company>
+    <Authors>Federico Blaseotto, Zhmayev Yaroslav</Authors>
+    <Copyright>Copyright © 2010-2015, Federico Blaseotto; 2016-2017 Zhmayev Yaroslav</Copyright>
+    <Version>2.0.5</Version>
+    <AssemblyVersion>2.0.5.0</AssemblyVersion>
+    <FileVersion>2.0.5.0</FileVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/CodeCavePro/OpenMCDF/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/CodeCavePro/OpenMCDF</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CodeCavePro/OpenMCDF</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Structured Storage Compound file Mono</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DocumentationFile>..\..\bin\Release\netstandard2.0\OpenMcdf.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+  </PropertyGroup>
+
+  <Import Project="..\OpenMcdf.Shared\OpenMcdf.Shared.projitems" Label="Shared" />
+
+</Project>

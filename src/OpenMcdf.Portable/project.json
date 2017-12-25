@@ -1,18 +1,14 @@
 ﻿{
-
   "dependencies": {
     "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
-    "NETStandard.Library": "1.6.0",
-    "System.Collections.NonGeneric": "4.0.1",
-    "System.Diagnostics.TraceSource": "4.0.0",
-    "System.Runtime.Serialization.Primitives": "4.1.1",
-    "System.Security.AccessControl": "4.0.0"
+    "NETStandard.Library": "1.6.1",
+    "System.Collections.NonGeneric": "4.3.0",
+    "System.Diagnostics.TraceSource": "4.3.0",
+    "System.Runtime.Serialization.Primitives": "4.3.0",
+    "System.Security.AccessControl": "4.3.0"
   },
-
   "frameworks": {
-    "netstandard1.3": {},
-    "netcoreapp1.0": {}
+    "netstandard1.3": {}
   },
-
   "supports": {}
 }

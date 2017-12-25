@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26510.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6C619B4F-100F-4D60-BEF1-60B770D24E5E}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		CHANGELOG.md = CHANGELOG.md
+		LICENSE.md = LICENSE.md
+		Support.txt = Support.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{8DC8730A-F254-4848-B272-BDFFCB5FDC00}"
 	ProjectSection(SolutionItems) = preProject
@@ -49,26 +56,26 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf.Shared", "src\Open
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf.Extensions.Shared", "src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.shproj", "{2AA71E5F-404E-42CE-A681-CF32693D079B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions.Portable", "src\OpenMcdf.Extensions.Portable\OpenMcdf.Extensions.Portable.csproj", "{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Portable", "src\OpenMcdf.Portable\OpenMcdf.Portable.csproj", "{2CA16F2C-820B-43F1-83B4-1DACABBD4513}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.NuGet", "packaging\OpenMcdf.NuGet\OpenMcdf.NuGet.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
-	ProjectSection(ProjectDependencies) = postProject
-		{DB748C1D-D71C-442B-832D-2E33BE816CBB} = {DB748C1D-D71C-442B-832D-2E33BE816CBB}
-		{2CA16F2C-820B-43F1-83B4-1DACABBD4513} = {2CA16F2C-820B-43F1-83B4-1DACABBD4513}
-		{56E15D4A-8A37-4C7C-BB44-FD59AFF220C1} = {56E15D4A-8A37-4C7C-BB44-FD59AFF220C1}
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35} = {DA2B58D7-7496-48A0-94EB-A248D2C7FB35}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{63D28B53-A452-4B54-848C-F4DC853B9BDF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Extensions.Standard", "src\OpenMcdf.Extensions.Standard\OpenMcdf.Extensions.Standard.csproj", "{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Standard", "src\OpenMcdf.Standard\OpenMcdf.Standard.csproj", "{AA9ABAB9-5FB5-40B5-9C67-2E5CD19868DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Portable", "..\..\..\..\Documents\Visual Studio 2017\Projects\CodeCave\OpenMCDF\src\OpenMcdf.Portable\OpenMcdf.Portable.csproj", "{2CA16F2C-820B-43F1-83B4-1DACABBD4513}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions.Portable", "..\..\..\..\Documents\Visual Studio 2017\Projects\CodeCave\OpenMCDF\src\OpenMcdf.Extensions.Portable\OpenMcdf.Extensions.Portable.csproj", "{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Nuget.Standard", "packaging\OpenMcdf.Nuget.Standard\OpenMcdf.Nuget.Standard.csproj", "{A79ECA70-15FB-4AF2-8B59-3287F372414F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.NuGet.Net40", "packaging\OpenMcdf.NuGet.Net40\OpenMcdf.NuGet.Net40.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.projitems*{2aa71e5f-404e-42ce-a681-cf32693d079b}*SharedItemsImports = 13
-		src\OpenMcdf.Shared\OpenMcdf.Shared.projitems*{2ca16f2c-820b-43f1-83b4-1dacabbd4513}*SharedItemsImports = 4
+		..\..\..\..\Documents\Visual Studio 2017\Projects\CodeCave\OpenMCDF\src\OpenMcdf.Shared\OpenMcdf.Shared.projitems*{2ca16f2c-820b-43f1-83b4-1dacabbd4513}*SharedItemsImports = 4
 		src\OpenMcdf.Shared\OpenMcdf.Shared.projitems*{56e15d4a-8a37-4c7c-bb44-fd59aff220c1}*SharedItemsImports = 4
-		src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.projitems*{da2b58d7-7496-48a0-94eb-a248d2c7fb35}*SharedItemsImports = 4
+		..\..\..\..\Documents\Visual Studio 2017\Projects\CodeCave\OpenMCDF\src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.projitems*{da2b58d7-7496-48a0-94eb-a248d2c7fb35}*SharedItemsImports = 4
 		src\OpenMcdf.Extensions.Shared\OpenMcdf.Extensions.Shared.projitems*{db748c1d-d71c-442b-832d-2e33be816cbb}*SharedItemsImports = 4
 		src\OpenMcdf.Shared\OpenMcdf.Shared.projitems*{e8c5b9b6-6aa3-4284-a4cf-0f2f788b8360}*SharedItemsImports = 13
 	EndGlobalSection
@@ -104,15 +111,28 @@ Global
 		{FD339266-8842-40B4-9230-F8E84FC42AC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD339266-8842-40B4-9230-F8E84FC42AC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD339266-8842-40B4-9230-F8E84FC42AC2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA9ABAB9-5FB5-40B5-9C67-2E5CD19868DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA9ABAB9-5FB5-40B5-9C67-2E5CD19868DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA9ABAB9-5FB5-40B5-9C67-2E5CD19868DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA9ABAB9-5FB5-40B5-9C67-2E5CD19868DC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CA16F2C-820B-43F1-83B4-1DACABBD4513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA2B58D7-7496-48A0-94EB-A248D2C7FB35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A79ECA70-15FB-4AF2-8B59-3287F372414F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
@@ -126,6 +146,7 @@ Global
 		{E2BAD82D-3040-462B-BAA2-6E608A9054F4} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{7077508F-B313-4DF6-8855-4764911BE161} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{FD339266-8842-40B4-9230-F8E84FC42AC2} = {73814657-FC73-4066-AABD-86062F2A132E}
+		{A79ECA70-15FB-4AF2-8B59-3287F372414F} = {63D28B53-A452-4B54-848C-F4DC853B9BDF}
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389} = {63D28B53-A452-4B54-848C-F4DC853B9BDF}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
