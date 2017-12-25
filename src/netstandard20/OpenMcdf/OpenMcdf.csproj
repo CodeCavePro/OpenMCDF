@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.3</RuntimeFrameworkVersion>
     <RootNamespace>OpenMcdf</RootNamespace>
     <AssemblyName>OpenMcdf</AssemblyName>
     <Description>MS Compound File Storage .NET Implementation</Description>
@@ -20,14 +21,18 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\bin\Release\</OutputPath>
-    <DocumentationFile>..\..\bin\Release\netstandard2.0\OpenMcdf.xml</DocumentationFile>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <DocumentationFile>..\..\..\bin\Release\netstandard2.0\OpenMcdf.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
   </PropertyGroup>
 
-  <Import Project="..\OpenMcdf.Shared\OpenMcdf.Shared.projitems" Label="Shared" />
+  <Import Project="..\..\shared\OpenMcdf\OpenMcdf.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <Compile Include="..\..\shared\Polyfills.cs" Link="Polyfills.cs" />
+  </ItemGroup>
 
 </Project>

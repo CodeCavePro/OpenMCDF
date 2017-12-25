@@ -23,7 +23,4 @@
     <Compile Include="$(MSBuildThisFileDirectory)StreamRW.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StreamView.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)OpenMcdfClassDiagram.cd" />
-  </ItemGroup>
 </Project>

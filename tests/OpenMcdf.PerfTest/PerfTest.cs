@@ -22,7 +22,7 @@ namespace OpenMcdf.PerfTest
             NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test, SkipWarmups = true)]
         [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 200.0d)] // max 0.2 sec
         [CounterMeasurement("TestCounter")]
-        public void SteamOfLargeFile()
+        public void Perf_SteamOfLargeFile()
         {
             if (!File.Exists(_fileName))
             {

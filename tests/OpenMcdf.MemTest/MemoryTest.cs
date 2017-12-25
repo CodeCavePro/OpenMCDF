@@ -19,11 +19,11 @@ namespace OpenMcdf.MemTest
             _testCounter = context.GetCounter("TestCounter");
         }
 
-        [PerfBenchmark(NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test, SkipWarmups = true)]
+        [PerfBenchmark(NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test, SkipWarmups = false)]
         [CounterMeasurement("TestCounter")]
         [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 6000.0d)] // max 6 sec
         [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo, 450 * 1024 * 1024)] // max 450 Mb in RAM
-        public void TestMultipleCodeFeatures()
+        public void Mem_MultipleCodeFeatures()
         {
             const int N_FACTOR = 1000;
 
@@ -135,7 +135,7 @@ namespace OpenMcdf.MemTest
         [CounterMeasurement("TestCounter")]
         [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 5500.0d)] // max 5.5 sec
         [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo, 3 * 1024 * 1024)] // max 3 Mb in RAM
-        public void TestMultipleStreamCommit()
+        public void Mem_MultipleStreamCommit()
         {
             File.Copy("report.xls", "reportOverwriteMultiple.xls", true);
 

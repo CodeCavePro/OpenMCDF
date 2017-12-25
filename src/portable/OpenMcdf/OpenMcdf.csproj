@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\Debug\netstandard1.3\</OutputPath>
+    <OutputPath>..\..\..\bin\Debug\netstandard1.3\</OutputPath>
     <DefineConstants>TRACE;DEBUG;PORTABLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -29,21 +29,23 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\Release\netstandard1.3\</OutputPath>
+    <OutputPath>..\..\..\bin\Release\netstandard1.3\</OutputPath>
     <DefineConstants>TRACE;PORTABLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\bin\Release\netstandard1.3\OpenMcdf.XML</DocumentationFile>
+    <DocumentationFile>..\..\..\bin\Release\netstandard1.3\OpenMcdf.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\shared\Polyfills.cs">
+      <Link>Polyfills.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Polyfills.cs" />
   </ItemGroup>
-  <Import Project="..\OpenMcdf.Shared\OpenMcdf.Shared.projitems" Label="Shared" />
+  <Import Project="..\..\shared\OpenMcdf\OpenMcdf.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

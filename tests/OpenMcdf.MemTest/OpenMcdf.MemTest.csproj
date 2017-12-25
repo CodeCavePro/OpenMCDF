@@ -91,7 +91,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\OpenMcdf\OpenMcdf.csproj">
+    <ProjectReference Include="..\..\src\net40\OpenMcdf\OpenMcdf.csproj">
       <Project>{56e15d4a-8a37-4c7c-bb44-fd59aff220c1}</Project>
       <Name>OpenMcdf</Name>
     </ProjectReference>
