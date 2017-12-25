@@ -34,7 +34,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf", "src\OpenMcdf\Op
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions", "src\OpenMcdf.Extensions\OpenMcdf.Extensions.csproj", "{DB748C1D-D71C-442B-832D-2E33BE816CBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructuredStorageExplorer", "gui\Structured Storage Explorer\StructuredStorageExplorer.csproj", "{4F6323A8-9C06-4D94-808F-EBD69B8370D7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{73814657-FC73-4066-AABD-86062F2A132E}"
 	ProjectSection(SolutionItems) = preProject
