@@ -28,8 +28,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\..\bin\Release\</OutputPath>
-    <DocumentationFile>..\..\..\bin\Release\netstandard2.0\OpenMcdf.xml</DocumentationFile>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DocumentationFile>..\bin\Release\netstandard2.0\OpenMcdf.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,7 +39,7 @@
   </ItemGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
