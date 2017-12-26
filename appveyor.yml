@@ -97,7 +97,9 @@ deploy:
     description: |-
         Supports the following .NET frameworks and standards
         * .NET 4.0
+        * [.NET 4.5.2](https://github.com/Microsoft/dotnet/blob/master/releases/net452/README.md)
         * [.NET 4.6.1](https://github.com/Microsoft/dotnet/blob/master/releases/net461/README.md)
+        * [.NET 4.7](https://github.com/Microsoft/dotnet/blob/master/releases/net47/README.md)
         * [.NET Standard 1.6](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard1.6.md) (.NET Core >=1.0, .NET >=4.6.1, Mono >=4.6 etc)
         * [.NET Standard 2.0](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md) (.NET Core >=2.0, .NET >=4.6.1, Mono >=5.4 etc)
     draft: false
