@@ -4,7 +4,7 @@ using System.IO;
 using NBench;
 using HelpersFromTests = OpenMcdf.Test.Helpers;
 
-// This project is used for profiling memory and performances of OpenMCDF .
+// This project is used for profiling memory and performances of OpenMCDF.
 
 namespace OpenMcdf.PerfTest
 {

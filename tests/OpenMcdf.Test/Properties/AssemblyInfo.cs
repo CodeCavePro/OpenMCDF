@@ -1,17 +1,15 @@
+using System.Resources;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OpenMcdfTest")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("-")]
-[assembly: AssemblyProduct("OpenMcdfTest")]
-[assembly: AssemblyCopyright("Copyright © 2010-2011, Federico Blaseotto")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyTitle("OpenMcdf.Test")]
+[assembly: AssemblyDescription("This project is used for profiling memory and performances of OpenMCDF")]
+[assembly: AssemblyCompany("Federico Blaseotto, Zhmayev Yaroslav")]
+[assembly: AssemblyProduct("OpenMcdf.Test")]
+[assembly: AssemblyCopyright("Copyright © 2010-2017, Federico Blaseotto; 2016-2017 Zhmayev Yaroslav")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM componenets.  If you need to access a type in this assembly from 
@@ -30,4 +28,6 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.5.1.*")]
+[assembly: AssemblyVersion("2.1.1.*")]
+
+[assembly: NeutralResourcesLanguage("en")]
