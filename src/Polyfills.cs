@@ -1,9 +1,13 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("OpenMcdf.Test")]
+[assembly: InternalsVisibleTo("OpenMcdf.Extensions")]
 
 #if NETSTANDARD1_6
 
-    public static class StreamExtension
+public static class StreamExtension
     {
         public static void Close(this Stream stream)
         {

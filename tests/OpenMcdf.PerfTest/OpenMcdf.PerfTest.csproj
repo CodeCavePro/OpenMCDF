@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenMcdf.PerfTest</RootNamespace>
     <AssemblyName>OpenMcdf.PerfTest</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <FileUpgradeFlags>
@@ -96,8 +96,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\net40\OpenMcdf\OpenMcdf.csproj">
-      <Project>{56e15d4a-8a37-4c7c-bb44-fd59aff220c1}</Project>
+    <ProjectReference Include="..\..\src\OpenMcdf.csproj">
+      <Project>{9128ccc3-88df-4f31-883e-47a04825276f}</Project>
       <Name>OpenMcdf</Name>
     </ProjectReference>
     <ProjectReference Include="..\OpenMcdf.Test\OpenMcdf.Test.csproj">
