@@ -28,20 +28,20 @@ namespace OpenMcdf.Extensions.OLEProperties
     {
         CodePageString = 0x00000001,
         PIDDSI_CATEGORY = 0x00000002, //Category VT_LPSTR
-        PIDDSI_PRESFORMAT = 0x00000003,//PresentationTarget	VT_LPSTR
-        PIDDSI_BYTECOUNT = 0x00000004,//Bytes   	VT_I4
-        PIDDSI_LINECOUNT = 0x00000005,// Lines   	VT_I4
-        PIDDSI_PARCOUNT = 0x00000006,// Paragraphs 	VT_I4
-        PIDDSI_SLIDECOUNT = 0x00000007,// Slides 	VT_I4
-        PIDDSI_NOTECOUNT = 0x00000008,// Notes  	VT_I4
-        PIDDSI_HIDDENCOUNT = 0x00000009,// HiddenSlides   	VT_I4
-        PIDDSI_MMCLIPCOUNT = 0x0000000A,// MMClips	VT_I4
-        PIDDSI_SCALE = 0x0000000B,//ScaleCrop  VT_BOOL
-        PIDDSI_HEADINGPAIR = 0x0000000C,// HeadingPairs VT_VARIANT | VT_VECTOR
-        PIDDSI_DOCPARTS = 0x0000000D,//TitlesofParts   	VT_VECTOR | VT_LPSTR
-        PIDDSI_MANAGER = 0x0000000E,//	  Manager VT_LPSTR
-        PIDDSI_COMPANY = 0x0000000F,// Company	VT_LPSTR
-        PIDDSI_LINKSDIRTY = 0x00000010,//LinksUpToDate   	VT_BOOL
+        PIDDSI_PRESFORMAT = 0x00000003, //PresentationTarget	VT_LPSTR
+        PIDDSI_BYTECOUNT = 0x00000004, //Bytes   	VT_I4
+        PIDDSI_LINECOUNT = 0x00000005, // Lines   	VT_I4
+        PIDDSI_PARCOUNT = 0x00000006, // Paragraphs 	VT_I4
+        PIDDSI_SLIDECOUNT = 0x00000007, // Slides 	VT_I4
+        PIDDSI_NOTECOUNT = 0x00000008, // Notes  	VT_I4
+        PIDDSI_HIDDENCOUNT = 0x00000009, // HiddenSlides   	VT_I4
+        PIDDSI_MMCLIPCOUNT = 0x0000000A, // MMClips	VT_I4
+        PIDDSI_SCALE = 0x0000000B, //ScaleCrop  VT_BOOL
+        PIDDSI_HEADINGPAIR = 0x0000000C, // HeadingPairs VT_VARIANT | VT_VECTOR
+        PIDDSI_DOCPARTS = 0x0000000D, //TitlesofParts   	VT_VECTOR | VT_LPSTR
+        PIDDSI_MANAGER = 0x0000000E, //	  Manager VT_LPSTR
+        PIDDSI_COMPANY = 0x0000000F, // Company	VT_LPSTR
+        PIDDSI_LINKSDIRTY = 0x00000010, //LinksUpToDate   	VT_BOOL
     }
 
     public static class Extensions

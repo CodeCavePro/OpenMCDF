@@ -1,4 +1,3 @@
 namespace OpenMcdf.Extensions.OLEProperties
 {
-    
 }

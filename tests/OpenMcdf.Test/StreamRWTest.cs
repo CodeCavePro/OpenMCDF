@@ -18,7 +18,7 @@ namespace OpenMcdf.Test
                 OpenMcdf.StreamRW reader = new OpenMcdf.StreamRW(memStream);
                 actual = reader.ReadInt64();
             }
-            Assert.AreEqual((long)input, actual);
+            Assert.AreEqual((long) input, actual);
         }
 
         [Test]
@@ -32,13 +32,13 @@ namespace OpenMcdf.Test
                 OpenMcdf.StreamRW reader = new OpenMcdf.StreamRW(memStream);
                 actual = reader.ReadInt64();
             }
-            Assert.AreEqual((long)input, actual);
+            Assert.AreEqual((long) input, actual);
         }
 
         [Test]
         public void ReadInt64_Int32MaxPlusTen()
         {
-            Int64 input = (Int64)Int32.MaxValue + 10;
+            Int64 input = (Int64) Int32.MaxValue + 10;
             byte[] bytes = BitConverter.GetBytes(input);
             long actual = 0;
             using (MemoryStream memStream = new MemoryStream(bytes))
@@ -46,7 +46,7 @@ namespace OpenMcdf.Test
                 OpenMcdf.StreamRW reader = new OpenMcdf.StreamRW(memStream);
                 actual = reader.ReadInt64();
             }
-            Assert.AreEqual((long)input, actual);
+            Assert.AreEqual((long) input, actual);
         }
     }
 }

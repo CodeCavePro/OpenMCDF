@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  * 
@@ -15,7 +15,7 @@ namespace OpenMcdf
     {
         //0 8 Compound document file identifier: D0H CFH 11H E0H A1H B1H 1AH E1H
         private byte[] headerSignature
-            = new byte[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
+            = new byte[] {0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1};
 
         public byte[] HeaderSignature
         {
@@ -63,13 +63,13 @@ namespace OpenMcdf
         public ushort SectorShift
         {
             get { return sectorShift; }
-            
         }
 
         //32 2 Size of a short-sector in the short-stream container stream (➜6.1) in power-of-two (sssz),
         //real short-sector size is short_sec_size = 2sssz bytes (maximum value is sector size
         //ssz, see above, most used value is 6 which means 64 bytes)
         private ushort miniSectorShift = 6;
+
         public ushort MiniSectorShift
         {
             get { return miniSectorShift; }
@@ -131,7 +131,7 @@ namespace OpenMcdf
 
         //60 4 SecID of first sector of the short-sector allocation table (➜6.2), or –2 (End Of Chain
         //SecID, ➜3.1) if not extant
-        private int firstMiniFATSectorID = unchecked((int)0xFFFFFFFE);
+        private int firstMiniFATSectorID = unchecked((int) 0xFFFFFFFE);
 
         /// <summary>
         /// This integer field contains the starting sector number for the mini FAT
@@ -182,13 +182,11 @@ namespace OpenMcdf
         public Header()
             : this(3)
         {
-
         }
 
 
         public Header(ushort version)
         {
-
             switch (version)
             {
                 case 3:
@@ -203,16 +201,12 @@ namespace OpenMcdf
 
                 default:
                     throw new CFException("Invalid Compound File Format version");
-
-
             }
 
             for (int i = 0; i < 109; i++)
             {
                 difat[i] = Sector.FREESECT;
             }
-
-
         }
 
         public void Write(Stream stream)
@@ -287,13 +281,14 @@ namespace OpenMcdf
         private void CheckVersion()
         {
             if (this.majorVersion != 3 && this.majorVersion != 4)
-                throw new CFFileFormatException("Unsupported Binary File Format version: OpenMcdf only supports Compound Files with major version equal to 3 or 4 ");
+                throw new CFFileFormatException(
+                    "Unsupported Binary File Format version: OpenMcdf only supports Compound Files with major version equal to 3 or 4 ");
         }
 
         /// <summary>
         /// Structured Storage signature
         /// </summary>
-        private byte[] OLE_CFS_SIGNATURE = new byte[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
+        private byte[] OLE_CFS_SIGNATURE = new byte[] {0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1};
 
         private void CheckSignature()
         {

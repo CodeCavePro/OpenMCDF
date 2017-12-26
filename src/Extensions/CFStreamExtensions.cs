@@ -42,14 +42,8 @@ namespace OpenMcdf.Extensions
 
             public override long Position
             {
-                get
-                {
-                    return position;
-                }
-                set
-                {
-                    position = value;
-                }
+                get { return position; }
+                set { position = value; }
             }
 
             public override int Read(byte[] buffer, int offset, int count)
@@ -108,7 +102,6 @@ namespace OpenMcdf.Extensions
                 // Do nothing
             }
 #endif
-
         }
 
         /// <summary>
@@ -134,6 +127,5 @@ namespace OpenMcdf.Extensions
             result.Read(new BinaryReader(new StreamDecorator(cfStream)));
             return result;
         }
-       
     }
 }

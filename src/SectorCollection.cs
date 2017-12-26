@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  * 
@@ -7,7 +7,6 @@
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
 using System;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -37,10 +36,10 @@ namespace OpenMcdf
 
         public SectorCollection()
         {
-
         }
 
         private bool sizeLimitReached = false;
+
         private void DoCheckSizeLimitReached()
         {
             if (!sizeLimitReached && (count - 1 > MAX_SECTOR_V4_COUNT_LOCK_RANGE))
@@ -78,7 +77,7 @@ namespace OpenMcdf
 
                 if ((index > -1) && (index < count))
                 {
-                    return (Sector)largeArraySlices[itemIndex][itemOffset];
+                    return (Sector) largeArraySlices[itemIndex][itemOffset];
                 }
                 else
                     throw new ArgumentOutOfRangeException("index", index, "Argument out of range");
@@ -127,7 +126,6 @@ namespace OpenMcdf
             DoCheckSizeLimitReached();
 
             add(item);
-
         }
 
         public void Clear()
@@ -154,10 +152,7 @@ namespace OpenMcdf
 
         public int Count
         {
-            get
-            {
-                return count;
-            }
+            get { return count; }
         }
 
         public bool IsReadOnly
@@ -176,13 +171,11 @@ namespace OpenMcdf
 
         public IEnumerator<Sector> GetEnumerator()
         {
-
             for (int i = 0; i < largeArraySlices.Count; i++)
             {
                 for (int j = 0; j < largeArraySlices[i].Count; j++)
                 {
-                    yield return (Sector)largeArraySlices[i][j];
-
+                    yield return (Sector) largeArraySlices[i][j];
                 }
             }
         }

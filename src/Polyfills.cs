@@ -1,5 +1,10 @@
+#if NETSTANDARD1_6
+
 using System;
 using System.IO;
+
+#endif
+
 using System.Runtime.CompilerServices;
 
 // ReSharper disable CheckNamespace
@@ -60,7 +65,8 @@ public static class StreamExtension
                 return 0.0; // Returns OleAut's zero'ed date value.
             if (value < TICKS_PER_DAY
             ) // This is a fix for VB. They want the default day to be 1/1/0001 rather then 12/30/1899.
-                value += DoubleDateOffset; // We could have moved this fix down but we would like to keep the bounds check.
+                value +=
+DoubleDateOffset; // We could have moved this fix down but we would like to keep the bounds check.
             if (value < OA_DATE_MIN_AS_TICKS)
                 throw new OverflowException();
 

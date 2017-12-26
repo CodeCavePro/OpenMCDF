@@ -18,10 +18,12 @@ namespace OpenMcdf.PerfTest
             _testCounter = context.GetCounter("TestCounter");
         }
 
-        [PerfBenchmark(NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test, SkipWarmups = false)]
+        [PerfBenchmark(NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test,
+            SkipWarmups = false)]
         [CounterMeasurement("TestCounter")]
         [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 7000.0d)] // max 7 sec
-        [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo, 450 * 1024 * 1024)] // max 450 Mb in RAM
+        [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo,
+            450 * 1024 * 1024)] // max 450 Mb in RAM
         public void PerfMem_MultipleCodeFeatures()
         {
             const int N_FACTOR = 1000;
@@ -62,7 +64,8 @@ namespace OpenMcdf.PerfTest
 
             File.Copy("8_Streams.cfs", "6_Streams.cfs", true);
 
-            cf = new CompoundFile("6_Streams.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle|CFSConfiguration.EraseFreeSectors);
+            cf = new CompoundFile("6_Streams.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
             cf.RootStorage.Delete("D");
             cf.RootStorage.Delete("G");
             cf.Commit();
@@ -130,15 +133,18 @@ namespace OpenMcdf.PerfTest
             }
         }
 
-        [PerfBenchmark(NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test, SkipWarmups = false)]
+        [PerfBenchmark(NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test,
+            SkipWarmups = false)]
         [CounterMeasurement("TestCounter")]
         [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 5500.0d)] // max 5.5 sec
-        [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo, 3 * 1024 * 1024)] // max 3 Mb in RAM
+        [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo,
+            3 * 1024 * 1024)] // max 3 Mb in RAM
         public void PerfMem_MultipleStreamCommit()
         {
             File.Copy("report.xls", "reportOverwriteMultiple.xls", true);
 
-            CompoundFile cf = new CompoundFile("reportOverwriteMultiple.xls", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            CompoundFile cf = new CompoundFile("reportOverwriteMultiple.xls", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle);
 
             Random r = new Random();
 

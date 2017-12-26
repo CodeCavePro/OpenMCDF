@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using OpenMcdf;
 
 namespace OpenMcdf.Test
 {
@@ -49,15 +48,11 @@ namespace OpenMcdf.Test
             FileStream output = new FileStream("LogEntries.txt", FileMode.Create);
             TextWriter tw = new StreamWriter(output);
 
-            Action<CFItem> va = delegate (CFItem item)
-            {
-                tw.WriteLine(item.Name);
-            };
+            Action<CFItem> va = delegate(CFItem item) { tw.WriteLine(item.Name); };
 
             cf.RootStorage.VisitEntries(va, true);
 
             tw.Close();
-
         }
 
 
@@ -100,7 +95,8 @@ namespace OpenMcdf.Test
 
             try
             {
-                f = new CompoundFile("CorruptedDoc_bug3547815.doc", CFSUpdateMode.ReadOnly, CFSConfiguration.NoValidationException);
+                f = new CompoundFile("CorruptedDoc_bug3547815.doc", CFSUpdateMode.ReadOnly,
+                    CFSConfiguration.NoValidationException);
             }
             catch
             {
@@ -115,11 +111,7 @@ namespace OpenMcdf.Test
 
                 using (TextWriter tw = new StreamWriter(output))
                 {
-
-                    Action<CFItem> va = delegate (CFItem item)
-                       {
-                           tw.WriteLine(item.Name);
-                       };
+                    Action<CFItem> va = delegate(CFItem item) { tw.WriteLine(item.Name); };
 
                     f.RootStorage.VisitEntries(va, true);
                     tw.Flush();
@@ -129,15 +121,11 @@ namespace OpenMcdf.Test
             {
                 Assert.IsTrue(ex is CFCorruptedFileException);
                 Assert.IsTrue(f != null && f.IsClosed);
-
             }
             finally
             {
                 if (output != null)
                     output.Close();
-
-
-
             }
         }
 
@@ -149,7 +137,8 @@ namespace OpenMcdf.Test
             try
             {
                 //Corrupted file has invalid children item sid reference
-                f = new CompoundFile("CorruptedDoc_bug3547815_B.doc", CFSUpdateMode.ReadOnly, CFSConfiguration.NoValidationException);
+                f = new CompoundFile("CorruptedDoc_bug3547815_B.doc", CFSUpdateMode.ReadOnly,
+                    CFSConfiguration.NoValidationException);
             }
             catch
             {
@@ -165,11 +154,7 @@ namespace OpenMcdf.Test
 
                 using (TextWriter tw = new StreamWriter(output))
                 {
-
-                    Action<CFItem> va = delegate (CFItem item)
-                    {
-                        tw.WriteLine(item.Name);
-                    };
+                    Action<CFItem> va = delegate(CFItem item) { tw.WriteLine(item.Name); };
 
                     f.RootStorage.VisitEntries(va, true);
                     tw.Flush();
@@ -183,8 +168,6 @@ namespace OpenMcdf.Test
             {
                 if (output != null)
                     output.Close();
-
-
             }
         }
 
@@ -224,10 +207,7 @@ namespace OpenMcdf.Test
 
             Console.SetOut(sw);
 
-            Action<CFItem> va = delegate (CFItem target)
-            {
-                sw.WriteLine(target.Name);
-            };
+            Action<CFItem> va = delegate(CFItem target) { sw.WriteLine(target.Name); };
 
             cf.RootStorage.VisitEntries(va, true);
 
@@ -259,7 +239,10 @@ namespace OpenMcdf.Test
             CompoundFile cf = new CompoundFile(FILENAME);
 
             CFStorage found = null;
-            Action<CFItem> action = delegate (CFItem item) { if (item.Name == "AnotherStorage") found = item as CFStorage; };
+            Action<CFItem> action = delegate(CFItem item)
+            {
+                if (item.Name == "AnotherStorage") found = item as CFStorage;
+            };
             cf.RootStorage.VisitEntries(action, true);
 
             Assert.IsNotNull(found);
@@ -277,7 +260,7 @@ namespace OpenMcdf.Test
             CompoundFile cf = new CompoundFile(FILENAME);
 
             CFStorage found = null;
-            Action<CFItem> action = delegate (CFItem item)
+            Action<CFItem> action = delegate(CFItem item)
             {
                 if (item.Name == "AnotherStorage")
                     found = item as CFStorage;
@@ -349,7 +332,6 @@ namespace OpenMcdf.Test
         {
             CompoundFile cf = new CompoundFile();
             cf.RootStorage.AddStorage("Level_1")
-
                 .AddStream("Level2Stream")
                 .SetData(Helpers.GetBuffer(100));
 
@@ -366,7 +348,6 @@ namespace OpenMcdf.Test
             {
                 Assert.IsTrue(ex.GetType() == typeof(CFDuplicatedItemException));
             }
-
         }
 
         [Test]

@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  * 
@@ -15,17 +15,22 @@ namespace OpenMcdf
 {
     internal enum SectorType
     {
-        Normal, Mini, FAT, DIFAT, RangeLockSector, Directory
+        Normal,
+        Mini,
+        FAT,
+        DIFAT,
+        RangeLockSector,
+        Directory
     }
 
     internal class Sector : IDisposable
     {
         public static int MINISECTOR_SIZE = 64;
 
-        public const int FREESECT = unchecked((int)0xFFFFFFFF);
-        public const int ENDOFCHAIN = unchecked((int)0xFFFFFFFE);
-        public const int FATSECT = unchecked((int)0xFFFFFFFD);
-        public const int DIFSECT = unchecked((int)0xFFFFFFFC);
+        public const int FREESECT = unchecked((int) 0xFFFFFFFF);
+        public const int ENDOFCHAIN = unchecked((int) 0xFFFFFFFE);
+        public const int FATSECT = unchecked((int) 0xFFFFFFFD);
+        public const int DIFSECT = unchecked((int) 0xFFFFFFFC);
 
         private bool dirtyFlag = false;
 
@@ -37,7 +42,10 @@ namespace OpenMcdf
 
         public bool IsStreamed
         {
-            get { return (stream != null && size != MINISECTOR_SIZE) ? (this.id * size) + size < stream.Length : false; }
+            get
+            {
+                return (stream != null && size != MINISECTOR_SIZE) ? (this.id * size) + size < stream.Length : false;
+            }
         }
 
         private int size = 0;
@@ -77,18 +85,12 @@ namespace OpenMcdf
         public int Id
         {
             get { return id; }
-            set
-            {
-                id = value;
-            }
+            set { id = value; }
         }
 
         public int Size
         {
-            get
-            {
-                return size;
-            }
+            get { return size; }
         }
 
         private byte[] data;
@@ -101,7 +103,7 @@ namespace OpenMcdf
 
                 if (IsStreamed)
                 {
-                    stream.Seek((long)size + (long)this.id * (long)size, SeekOrigin.Begin);
+                    stream.Seek((long) size + (long) this.id * (long) size, SeekOrigin.Begin);
                     stream.Read(data, 0, size);
                 }
             }
@@ -134,7 +136,7 @@ namespace OpenMcdf
         public void InitFATData()
         {
             data = new byte[size];
-            
+
             for (int i = 0; i < size; i++)
                 data[i] = 0xFF;
 
@@ -164,15 +166,12 @@ namespace OpenMcdf
                         if (disposing)
                         {
                             // Call from user code...
-
-
                         }
 
                         this.data = null;
                         this.dirtyFlag = false;
                         this.id = Sector.ENDOFCHAIN;
                         this.size = 0;
-
                     }
                 }
             }
@@ -180,12 +179,11 @@ namespace OpenMcdf
             {
                 _disposed = true;
             }
-
         }
 
         #region IDisposable Members
 
-        private bool _disposed;//false
+        private bool _disposed; //false
 
         void IDisposable.Dispose()
         {
@@ -195,8 +193,4 @@ namespace OpenMcdf
 
         #endregion
     }
-
-
-
-
 }

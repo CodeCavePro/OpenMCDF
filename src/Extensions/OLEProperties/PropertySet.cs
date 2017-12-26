@@ -18,17 +18,11 @@ namespace OpenMcdf.Extensions.OLEProperties
         }
 
         List<ITypedPropertyValue> properties = new List<ITypedPropertyValue>();
+
         public List<ITypedPropertyValue> Properties
         {
-            get
-            {
-                return properties;
-            }
-            set
-            {
-                properties = value;
-            }
+            get { return properties; }
+            set { properties = value; }
         }
-
     }
 }

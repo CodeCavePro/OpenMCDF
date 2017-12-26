@@ -13,7 +13,7 @@ namespace OpenMcdf.PerfTest
             const int MB_SIZE = 10;
 
             byte[] b = HelpersFromTests.GetBuffer(1024 * 1024 * MB_SIZE); //2GB buffer
-            byte[] cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
+            byte[] cmp = new byte[] {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7};
 
             CompoundFile cf = new CompoundFile(CFSVersion.Ver_4, CFSConfiguration.Default);
             CFStream st = cf.RootStorage.AddStream("MySuperLargeStream");
@@ -30,7 +30,6 @@ namespace OpenMcdf.PerfTest
             sw.Start();
             for (int i = 0; i < N_LOOP; i++)
             {
-
                 cfst.Append(b);
                 cf.Commit(true);
 
@@ -58,14 +57,13 @@ namespace OpenMcdf.PerfTest
             sw.Reset();
             sw.Start();
             byte[] data = new byte[count];
-            count = cf.RootStorage.GetStream("MySuperLargeStream").Read(data, b.Length * (long)N_LOOP, count);
+            count = cf.RootStorage.GetStream("MySuperLargeStream").Read(data, b.Length * (long) N_LOOP, count);
             sw.Stop();
             Console.Write(count);
             cf.Close();
 
             Console.WriteLine("Closed Final " + sw.ElapsedMilliseconds);
             Console.ReadKey();
-
         }
 
         internal static void DummyFile()
@@ -82,10 +80,8 @@ namespace OpenMcdf.PerfTest
             sw.Start();
             for (int i = 0; i < 42; i++)
             {
-
                 fs.Seek(b.Length * i, SeekOrigin.Begin);
                 fs.Write(b, 0, b.Length);
-
             }
 
             fs.Close();
@@ -98,10 +94,8 @@ namespace OpenMcdf.PerfTest
 
         internal static void AddNodes(String depth, CFStorage cfs)
         {
-
-            Action<CFItem> va = delegate (CFItem target)
+            Action<CFItem> va = delegate(CFItem target)
             {
-
                 String temp = target.Name + (target is CFStorage ? "" : " (" + target.Size + " bytes )");
 
                 //Stream
@@ -109,13 +103,13 @@ namespace OpenMcdf.PerfTest
                 Console.WriteLine(depth + temp);
 
                 if (target is CFStorage)
-                {  //Storage
+                {
+                    //Storage
 
                     String newDepth = depth + "    ";
 
                     //Recursion into the storage
-                    AddNodes(newDepth, (CFStorage)target);
-
+                    AddNodes(newDepth, (CFStorage) target);
                 }
             };
 

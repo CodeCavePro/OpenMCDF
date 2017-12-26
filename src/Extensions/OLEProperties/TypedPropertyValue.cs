@@ -7,65 +7,47 @@ namespace OpenMcdf.Extensions.OLEProperties
     {
         private VTPropertyType _VTType;
 
-        public VTPropertyType VTType 
-        { 
+        public VTPropertyType VTType
+        {
             get { return _VTType; }
-           //set { _VTType = value; }
+            //set { _VTType = value; }
         }
 
         protected object propertyValue = null;
+
         public TypedPropertyValue(VTPropertyType vtType)
         {
             this._VTType = vtType;
         }
+
         public virtual object PropertyValue
         {
-            get
-            {
-                return propertyValue;
-            }
+            get { return propertyValue; }
 
-            set
-            {
-                propertyValue = value;
-            }
+            set { propertyValue = value; }
         }
 
 
         public bool IsArray
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
+            set { throw new NotImplementedException(); }
         }
 
         public bool IsVector
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
+            set { throw new NotImplementedException(); }
         }
 
         public virtual void Read(System.IO.BinaryReader br)
         {
-          
         }
 
         public virtual void Write(System.IO.BinaryWriter bw)
         {
-          
         }
     }
 }

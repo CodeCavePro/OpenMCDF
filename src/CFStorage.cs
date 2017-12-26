@@ -129,9 +129,9 @@ namespace OpenMcdf
             if (String.IsNullOrEmpty(streamName))
                 throw new CFException("Stream name cannot be null or empty");
 
-            
 
-            IDirectoryEntry dirEntry = DirectoryEntry.TryNew(streamName, StgType.StgStream, this.CompoundFile.GetDirectories());
+            IDirectoryEntry dirEntry =
+                DirectoryEntry.TryNew(streamName, StgType.StgStream, this.CompoundFile.GetDirectories());
 
             // Add new Stream directory entry
             //cfo = new CFStream(this.CompoundFile, streamName);
@@ -147,8 +147,9 @@ namespace OpenMcdf
             catch (RBTreeException)
             {
                 CompoundFile.ResetDirectoryEntry(dirEntry.SID);
-                
-                throw new CFDuplicatedItemException("An entry with name '" + streamName + "' is already present in storage '" + this.Name + "' ");
+
+                throw new CFDuplicatedItemException("An entry with name '" + streamName +
+                                                    "' is already present in storage '" + this.Name + "' ");
             }
 
             return new CFStream(this.CompoundFile, dirEntry);
@@ -189,9 +190,9 @@ namespace OpenMcdf
 
             IRBNode outDe = null;
 
-            if (Children.TryLookup(tmp, out outDe) && (((IDirectoryEntry)outDe).StgType == StgType.StgStream))
+            if (Children.TryLookup(tmp, out outDe) && (((IDirectoryEntry) outDe).StgType == StgType.StgStream))
             {
-                return new CFStream(this.CompoundFile, (IDirectoryEntry)outDe);
+                return new CFStream(this.CompoundFile, (IDirectoryEntry) outDe);
             }
             else
             {
@@ -233,9 +234,9 @@ namespace OpenMcdf
 
             IRBNode outDe = null;
 
-            if (Children.TryLookup(tmp, out outDe) && (((IDirectoryEntry)outDe).StgType == StgType.StgStream))
+            if (Children.TryLookup(tmp, out outDe) && (((IDirectoryEntry) outDe).StgType == StgType.StgStream))
             {
-                return new CFStream(this.CompoundFile, (IDirectoryEntry)outDe);
+                return new CFStream(this.CompoundFile, (IDirectoryEntry) outDe);
             }
             else
             {
@@ -270,7 +271,7 @@ namespace OpenMcdf
             IDirectoryEntry template = DirectoryEntry.Mock(storageName, StgType.StgInvalid);
             IRBNode outDe = null;
 
-            if (Children.TryLookup(template, out outDe) && ((IDirectoryEntry)outDe).StgType == StgType.StgStorage)
+            if (Children.TryLookup(template, out outDe) && ((IDirectoryEntry) outDe).StgType == StgType.StgStorage)
             {
                 return new CFStorage(this.CompoundFile, outDe as IDirectoryEntry);
             }
@@ -305,7 +306,7 @@ namespace OpenMcdf
             IDirectoryEntry template = DirectoryEntry.Mock(storageName, StgType.StgInvalid);
             IRBNode outDe = null;
 
-            if (Children.TryLookup(template, out outDe) && ((IDirectoryEntry)outDe).StgType == StgType.StgStorage)
+            if (Children.TryLookup(template, out outDe) && ((IDirectoryEntry) outDe).StgType == StgType.StgStorage)
             {
                 return new CFStorage(this.CompoundFile, outDe as IDirectoryEntry);
             }
@@ -362,7 +363,8 @@ namespace OpenMcdf
             {
                 CompoundFile.ResetDirectoryEntry(cfo.SID);
                 cfo = null;
-                throw new CFDuplicatedItemException("An entry with name '" + storageName + "' is already present in storage '" + this.Name + "' ");
+                throw new CFDuplicatedItemException("An entry with name '" + storageName +
+                                                    "' is already present in storage '" + this.Name + "' ");
             }
 
             IDirectoryEntry childrenRoot = Children.Root as IDirectoryEntry;
@@ -403,32 +405,32 @@ namespace OpenMcdf
                 return;
             List<IRBNode> subStorages = new List<IRBNode>();
 
-                Action<IRBNode> internalAction =
-                    delegate(IRBNode targetNode)
-                    {
-                        IDirectoryEntry d = targetNode as IDirectoryEntry;
-                        if (d.StgType == StgType.StgStream)
-                            action(new CFStream(this.CompoundFile, d));
-                        else
-                            action(new CFStorage(this.CompoundFile, d));
+            Action<IRBNode> internalAction =
+                delegate(IRBNode targetNode)
+                {
+                    IDirectoryEntry d = targetNode as IDirectoryEntry;
+                    if (d.StgType == StgType.StgStream)
+                        action(new CFStream(this.CompoundFile, d));
+                    else
+                        action(new CFStorage(this.CompoundFile, d));
 
-                        if (d.Child != DirectoryEntry.NOSTREAM)
-                            subStorages.Add(targetNode);
+                    if (d.Child != DirectoryEntry.NOSTREAM)
+                        subStorages.Add(targetNode);
 
-                        return;
-                    };
+                    return;
+                };
 
-                this.Children.VisitTreeNodes(internalAction);
+            this.Children.VisitTreeNodes(internalAction);
 
             if (!recursive || subStorages.Count <= 0)
                 return;
 
-                    foreach (IRBNode n in subStorages)
-                    {
-                        IDirectoryEntry d = n as IDirectoryEntry;
-                        (new CFStorage(this.CompoundFile, d)).VisitEntries(action, recursive);
-                    }
+            foreach (IRBNode n in subStorages)
+            {
+                IDirectoryEntry d = n as IDirectoryEntry;
+                (new CFStorage(this.CompoundFile, d)).VisitEntries(action, recursive);
             }
+        }
 
         /// <summary>
         /// Remove an entry from the current storage and compound file.
@@ -462,16 +464,16 @@ namespace OpenMcdf
             //if (foundObj.GetType() != typeCheck)
             //    throw new CFException("Entry named [" + entryName + "] has not the correct type");
 
-            if (((IDirectoryEntry)foundObj).StgType == StgType.StgRoot)
+            if (((IDirectoryEntry) foundObj).StgType == StgType.StgRoot)
                 throw new CFException("Root storage cannot be removed");
 
 
             IRBNode altDel = null;
-            switch (((IDirectoryEntry)foundObj).StgType)
+            switch (((IDirectoryEntry) foundObj).StgType)
             {
                 case StgType.StgStorage:
 
-                    CFStorage temp = new CFStorage(this.CompoundFile, ((IDirectoryEntry)foundObj));
+                    CFStorage temp = new CFStorage(this.CompoundFile, ((IDirectoryEntry) foundObj));
 
                     // This is a storage. we have to remove children items first
                     foreach (IRBNode de in temp.Children)
@@ -479,8 +481,6 @@ namespace OpenMcdf
                         IDirectoryEntry ded = de as IDirectoryEntry;
                         temp.Delete(ded.Name);
                     }
-
-
 
 
                     // ...then we need to rethread the root of siblings tree...
@@ -499,7 +499,7 @@ namespace OpenMcdf
                         foundObj = altDel;
                     }
 
-                    this.CompoundFile.InvalidateDirectoryEntry(((IDirectoryEntry)foundObj).SID);
+                    this.CompoundFile.InvalidateDirectoryEntry(((IDirectoryEntry) foundObj).SID);
 
                     break;
 
@@ -524,8 +524,7 @@ namespace OpenMcdf
                         foundObj = altDel;
                     }
 
-                    this.CompoundFile.InvalidateDirectoryEntry(((IDirectoryEntry)foundObj).SID);
-
+                    this.CompoundFile.InvalidateDirectoryEntry(((IDirectoryEntry) foundObj).SID);
 
 
                     break;

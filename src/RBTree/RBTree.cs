@@ -3,10 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
 #if ASSERT
 using System.Diagnostics;
+
 #endif
 
 // ------------------------------------------------------------- 
@@ -25,6 +24,7 @@ namespace RedBlackTree
         {
         }
     }
+
     public class RBTreeDuplicatedItemException : RBTreeException
     {
         public RBTreeDuplicatedItemException(String msg)
@@ -33,31 +33,23 @@ namespace RedBlackTree
         }
     }
 
-    public enum Color { RED = 0, BLACK = 1 }
+    public enum Color
+    {
+        RED = 0,
+        BLACK = 1
+    }
 
     /// <summary>
     /// Red Black Node interface
     /// </summary>
     public interface IRBNode : IComparable
     {
+        IRBNode Left { get; set; }
 
-        IRBNode Left
-        {
-            get;
-            set;
-        }
-
-        IRBNode Right
-        {
-            get;
-            set;
-        }
+        IRBNode Right { get; set; }
 
 
-        Color Color
-
-        { get; set; }
-
+        Color Color { get; set; }
 
 
         IRBNode Parent { get; set; }
@@ -101,7 +93,6 @@ namespace RedBlackTree
 
         public RBTree()
         {
-
         }
 
         public RBTree(IRBNode root)
@@ -200,7 +191,6 @@ namespace RedBlackTree
         }
 
 
-
         public void Insert(IRBNode newNode)
         {
             newNode.Color = Color.RED;
@@ -218,7 +208,8 @@ namespace RedBlackTree
                     int compResult = newNode.CompareTo(n);
                     if (compResult == 0)
                     {
-                        throw new RBTreeDuplicatedItemException("RBNode " + newNode.ToString() + " already present in tree");
+                        throw new RBTreeDuplicatedItemException(
+                            "RBNode " + newNode.ToString() + " already present in tree");
                         //n.Value = value;
                         //return;
                     }
@@ -349,7 +340,7 @@ namespace RedBlackTree
             IRBNode n = LookupNode(template);
             template = n;
             if (n == null)
-                return;  // Key not found, do nothing
+                return; // Key not found, do nothing
             if (n.Left != null && n.Right != null)
             {
                 // Copy key/value from predecessor and then delete it instead
@@ -495,7 +486,6 @@ namespace RedBlackTree
             {
                 DoVisitTree(action, walker.Right);
             }
-
         }
 
         internal void VisitTreeNodes(Action<IRBNode> action)
@@ -519,10 +509,8 @@ namespace RedBlackTree
 
             if (walker.Right != null)
             {
-
                 DoVisitTreeNodes(action, walker.Right);
             }
-
         }
 
         public class RBTreeEnumerator : IEnumerator<IRBNode>
@@ -537,10 +525,7 @@ namespace RedBlackTree
 
             public IRBNode Current
             {
-                get
-                {
-                    return heap.ElementAt(position);
-                }
+                get { return heap.ElementAt(position); }
             }
 
             public void Dispose()
@@ -549,10 +534,7 @@ namespace RedBlackTree
 
             object System.Collections.IEnumerator.Current
             {
-                get
-                {
-                    return heap.ElementAt(position);
-                }
+                get { return heap.ElementAt(position); }
             }
 
             public bool MoveNext()
@@ -618,17 +600,17 @@ namespace RedBlackTree
         //}
 
         internal event Action<IRBNode> NodeInserted;
+
         //internal event Action<RBNode<V>> NodeDeleted;
         internal event Action<IRBNode, NodeOperation> NodeOperation;
-
-
     }
 
     internal enum NodeOperation
     {
-        LeftAssigned, RightAssigned, ColorAssigned, ParentAssigned,
+        LeftAssigned,
+        RightAssigned,
+        ColorAssigned,
+        ParentAssigned,
         ValueAssigned
     }
-
-
 }

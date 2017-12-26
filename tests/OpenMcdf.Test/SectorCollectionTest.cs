@@ -1,12 +1,8 @@
-using OpenMcdf;
 using NUnit.Framework;
-using System.Collections.Generic;
 using System;
 
 namespace OpenMcdf.Test
 {
-
-
     /// <summary>
     ///This is a test class for SectorCollectionTest and is intended
     ///to contain all SectorCollectionTest Unit Tests
@@ -20,7 +16,6 @@ namespace OpenMcdf.Test
         [Test]
         public void CountTest()
         {
-            
             int count = 0;
 
             SectorCollection target = new SectorCollection(); // TODO: Initialize to an appropriate value
@@ -89,7 +84,6 @@ namespace OpenMcdf.Test
         [Test]
         public void SectorCollectionConstructorTest()
         {
-
             SectorCollection target = new SectorCollection();
 
             Assert.IsNotNull(target);
@@ -130,7 +124,7 @@ namespace OpenMcdf.Test
                 target.Add(null);
             }
 
-            
+
             Sector item = new Sector(4096);
             target.Add(item);
             Assert.IsTrue(target.Count == 580);

@@ -1,4 +1,3 @@
-﻿
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
@@ -47,7 +46,8 @@ namespace OpenMcdf
         protected void CheckDisposed()
         {
             if (compoundFile.IsClosed)
-                throw new CFDisposedException("Owner Compound file has been closed and owned items have been invalidated");
+                throw new CFDisposedException(
+                    "Owner Compound file has been closed and owned items have been invalidated");
         }
 
         protected CFItem()
@@ -70,13 +70,10 @@ namespace OpenMcdf
         }
 
 
-
         internal int CompareTo(CFItem other)
         {
-
             return this.dirEntry.CompareTo(other.DirEntry);
         }
-
 
         #endregion
 
@@ -84,7 +81,7 @@ namespace OpenMcdf
 
         public int CompareTo(object obj)
         {
-            return this.dirEntry.CompareTo(((CFItem)obj).DirEntry);
+            return this.dirEntry.CompareTo(((CFItem) obj).DirEntry);
         }
 
         #endregion
@@ -98,7 +95,7 @@ namespace OpenMcdf
             }
 
             // If one is null, but not both, return false.
-            if (((object)leftItem == null) || ((object)rightItem == null))
+            if (((object) leftItem == null) || ((object) rightItem == null))
             {
                 return false;
             }
@@ -145,10 +142,7 @@ namespace OpenMcdf
         /// </summary>
         public long Size
         {
-            get
-            {
-                return this.dirEntry.Size;
-            }
+            get { return this.dirEntry.Size; }
         }
 
 
@@ -161,10 +155,7 @@ namespace OpenMcdf
         /// </remarks>
         public bool IsStorage
         {
-            get
-            {
-                return this.dirEntry.StgType == StgType.StgStorage;
-            }
+            get { return this.dirEntry.StgType == StgType.StgStorage; }
         }
 
         /// <summary>
@@ -176,10 +167,7 @@ namespace OpenMcdf
         /// </remarks>
         public bool IsStream
         {
-            get
-            {
-                return this.dirEntry.StgType == StgType.StgStream;
-            }
+            get { return this.dirEntry.StgType == StgType.StgStream; }
         }
 
         /// <summary>
@@ -191,10 +179,7 @@ namespace OpenMcdf
         /// </remarks>
         public bool IsRoot
         {
-            get
-            {
-                return this.dirEntry.StgType == StgType.StgRoot;
-            }
+            get { return this.dirEntry.StgType == StgType.StgRoot; }
         }
 
         /// <summary>
@@ -202,10 +187,7 @@ namespace OpenMcdf
         /// </summary>
         public DateTime CreationDate
         {
-            get
-            {
-                return DateTime.FromFileTime(BitConverter.ToInt64(this.dirEntry.CreationDate, 0));
-            }
+            get { return DateTime.FromFileTime(BitConverter.ToInt64(this.dirEntry.CreationDate, 0)); }
 
             set
             {
@@ -221,10 +203,7 @@ namespace OpenMcdf
         /// </summary>
         public DateTime ModifyDate
         {
-            get
-            {
-                return DateTime.FromFileTime(BitConverter.ToInt64(this.dirEntry.ModifyDate, 0));
-            }
+            get { return DateTime.FromFileTime(BitConverter.ToInt64(this.dirEntry.ModifyDate, 0)); }
 
             set
             {
@@ -240,10 +219,7 @@ namespace OpenMcdf
         /// </summary>
         public Guid CLSID
         {
-            get
-            {
-                return this.dirEntry.StorageCLSID;
-            }
+            get { return this.dirEntry.StorageCLSID; }
             set
             {
                 if (this.dirEntry.StgType != StgType.StgStream)
@@ -263,7 +239,8 @@ namespace OpenMcdf
         public override string ToString()
         {
             if (this.dirEntry != null)
-                return "[" + this.dirEntry.LeftSibling + "," + this.dirEntry.SID + "," + this.dirEntry.RightSibling + "]" + " " + this.dirEntry.GetEntryName();
+                return "[" + this.dirEntry.LeftSibling + "," + this.dirEntry.SID + "," + this.dirEntry.RightSibling +
+                       "]" + " " + this.dirEntry.GetEntryName();
             else
                 return String.Empty;
         }

@@ -7,12 +7,12 @@ namespace OpenMcdf.Extensions.OLEProperties
 {
     public enum Behavior
     {
-        CaseSensitive, CaseInsensitive
+        CaseSensitive,
+        CaseInsensitive
     }
 
     public class PropertyContext
     {
-
         public Int32 CodePage { get; set; }
         public Behavior Behavior { get; set; }
         public UInt32 Locale { get; set; }
@@ -20,7 +20,9 @@ namespace OpenMcdf.Extensions.OLEProperties
 
     public enum PropertyDimensions
     {
-        IsScalar, IsVector, IsArray
+        IsScalar,
+        IsVector,
+        IsArray
     }
 
     //public class PropertyResult
@@ -32,7 +34,6 @@ namespace OpenMcdf.Extensions.OLEProperties
 
     public class PropertyReader
     {
-
         private PropertyContext ctx = new PropertyContext();
         private PropertyFactory factory = null;
 
@@ -41,7 +42,8 @@ namespace OpenMcdf.Extensions.OLEProperties
             factory = new PropertyFactory(ctx);
         }
 
-        public List<ITypedPropertyValue> ReadProperty(PropertyIdentifiersSummaryInfo propertyIdentifier, BinaryReader br)
+        public List<ITypedPropertyValue> ReadProperty(PropertyIdentifiersSummaryInfo propertyIdentifier,
+            BinaryReader br)
         {
             List<ITypedPropertyValue> res = new List<ITypedPropertyValue>();
             bool isVariant = false;
@@ -49,7 +51,7 @@ namespace OpenMcdf.Extensions.OLEProperties
 
             UInt16 pVal = br.ReadUInt16();
 
-            VTPropertyType vType = (VTPropertyType)(pVal & 0x00FF);
+            VTPropertyType vType = (VTPropertyType) (pVal & 0x00FF);
 
             if ((pVal & 0x1000) != 0)
                 dim = PropertyDimensions.IsVector;
@@ -67,7 +69,7 @@ namespace OpenMcdf.Extensions.OLEProperties
                     ITypedPropertyValue vectorHeader = factory.NewProperty(VTPropertyType.VT_VECTOR_HEADER, ctx);
                     vectorHeader.Read(br);
 
-                    uint nItems = (uint)vectorHeader.PropertyValue;
+                    uint nItems = (uint) vectorHeader.PropertyValue;
 
                     for (int i = 0; i < nItems; i++)
                     {
@@ -76,7 +78,7 @@ namespace OpenMcdf.Extensions.OLEProperties
                         if (isVariant)
                         {
                             UInt16 pValItem = br.ReadUInt16();
-                            vTypeItem = (VTPropertyType)(pValItem & 0x00FF);
+                            vTypeItem = (VTPropertyType) (pValItem & 0x00FF);
                             br.ReadUInt16(); // Ushort Padding
                         }
                         else
@@ -100,7 +102,7 @@ namespace OpenMcdf.Extensions.OLEProperties
 
                     if (propertyIdentifier == PropertyIdentifiersSummaryInfo.CodePageString)
                     {
-                        this.ctx.CodePage = (short)pr.PropertyValue;
+                        this.ctx.CodePage = (short) pr.PropertyValue;
                     }
 
                     res.Add(pr);

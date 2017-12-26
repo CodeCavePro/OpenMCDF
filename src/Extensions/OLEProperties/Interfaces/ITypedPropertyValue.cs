@@ -2,23 +2,11 @@ namespace OpenMcdf.Extensions.OLEProperties.Interfaces
 {
     public interface ITypedPropertyValue : IBinarySerializable
     {
-        bool IsArray
-        {
-            get;
-            set;
-        }
+        bool IsArray { get; set; }
 
-        bool IsVector
-        {
-            get;
-            set;
-        }
+        bool IsVector { get; set; }
 
-        object PropertyValue
-        {
-            get;
-            set;
-        }
+        object PropertyValue { get; set; }
 
         VTPropertyType VTType
         {

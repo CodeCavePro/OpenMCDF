@@ -40,7 +40,7 @@ namespace OpenMcdf.Extensions.OLEProperties
             for (int i = 0; i < PropertySet0.NumProperties; i++)
             {
                 PropertyIdentifierAndOffset pio = new PropertyIdentifierAndOffset();
-                pio.PropertyIdentifier = (PropertyIdentifiersSummaryInfo)br.ReadUInt32();
+                pio.PropertyIdentifier = (PropertyIdentifiersSummaryInfo) br.ReadUInt32();
                 pio.Offset = br.ReadUInt32();
                 PropertySet0.PropertyIdentifierAndOffsets.Add(pio);
             }
@@ -49,8 +49,10 @@ namespace OpenMcdf.Extensions.OLEProperties
             PropertyReader pr = new PropertyReader();
             for (int i = 0; i < PropertySet0.NumProperties; i++)
             {
-                br.BaseStream.Seek(Offset0 + PropertySet0.PropertyIdentifierAndOffsets[i].Offset, System.IO.SeekOrigin.Begin);
-                PropertySet0.Properties.AddRange(pr.ReadProperty(PropertySet0.PropertyIdentifierAndOffsets[i].PropertyIdentifier, br));
+                br.BaseStream.Seek(Offset0 + PropertySet0.PropertyIdentifierAndOffsets[i].Offset,
+                    System.IO.SeekOrigin.Begin);
+                PropertySet0.Properties.AddRange(
+                    pr.ReadProperty(PropertySet0.PropertyIdentifierAndOffsets[i].PropertyIdentifier, br));
             }
         }
 

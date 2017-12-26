@@ -1,8 +1,6 @@
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using OpenMcdf;
 using System.IO;
 using System.Diagnostics;
 using NUnit.Framework;
@@ -24,7 +22,8 @@ namespace OpenMcdf.Test
 
             File.Copy(FILENAME, "MultipleStorage_Deleted_Compress.cfs", true);
 
-            CompoundFile cf = new CompoundFile("MultipleStorage_Deleted_Compress.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
+            CompoundFile cf = new CompoundFile("MultipleStorage_Deleted_Compress.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
 
             CFStorage st = cf.RootStorage.GetStorage("MyStorage");
             st = st.GetStorage("AnotherStorage");
@@ -39,7 +38,6 @@ namespace OpenMcdf.Test
             FileInfo dstFile = new FileInfo("MultipleStorage_Deleted_Compress.cfs");
 
             Assert.IsTrue(srcFile.Length > dstFile.Length);
-
         }
 
         [Test]
@@ -117,7 +115,6 @@ namespace OpenMcdf.Test
             FileInfo dstFile = new FileInfo("MultipleStorage_Deleted_Compress.cfs");
 
             Assert.IsFalse(srcFile.Length > dstFile.Length);
-
         }
 
         [Test]
@@ -125,7 +122,8 @@ namespace OpenMcdf.Test
         {
             String filename = "WRITE_AND_READ_CFS_V4.cfs";
 
-            CompoundFile cf = new CompoundFile(CFSVersion.Ver_4, CFSConfiguration.EraseFreeSectors | CFSConfiguration.SectorRecycle);
+            CompoundFile cf = new CompoundFile(CFSVersion.Ver_4,
+                CFSConfiguration.EraseFreeSectors | CFSConfiguration.SectorRecycle);
 
             CFStorage st = cf.RootStorage.AddStorage("MyStorage");
             CFStream sm = st.AddStream("MyStream");
@@ -150,7 +148,8 @@ namespace OpenMcdf.Test
         {
             String filename = "WRITE_COMMIT_READ_CFS_V4.cfs";
 
-            CompoundFile cf = new CompoundFile(CFSVersion.Ver_4, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
+            CompoundFile cf = new CompoundFile(CFSVersion.Ver_4,
+                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
 
             CFStorage st = cf.RootStorage.AddStorage("MyStorage");
             CFStream sm = st.AddStream("MyStream");
@@ -193,9 +192,7 @@ namespace OpenMcdf.Test
 
             file.Save("test.mdf");
 
-            var meta = file.
-                RootStorage.
-                AddStream("meta");
+            var meta = file.RootStorage.AddStream("meta");
 
             meta.Append(BitConverter.GetBytes(DateTime.Now.ToBinary()));
             meta.Append(BitConverter.GetBytes(DateTime.Now.ToBinary()));
@@ -215,19 +212,20 @@ namespace OpenMcdf.Test
         [Test]
         public void Test_COMPARE_DIR_ENTRY_NAME_BUG_FIX_ID_3487353()
         {
-            var f = new CompoundFile("report_name_fix.xls", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
+            var f = new CompoundFile("report_name_fix.xls", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
             CFStream cfs = f.RootStorage.AddStream("Poorbook");
             cfs.Append(Helpers.GetBuffer(20));
             f.Commit();
             f.Close();
 
-            f = new CompoundFile("report_name_fix.xls", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
+            f = new CompoundFile("report_name_fix.xls", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
             cfs = f.RootStorage.GetStream("Workbook");
             Assert.IsTrue(cfs.Name == "Workbook");
             f.RootStorage.Delete("PoorBook");
             f.Commit();
             f.Close();
-
         }
 
         [Test]
@@ -346,7 +344,8 @@ namespace OpenMcdf.Test
 
             Trace.Listeners.Add(new ConsoleTraceListener());
             // Phase 3
-            cf = new CompoundFile("6_Streams.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
+            cf = new CompoundFile("6_Streams.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
             cf.RootStorage.Delete("D");
             cf.RootStorage.Delete("G");
             cf.Commit();
@@ -364,7 +363,6 @@ namespace OpenMcdf.Test
             try
             {
                 testSt = cfTest.RootStorage.GetStream("D");
-
             }
             catch (Exception ex)
             {
@@ -402,7 +400,7 @@ namespace OpenMcdf.Test
             Assert.IsTrue(new FileInfo("6_Streams_Shrinked.cfs").Length < new FileInfo("6_Streams.cfs").Length);
 
             cfTest = new CompoundFile("6_Streams_Shrinked.cfs");
-            Action<CFItem> va = delegate (CFItem item)
+            Action<CFItem> va = delegate(CFItem item)
             {
                 if (item.IsStream)
                 {
@@ -537,7 +535,6 @@ namespace OpenMcdf.Test
 
             sw.Stop();
             Console.WriteLine(sw.ElapsedMilliseconds);
-
         }
 
         [Test]
@@ -557,7 +554,6 @@ namespace OpenMcdf.Test
             try
             {
                 f = new CompoundFile("CyclicFAT.cfs");
-
             }
             catch (Exception ex)
             {
@@ -578,9 +574,9 @@ namespace OpenMcdf.Test
             {
                 f = new CompoundFile();
                 CFStream st = f.RootStorage.AddStream("LargeStream");
-                st.Append(Helpers.GetBuffer(20000000, 0x0A));       //Forcing creation of two DIFAT sectors
+                st.Append(Helpers.GetBuffer(20000000, 0x0A)); //Forcing creation of two DIFAT sectors
                 byte[] b1 = Helpers.GetBuffer(3, 0x0B);
-                st.Append(b1);                                      //Forcing creation of two DIFAT sectors
+                st.Append(b1); //Forcing creation of two DIFAT sectors
 
                 f.Save("$OpenMcdf$LargeFile.cfs");
 
@@ -602,7 +598,6 @@ namespace OpenMcdf.Test
                 if (File.Exists("$OpenMcdf$LargeFile.cfs"))
                     File.Delete("$OpenMcdf$LargeFile.cfs");
             }
-
         }
 
         [Test]
@@ -645,13 +640,11 @@ namespace OpenMcdf.Test
                 //if (File.Exists("$ItemsLargeNumber.cfs"))
                 //    File.Delete("$ItemsLargeNumber.cfs");
             }
-
         }
 
         [Test]
         public void Test_FIX_BUG_16_CORRUPTED_AFTER_RESIZE()
         {
-
             const string FILE_PATH = @"BUG_16_.xls";
 
             CompoundFile cf = new CompoundFile(FILE_PATH);
@@ -672,7 +665,6 @@ namespace OpenMcdf.Test
         [Test]
         public void Test_FIX_BUG_17_CORRUPTED_PPT_FILE()
         {
-
             const string FILE_PATH = @"2_MB-W.ppt";
 
             using (CompoundFile file = new CompoundFile(FILE_PATH))
@@ -721,14 +713,11 @@ namespace OpenMcdf.Test
             {
                 fs = new FileStream("CorruptedDoc_bug36.doc", FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                 CompoundFile file = new CompoundFile(fs, CFSUpdateMode.ReadOnly, CFSConfiguration.LeaveOpen);
-
             }
             catch (Exception ex)
             {
                 Assert.IsTrue(fs.CanRead && fs.CanSeek && fs.CanWrite);
             }
-
-
         }
 
         [Test]
@@ -745,10 +734,10 @@ namespace OpenMcdf.Test
                 CompoundFile cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
                 var s = cf.RootStorage.AddStream("miniToNormal");
                 s.Append(Helpers.GetBuffer(4090, 0xAA));
-               
+
                 cf.Save("TEST_ISSUE_2");
                 cf.Close();
-                var cf2 = new CompoundFile("TEST_ISSUE_2",CFSUpdateMode.Update,CFSConfiguration.Default);
+                var cf2 = new CompoundFile("TEST_ISSUE_2", CFSUpdateMode.Update, CFSConfiguration.Default);
                 cf2.RootStorage.GetStream("miniToNormal").Append(Helpers.GetBuffer(6, 0xBB));
                 cf2.Commit();
                 cf2.Close();
@@ -765,87 +754,11 @@ namespace OpenMcdf.Test
             CompoundFile cf = new CompoundFile("report.xls");
             Guid g = cf.getGuidBySID(0);
             Assert.IsNotNull(g);
-            g =cf.getGuidForStream(3);
+            g = cf.getGuidForStream(3);
             Assert.IsNotNull(g);
             Assert.IsTrue(!String.IsNullOrEmpty(cf.GetNameDirEntry(2)));
             Assert.IsTrue(cf.GetNumDirectories() > 0);
         }
-            //[Test]
-            //public void Test_CORRUPTED_CYCLIC_DIFAT_VALIDATION_CHECK()
-            //{
-
-            //    CompoundFile cf = null;
-            //    try
-            //    {
-            //        cf = new CompoundFile("CiclycDFAT.cfs");
-            //        CFStorage s = cf.RootStorage.GetStorage("MyStorage");
-            //        CFStream st = s.GetStream("MyStream");
-            //        Assert.IsTrue(st.Size > 0);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Assert.IsTrue(ex is CFCorruptedFileException);
-            //    }
-            //    finally
-            //    {
-            //        if (cf != null)
-            //        {
-            //            cf.Close();
-            //        }
-            //    }
-            //}
-            //[Test]
-            //public void Test_REM()
-            //{
-            //    var f = new CompoundFile();
-
-            //    byte[] bB = Helpers.GetBuffer(5 * 1024, 0x0B); 
-            //    f.RootStorage.AddStream("Test").AppendData(bB);
-            //    f.Save("Astorage.cfs");
-            //}
-
-        public void Test_COPY_ENTRIES_FROM_TO_STORAGE()
-        {
-            CompoundFile cfDst = new CompoundFile();
-            CompoundFile cfSrc = new CompoundFile("MultipleStorage4.cfs");
-
-            Copy(cfSrc.RootStorage, cfDst.RootStorage);
-
-            cfDst.Save("MultipleStorage4Copy.cfs");
-
-            cfDst.Close();
-            cfSrc.Close();
-
-        }
-
-        #region Copy heper method
-            /// <summary>
-            /// Copies the given <paramref name="source"/> to the given <paramref name="destination"/>
-            /// </summary>
-            /// <param name="source"></param>
-            /// <param name="destination"></param>
-        public static void Copy(CFStorage source, CFStorage destination)
-        {
-            source.VisitEntries(action =>
-            {
-                if (action.IsStorage)
-                {
-                    var destionationStorage = destination.AddStorage(action.Name);
-                    destionationStorage.CLSID = action.CLSID;
-                    destionationStorage.CreationDate = action.CreationDate;
-                    destionationStorage.ModifyDate = action.ModifyDate;
-                    Copy(action as CFStorage, destionationStorage);
-                }
-                else
-                {
-                    var sourceStream = action as CFStream;
-                    var destinationStream = destination.AddStream(action.Name);
-                    if (sourceStream != null) destinationStream.SetData(sourceStream.GetData());
-                }
-
-            }, false);
-        }
-        #endregion
         //[Test]
         //public void Test_CORRUPTED_CYCLIC_DIFAT_VALIDATION_CHECK()
         //{
@@ -880,5 +793,81 @@ namespace OpenMcdf.Test
         //    f.Save("Astorage.cfs");
         //}
 
+        public void Test_COPY_ENTRIES_FROM_TO_STORAGE()
+        {
+            CompoundFile cfDst = new CompoundFile();
+            CompoundFile cfSrc = new CompoundFile("MultipleStorage4.cfs");
+
+            Copy(cfSrc.RootStorage, cfDst.RootStorage);
+
+            cfDst.Save("MultipleStorage4Copy.cfs");
+
+            cfDst.Close();
+            cfSrc.Close();
+        }
+
+        #region Copy heper method
+
+        /// <summary>
+        /// Copies the given <paramref name="source"/> to the given <paramref name="destination"/>
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        public static void Copy(CFStorage source, CFStorage destination)
+        {
+            source.VisitEntries(action =>
+            {
+                if (action.IsStorage)
+                {
+                    var destionationStorage = destination.AddStorage(action.Name);
+                    destionationStorage.CLSID = action.CLSID;
+                    destionationStorage.CreationDate = action.CreationDate;
+                    destionationStorage.ModifyDate = action.ModifyDate;
+                    Copy(action as CFStorage, destionationStorage);
+                }
+                else
+                {
+                    var sourceStream = action as CFStream;
+                    var destinationStream = destination.AddStream(action.Name);
+                    if (sourceStream != null) destinationStream.SetData(sourceStream.GetData());
+                }
+            }, false);
+        }
+
+        #endregion
+
+        //[Test]
+        //public void Test_CORRUPTED_CYCLIC_DIFAT_VALIDATION_CHECK()
+        //{
+
+        //    CompoundFile cf = null;
+        //    try
+        //    {
+        //        cf = new CompoundFile("CiclycDFAT.cfs");
+        //        CFStorage s = cf.RootStorage.GetStorage("MyStorage");
+        //        CFStream st = s.GetStream("MyStream");
+        //        Assert.IsTrue(st.Size > 0);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Assert.IsTrue(ex is CFCorruptedFileException);
+        //    }
+        //    finally
+        //    {
+        //        if (cf != null)
+        //        {
+        //            cf.Close();
+        //        }
+        //    }
+        //}
+        //[Test]
+        //public void Test_REM()
+        //{
+        //    var f = new CompoundFile();
+
+        //    byte[] bB = Helpers.GetBuffer(5 * 1024, 0x0B); 
+        //    f.RootStorage.AddStream("Test").AppendData(bB);
+        //    f.Save("Astorage.cfs");
+        //}
     }
 }
