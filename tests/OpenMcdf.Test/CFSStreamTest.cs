@@ -14,29 +14,6 @@ namespace OpenMcdf.Test
     [TestFixture]
     public class CFSStreamTest
     {
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
         [Test]
         public void Test_READ_STREAM()
         {
@@ -172,6 +149,7 @@ namespace OpenMcdf.Test
 
         }
 
+
         [Test]
         public void Test_WRITE_STREAM_WITH_DIFAT()
         {
@@ -202,6 +180,7 @@ namespace OpenMcdf.Test
                 File.Delete("WRITE_STREAM_WITH_DIFAT.cfs");
 
         }
+
 
         [Test]
         public void Test_WRITE_MINISTREAM_READ_REWRITE_STREAM()
@@ -468,6 +447,8 @@ namespace OpenMcdf.Test
 
         }
 
+
+
         [Test]
         public void Test_DELETE_STREAM_1()
         {
@@ -495,6 +476,7 @@ namespace OpenMcdf.Test
 
             cf.Close();
         }
+
 
         [Test]
         public void Test_WRITE_AND_READ_CFS()
@@ -538,6 +520,7 @@ namespace OpenMcdf.Test
             }
 
         }
+
 
         [Test]
         public void Test_INCREMENTAL_SIZE_MULTIPLE_WRITE_AND_READ_CFS_STREAM()
@@ -694,6 +677,7 @@ namespace OpenMcdf.Test
             cf2.Close();
         }
 
+
         [Test]
         public void Test_APPEND_DATA_TO_STREAM()
         {
@@ -831,10 +815,10 @@ namespace OpenMcdf.Test
         public void Test_RESIZE_STREAM_TRANSITION_TO_NORMAL()
         {
             CompoundFile cf = null;
-            byte[] buffer2Mb = Helpers.GetBuffer(1024 * 2, 0xAA); //2MB buffer
+            byte[] b = Helpers.GetBuffer(1024 * 2, 0xAA); //2MB buffer
 
             cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
-            cf.RootStorage.AddStream("AStream").SetData(buffer2Mb);
+            cf.RootStorage.AddStream("AStream").SetData(b);
             cf.Save("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL.cfs");
             cf.Save("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL2.cfs");
             cf.Close();
@@ -852,7 +836,7 @@ namespace OpenMcdf.Test
 
             byte[] buffer = new byte[2048];
             item.Read(buffer, 0, 2048);
-            Assert.IsTrue(Helpers.CompareBuffer(buffer2Mb, buffer));
+            Assert.IsTrue(Helpers.CompareBuffer(b, buffer));
 
         }
 
@@ -960,7 +944,9 @@ namespace OpenMcdf.Test
             Assert.IsTrue(larger >= smaller, "Larger size:" + larger.ToString() + " - Smaller size:" + smaller.ToString());
 
         }
-        
+
+
+
         [Test]
         public void TEST_STREAM_VIEW()
         {
@@ -970,13 +956,14 @@ namespace OpenMcdf.Test
             Buffer.BlockCopy(BitConverter.GetBytes((int)1), 0, s.GetData(), 0, 4);
             temp.Add(s);
 
-            StreamView sv = new StreamView(temp, 512, 0, a);
+            StreamView sv = new StreamView(temp, 512, 0,null, a);
             BinaryReader br = new BinaryReader(sv);
             Int32 t = br.ReadInt32();
 
             Assert.IsTrue(t == 1);
         }
-        
+
+
         [Test]
         public void Test_STREAM_VIEW_2()
         {
@@ -991,7 +978,8 @@ namespace OpenMcdf.Test
 
             Assert.IsTrue(t == 1);
         }
-        
+
+
         /// <summary>
         /// Write a sequence of Int32 greater than sector size,
         /// read and compare.
@@ -1043,5 +1031,8 @@ namespace OpenMcdf.Test
                 Assert.IsTrue(i == br.ReadInt32(), "Failed with " + i.ToString());
             }
         }
+
+
+
     }
 }

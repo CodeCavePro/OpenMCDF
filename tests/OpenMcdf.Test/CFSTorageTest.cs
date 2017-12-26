@@ -12,29 +12,6 @@ namespace OpenMcdf.Test
     [TestFixture]
     public class CFSTorageTest
     {
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        //public static void MyClassInitialize(TestContext testContext) 
-
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
         [Test]
         public void Test_CREATE_STORAGE()
         {
@@ -82,6 +59,7 @@ namespace OpenMcdf.Test
             tw.Close();
 
         }
+
 
         [Test]
         public void Test_TRY_GET_STREAM_STORAGE()
@@ -210,6 +188,7 @@ namespace OpenMcdf.Test
             }
         }
 
+
         [Test]
         public void Test_VISIT_STORAGE()
         {
@@ -337,26 +316,23 @@ namespace OpenMcdf.Test
         [Test]
         public void Test_LAZY_LOAD_CHILDREN_()
         {
-            using (var cf = new CompoundFile())
-            {
-                cf.RootStorage.AddStorage("Level_1")
-                    .AddStorage("Level_2")
-                    .AddStream("Level2Stream")
-                    .SetData(Helpers.GetBuffer(100));
+            CompoundFile cf = new CompoundFile();
+            cf.RootStorage.AddStorage("Level_1")
+                .AddStorage("Level_2")
+                .AddStream("Level2Stream")
+                .SetData(Helpers.GetBuffer(100));
 
-                cf.Save("$Hel1");
-                cf.Close(true);
-            }
+            cf.Save("$Hel1");
 
-            using (var cf = new CompoundFile("$Hel1"))
-            {
-                IList<CFItem> i = cf.GetAllNamedEntries("Level2Stream");
-                Assert.IsNotNull(i[0]);
-                Assert.IsTrue(i[0] is CFStream);
-                Assert.IsTrue((i[0] as CFStream).GetData().Length == 100);
-                cf.Save("$Hel2");
-                cf.Close(true);
-            }
+            cf.Close();
+
+            cf = new CompoundFile("$Hel1");
+            IList<CFItem> i = cf.GetAllNamedEntries("Level2Stream");
+            Assert.IsNotNull(i[0]);
+            Assert.IsTrue(i[0] is CFStream);
+            Assert.IsTrue((i[0] as CFStream).GetData().Length == 100);
+            cf.Save("$Hel2");
+            cf.Close();
 
             if (File.Exists("$Hel1"))
             {
@@ -391,6 +367,23 @@ namespace OpenMcdf.Test
                 Assert.IsTrue(ex.GetType() == typeof(CFDuplicatedItemException));
             }
 
+        }
+
+        [Test]
+        public void Test_CORRUPTEDDOC_BUG36_SHOULD_THROW_CORRUPTED_FILE_EXCEPTION()
+        {
+            try
+            {
+                using (CompoundFile file = new CompoundFile("CorruptedDoc_bug36.doc", CFSUpdateMode.ReadOnly,
+                    CFSConfiguration.NoValidationException))
+                {
+                    //Many thanks to theseus for bug reporting
+                }
+            }
+            catch (Exception ex)
+            {
+                Assert.IsInstanceOf<CFCorruptedFileException>(ex);
+            }
         }
     }
 }

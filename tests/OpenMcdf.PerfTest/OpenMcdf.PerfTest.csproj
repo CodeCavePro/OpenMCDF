@@ -13,6 +13,7 @@
     <AssemblyName>OpenMcdf.PerfTest</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -64,7 +65,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssetDeployer.cs" />
+    <Compile Include="..\OpenMcdf.Test\AssetDeployer.cs">
+      <Link>AssetDeployer.cs</Link>
+    </Compile>
     <Compile Include="Helpers.cs" />
     <Compile Include="MemoryTest.cs" />
     <Compile Include="PerformanceTestStuite.cs" />

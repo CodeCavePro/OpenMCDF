@@ -33,6 +33,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -69,10 +70,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssetDeployer.cs" />
     <Compile Include="CFSStreamExtensionsTest.cs" />
     <Compile Include="CFSStreamTest.cs" />
     <Compile Include="CFSTorageTest.cs" />
-    <Compile Include="AssetDeployer.cs" />
     <Compile Include="CompoundFileTest.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

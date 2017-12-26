@@ -20,7 +20,7 @@ namespace OpenMcdf.PerfTest
 
         [PerfBenchmark(NumberOfIterations = 1, RunMode = RunMode.Iterations, TestMode = TestMode.Test, SkipWarmups = false)]
         [CounterMeasurement("TestCounter")]
-        [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 6000.0d)] // max 6 sec
+        [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 7000.0d)] // max 7 sec
         [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo, 450 * 1024 * 1024)] // max 450 Mb in RAM
         public void PerfMem_MultipleCodeFeatures()
         {

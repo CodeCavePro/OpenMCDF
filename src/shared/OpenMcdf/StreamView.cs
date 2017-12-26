@@ -1,9 +1,9 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * 
  * The Original Code is OpenMCDF - Compound Document Format library.
- *
+ * 
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
 
@@ -14,7 +14,6 @@ using System.Collections;
 using System.IO;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Linq;
 
 namespace OpenMcdf
 {
@@ -29,7 +28,7 @@ namespace OpenMcdf
 
         private List<Sector> sectorChain;
         private Stream stream;
-
+        private bool isFatStream = false;
         private List<Sector> freeSectors = new List<Sector>();
         public IEnumerable<Sector> FreeSectors
         {
@@ -49,18 +48,15 @@ namespace OpenMcdf
             this.stream = stream;
         }
 
-        public StreamView(List<Sector> sectorChain, int sectorSize, long length, Queue<Sector> availableSectors, Stream stream)
+        public StreamView(List<Sector> sectorChain, int sectorSize, long length, Queue<Sector> availableSectors, Stream stream, bool isFatStream = false)
             : this(sectorChain, sectorSize, stream)
         {
+            this.isFatStream = isFatStream;
             adjustLength(length, availableSectors);
         }
 
 
-        public StreamView(List<Sector> sectorChain, int sectorSize, long length, Stream stream)
-            : this(sectorChain, sectorSize, stream)
-        {
-            adjustLength(length);
-        }
+
 
         public List<Sector> BaseSectorChain
         {
@@ -258,7 +254,11 @@ namespace OpenMcdf
                         t = availableSectors.Dequeue();
                     }
 
-                    sectorChain.Add(t);
+                    if (isFatStream)
+                    {
+                        t.InitFATData();
+                    }
+                        sectorChain.Add(t);
                     nSec--;
                 }
 

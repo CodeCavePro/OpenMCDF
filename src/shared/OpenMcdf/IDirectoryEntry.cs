@@ -1,14 +1,14 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * 
  * The Original Code is OpenMCDF - Compound Document Format library.
- *
+ * 
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
 
-using RedBlackTree;
 using System;
+using RedBlackTree;
 
 
 namespace OpenMcdf
@@ -23,7 +23,7 @@ namespace OpenMcdf
         byte[] ModifyDate { get; set; }
         string Name { get; }
         ushort NameLength { get; set; }
-        void Read(System.IO.Stream stream);
+        void Read(System.IO.Stream stream, CFSVersion ver = CFSVersion.Ver_3);
         int RightSibling { get; set; }
         void SetEntryName(string entryName);
         int SID { get; set; }

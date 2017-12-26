@@ -1,15 +1,16 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * 
  * The Original Code is OpenMCDF - Compound Document Format library.
- *
+ * 
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using RedBlackTree;
 
 namespace OpenMcdf
 {
@@ -378,7 +379,7 @@ namespace OpenMcdf
         //    return ms.ToArray();
         //}
 
-        public void Read(Stream stream)
+        public void Read(Stream stream, CFSVersion ver = CFSVersion.Ver_3)
         {
             StreamRW rw = new StreamRW(stream);
 
@@ -404,7 +405,19 @@ namespace OpenMcdf
             creationDate = rw.ReadBytes(8);
             modifyDate = rw.ReadBytes(8);
             startSetc = rw.ReadInt32();
-            size = rw.ReadInt64();
+
+            if (ver == CFSVersion.Ver_3)
+            {
+                // avoid dirty read for version 3 files (max size: 32bit integer)
+                // where most significant bits are not initialized to zero
+
+                size = rw.ReadInt32();
+                rw.ReadBytes(4); //discard most significant 4 (possibly) dirty bytes
+            }
+            else
+            {
+                size = rw.ReadInt64();
+            }
         }
 
         public string Name
@@ -413,7 +426,7 @@ namespace OpenMcdf
         }
 
 
-        public RedBlackTree.IRBNode Left
+        public IRBNode Left
         {
             get
             {
@@ -431,7 +444,7 @@ namespace OpenMcdf
             }
         }
 
-        public RedBlackTree.IRBNode Right
+        public IRBNode Right
         {
             get
             {
@@ -451,11 +464,11 @@ namespace OpenMcdf
             }
         }
 
-        public RedBlackTree.Color Color
+        public Color Color
         {
             get
             {
-                return (RedBlackTree.Color)StgColor;
+                return (Color)StgColor;
             }
             set
             {
@@ -465,7 +478,7 @@ namespace OpenMcdf
 
         private IDirectoryEntry parent = null;
 
-        public RedBlackTree.IRBNode Parent
+        public IRBNode Parent
         {
             get
             {
@@ -477,12 +490,12 @@ namespace OpenMcdf
             }
         }
 
-        public RedBlackTree.IRBNode Grandparent()
+        public IRBNode Grandparent()
         {
             return parent != null ? parent.Parent : null;
         }
 
-        public RedBlackTree.IRBNode Sibling()
+        public IRBNode Sibling()
         {
             if (this == Parent.Left)
                 return Parent.Right;
@@ -490,7 +503,7 @@ namespace OpenMcdf
                 return Parent.Left;
         }
 
-        public RedBlackTree.IRBNode Uncle()
+        public IRBNode Uncle()
         {
             return parent != null ? Parent.Sibling() : null;
         }
@@ -554,7 +567,7 @@ namespace OpenMcdf
         }
 
 
-        public void AssignValueTo(RedBlackTree.IRBNode other)
+        public void AssignValueTo(IRBNode other)
         {
             DirectoryEntry d = other as DirectoryEntry;
 

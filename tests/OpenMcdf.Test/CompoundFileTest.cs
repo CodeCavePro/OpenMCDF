@@ -15,28 +15,6 @@ namespace OpenMcdf.Test
     [TestFixture]
     public class CompoundFileTest
     {
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
         [Test]
         public void Test_COMPRESS_SPACE()
         {
@@ -424,7 +402,7 @@ namespace OpenMcdf.Test
             Assert.IsTrue(new FileInfo("6_Streams_Shrinked.cfs").Length < new FileInfo("6_Streams.cfs").Length);
 
             cfTest = new CompoundFile("6_Streams_Shrinked.cfs");
-            Action<CFItem> va = delegate(CFItem item)
+            Action<CFItem> va = delegate (CFItem item)
             {
                 if (item.IsStream)
                 {
@@ -735,6 +713,139 @@ namespace OpenMcdf.Test
             }
         }
 
+        [Test]
+        public void Test_CORRUPTEDDOC_BUG36_SHOULD_THROW_CORRUPTED_FILE_EXCEPTION()
+        {
+            FileStream fs = null;
+            try
+            {
+                fs = new FileStream("CorruptedDoc_bug36.doc", FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                CompoundFile file = new CompoundFile(fs, CFSUpdateMode.ReadOnly, CFSConfiguration.LeaveOpen);
+
+            }
+            catch (Exception ex)
+            {
+                Assert.IsTrue(fs.CanRead && fs.CanSeek && fs.CanWrite);
+            }
+
+
+        }
+
+        [Test]
+        public void Test_ISSUE_2_WRONG_CUTOFF_SIZE()
+        {
+            FileStream fs = null;
+            try
+            {
+                if (File.Exists("TEST_ISSUE_2"))
+                {
+                    File.Delete("TEST_ISSUE_2");
+                }
+
+                CompoundFile cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
+                var s = cf.RootStorage.AddStream("miniToNormal");
+                s.Append(Helpers.GetBuffer(4090, 0xAA));
+               
+                cf.Save("TEST_ISSUE_2");
+                cf.Close();
+                var cf2 = new CompoundFile("TEST_ISSUE_2",CFSUpdateMode.Update,CFSConfiguration.Default);
+                cf2.RootStorage.GetStream("miniToNormal").Append(Helpers.GetBuffer(6, 0xBB));
+                cf2.Commit();
+                cf2.Close();
+            }
+            catch (Exception ex)
+            {
+                Assert.IsTrue(fs.CanRead && fs.CanSeek && fs.CanWrite);
+            }
+        }
+
+        [Test]
+        public void Test_PR_13()
+        {
+            CompoundFile cf = new CompoundFile("report.xls");
+            Guid g = cf.getGuidBySID(0);
+            Assert.IsNotNull(g);
+            g =cf.getGuidForStream(3);
+            Assert.IsNotNull(g);
+            Assert.IsTrue(!String.IsNullOrEmpty(cf.GetNameDirEntry(2)));
+            Assert.IsTrue(cf.GetNumDirectories() > 0);
+        }
+            //[Test]
+            //public void Test_CORRUPTED_CYCLIC_DIFAT_VALIDATION_CHECK()
+            //{
+
+            //    CompoundFile cf = null;
+            //    try
+            //    {
+            //        cf = new CompoundFile("CiclycDFAT.cfs");
+            //        CFStorage s = cf.RootStorage.GetStorage("MyStorage");
+            //        CFStream st = s.GetStream("MyStream");
+            //        Assert.IsTrue(st.Size > 0);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Assert.IsTrue(ex is CFCorruptedFileException);
+            //    }
+            //    finally
+            //    {
+            //        if (cf != null)
+            //        {
+            //            cf.Close();
+            //        }
+            //    }
+            //}
+            //[Test]
+            //public void Test_REM()
+            //{
+            //    var f = new CompoundFile();
+
+            //    byte[] bB = Helpers.GetBuffer(5 * 1024, 0x0B); 
+            //    f.RootStorage.AddStream("Test").AppendData(bB);
+            //    f.Save("Astorage.cfs");
+            //}
+
+        public void Test_COPY_ENTRIES_FROM_TO_STORAGE()
+        {
+            CompoundFile cfDst = new CompoundFile();
+            CompoundFile cfSrc = new CompoundFile("MultipleStorage4.cfs");
+
+            Copy(cfSrc.RootStorage, cfDst.RootStorage);
+
+            cfDst.Save("MultipleStorage4Copy.cfs");
+
+            cfDst.Close();
+            cfSrc.Close();
+
+        }
+
+        #region Copy heper method
+            /// <summary>
+            /// Copies the given <paramref name="source"/> to the given <paramref name="destination"/>
+            /// </summary>
+            /// <param name="source"></param>
+            /// <param name="destination"></param>
+        public static void Copy(CFStorage source, CFStorage destination)
+        {
+            source.VisitEntries(action =>
+            {
+                if (action.IsStorage)
+                {
+                    var destionationStorage = destination.AddStorage(action.Name);
+                    destionationStorage.CLSID = action.CLSID;
+                    destionationStorage.CreationDate = action.CreationDate;
+                    destionationStorage.ModifyDate = action.ModifyDate;
+                    Copy(action as CFStorage, destionationStorage);
+                }
+                else
+                {
+                    var sourceStream = action as CFStream;
+                    var destinationStream = destination.AddStream(action.Name);
+                    if (sourceStream != null) destinationStream.SetData(sourceStream.GetData());
+                }
+
+            }, false);
+        }
+        #endregion
         //[Test]
         //public void Test_CORRUPTED_CYCLIC_DIFAT_VALIDATION_CHECK()
         //{

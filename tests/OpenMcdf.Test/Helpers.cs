@@ -1,4 +1,7 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace OpenMcdf.Test
 {
@@ -25,12 +28,6 @@ namespace OpenMcdf.Test
 
         public static bool CompareBuffer(byte[] b, byte[] p)
         {
-            if (b == null && p == null)
-                throw new Exception("Null buffers");
-
-            if (b.Length != p.Length)
-                return false;
-
             bool res = CompareBuffer(b, p, b.Length);
             return res && (b.Length == p.Length);
         }
@@ -40,11 +37,12 @@ namespace OpenMcdf.Test
             if (b == null && p == null)
                 throw new Exception("Null buffers");
 
-            if (b == null && p != null) 
+            if (b == null && p != null)
                 return false;
 
-            if (b != null && p == null) 
+            if (b != null && p == null)
                 return false;
+
 
             for (int i = 0; i < count; i++)
             {

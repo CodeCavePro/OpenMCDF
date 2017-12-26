@@ -1,9 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * 
  * The Original Code is OpenMCDF - Compound Document Format library.
- *
+ * 
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
 
@@ -20,7 +20,7 @@ namespace OpenMcdf
     /// <param name="item">Currently visited <see cref="T:OpenMcdf.CFItem">item</see></param>
     /// <example>
     /// <code>
-    ///
+    /// 
     /// //We assume that xls file should be a valid OLE compound file
     /// const String STORAGE_NAME = "report.xls";
     /// CompoundFile cf = new CompoundFile(STORAGE_NAME);
@@ -108,7 +108,7 @@ namespace OpenMcdf
         /// <exception cref="T:OpenMcdf.CFException">Raised when adding a stream with null or empty name</exception>
         /// <example>
         /// <code>
-        ///
+        /// 
         ///  String filename = "A_NEW_COMPOUND_FILE_YOU_CAN_WRITE_TO.cfs";
         ///
         ///  CompoundFile cf = new CompoundFile();
@@ -119,7 +119,7 @@ namespace OpenMcdf
         ///  sm.SetData(b);
         ///
         ///  cf.Save(filename);
-        ///
+        ///  
         /// </code>
         /// </example>
         public CFStream AddStream(String streamName)
@@ -129,7 +129,7 @@ namespace OpenMcdf
             if (String.IsNullOrEmpty(streamName))
                 throw new CFException("Stream name cannot be null or empty");
 
-
+            
 
             IDirectoryEntry dirEntry = DirectoryEntry.TryNew(streamName, StgType.StgStream, this.CompoundFile.GetDirectories());
 
@@ -147,7 +147,7 @@ namespace OpenMcdf
             catch (RBTreeException)
             {
                 CompoundFile.ResetDirectoryEntry(dirEntry.SID);
-
+                
                 throw new CFDuplicatedItemException("An entry with name '" + streamName + "' is already present in storage '" + this.Name + "' ");
             }
 
@@ -253,7 +253,7 @@ namespace OpenMcdf
         /// <exception cref="T:OpenMcdf.CFItemNotFound">Raised if item to delete is not found</exception>
         /// <example>
         /// <code>
-        ///
+        /// 
         /// String FILENAME = "MultipleStorage2.cfs";
         /// CompoundFile cf = new CompoundFile(FILENAME, UpdateMode.ReadOnly, false, false);
         ///
@@ -288,7 +288,7 @@ namespace OpenMcdf
         /// <exception cref="T:OpenMcdf.CFDisposedException">Raised if trying to delete item from a closed compound file</exception>
         /// <example>
         /// <code>
-        ///
+        /// 
         /// String FILENAME = "MultipleStorage2.cfs";
         /// CompoundFile cf = new CompoundFile(FILENAME, UpdateMode.ReadOnly, false, false);
         ///
@@ -326,7 +326,7 @@ namespace OpenMcdf
         /// <exception cref="T:OpenMcdf.CFException">Raised when adding a storage with null or empty name</exception>
         /// <example>
         /// <code>
-        ///
+        /// 
         ///  String filename = "A_NEW_COMPOUND_FILE_YOU_CAN_WRITE_TO.cfs";
         ///
         ///  CompoundFile cf = new CompoundFile();
@@ -337,7 +337,7 @@ namespace OpenMcdf
         ///  sm.SetData(b);
         ///
         ///  cf.Save(filename);
-        ///
+        ///  
         /// </code>
         /// </example>
         public CFStorage AddStorage(String storageName)
@@ -403,32 +403,32 @@ namespace OpenMcdf
                 return;
             List<IRBNode> subStorages = new List<IRBNode>();
 
-            Action<IRBNode> internalAction =
-                delegate(IRBNode targetNode)
-                {
-                    IDirectoryEntry d = targetNode as IDirectoryEntry;
-                    if (d.StgType == StgType.StgStream)
-                        action(new CFStream(this.CompoundFile, d));
-                    else
-                        action(new CFStorage(this.CompoundFile, d));
+                Action<IRBNode> internalAction =
+                    delegate(IRBNode targetNode)
+                    {
+                        IDirectoryEntry d = targetNode as IDirectoryEntry;
+                        if (d.StgType == StgType.StgStream)
+                            action(new CFStream(this.CompoundFile, d));
+                        else
+                            action(new CFStorage(this.CompoundFile, d));
 
-                    if (d.Child != DirectoryEntry.NOSTREAM)
-                        subStorages.Add(targetNode);
+                        if (d.Child != DirectoryEntry.NOSTREAM)
+                            subStorages.Add(targetNode);
 
-                    return;
-                };
+                        return;
+                    };
 
-            this.Children.VisitTreeNodes(internalAction);
+                this.Children.VisitTreeNodes(internalAction);
 
             if (!recursive || subStorages.Count <= 0)
                 return;
 
-            foreach (IRBNode n in subStorages)
-            {
-                IDirectoryEntry d = n as IDirectoryEntry;
-                (new CFStorage(this.CompoundFile, d)).VisitEntries(action, recursive);
+                    foreach (IRBNode n in subStorages)
+                    {
+                        IDirectoryEntry d = n as IDirectoryEntry;
+                        (new CFStorage(this.CompoundFile, d)).VisitEntries(action, recursive);
+                    }
             }
-        }
 
         /// <summary>
         /// Remove an entry from the current storage and compound file.
@@ -505,7 +505,7 @@ namespace OpenMcdf
 
                 case StgType.StgStream:
 
-                    // Free directory associated data stream.
+                    // Free directory associated data stream. 
                     CompoundFile.FreeAssociatedData((foundObj as IDirectoryEntry).SID);
 
                     // Remove item from children tree
@@ -537,7 +537,7 @@ namespace OpenMcdf
             //    if( ((IDirectoryEntry)target).SID>foundObj.SID )
             //    {
             //        ((IDirectoryEntry)target).SID--;
-            //    }
+            //    }                   
 
 
             //    ((IDirectoryEntry)target).LeftSibling--;
