@@ -1,0 +1,134 @@
+# Operating system (build VM template)
+os: Windows Server 2016
+
+# If the build configuration does not specify build worker image
+# then Visual Studio 2015 image is used.
+image: Visual Studio 2017
+
+# Restrict to Git branches below
+branches:
+  only:
+    - master
+
+# Scripts that run after cloning repository
+install:
+  - nuget restore
+
+# Cache files until appveyor.yml is modified.
+cache:
+  - packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
+  - '%LocalAppData%\NuGet\Cache'    # NuGet < v3
+  - '%LocalAppData%\NuGet\v3-cache' # NuGet v3
+
+# Version format
+version: 2.1.1.{build}
+
+environment:
+  VERSION_SIMPLE: '{version}'
+  VERSION_INFORMATIONAL: '{version}'
+  VERSION_SUFFIX: '-preview-$(APPVEYOR_BUILD_NUMBER)'
+  VERSION_SUFFIX_TAG: '-$(APPVEYOR_BUILD_NUMBER)'
+
+init:
+- ps: |
+    $env:VERSION_SIMPLE = $env:APPVEYOR_BUILD_VERSION
+    $env:VERSION_INFORMATIONAL = $env:APPVEYOR_BUILD_VERSION.TrimEnd(".$env:APPVEYOR_BUILD_NUMBER")
+
+    if ($env:APPVEYOR_REPO_TAG -eq "true" -and $env:APPVEYOR_REPO_TAG_NAME)
+    {
+        $env:VERSION_SUFFIX = $env:VERSION_SUFFIX_TAG
+        $tag_version = $env:APPVEYOR_REPO_TAG_NAME.TrimStart("v")
+        Write-Host "Building a tag: $tag_version";
+
+        if ($tag_version -match '([0-9]+[\.-][0-9]+[\.-][0-9]+([-A-Za-z0-9]+)?)')
+        {
+            $env:VERSION_INFORMATIONAL = $tag_version
+        }
+        if ($tag_version -match '^([0-9]+\.[0-9]+\.[0-9]+)$')
+        {
+            $env:VERSION_INFORMATIONAL = "$tag_version$env:VERSION_SUFFIX"
+        }
+    } 
+    else
+    {
+        $env:VERSION_INFORMATIONAL = "$env:VERSION_INFORMATIONAL$env:VERSION_SUFFIX"
+    }
+
+    Update-AppveyorBuild -Version $env:VERSION_INFORMATIONAL
+    Write-Host "Using build version: $env:APPVEYOR_BUILD_VERSION";
+
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  assembly_version: $(VERSION_SIMPLE)
+  file_version: $(VERSION_SIMPLE)
+  version: $(VERSION_INFORMATIONAL)
+  package_version: $(VERSION_INFORMATIONAL)
+  informational_version: $(VERSION_INFORMATIONAL)
+
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: $(VERSION_SIMPLE)
+  assembly_file_version: $(VERSION_SIMPLE)
+  assembly_informational_version: $(VERSION_INFORMATIONAL)
+
+# Run scripts below before
+before_build:
+  - where msbuild
+  - cmd: msbuild /t:Clean 
+
+# To run your custom scripts instead of automatic MSBuild
+build_script:
+  - cmd: msbuild /t:Rebuild /p:Configuration=Debug
+
+# NuGet files qualified as artifacts
+artifacts:
+  - path: 'bin\**\*.nupkg' # find the NuGet files
+    name: OpenMCDF
+
+# Deploy to GitHub releases
+deploy: 
+  - 
+    provider: GitHub
+    auth_token: 
+      secure: 2+d0KgCbWQpUR8TZfzvUEzbi4NQP6F/Tt0PUwLn6jXZCyO8FnrFVFJPsFa0QBQFl
+    artifact: OpenMCDF
+    description: |-
+        Supports the following .NET frameworks and standards
+        * .NET 4.0
+        * [.NET 4.6.1](https://github.com/Microsoft/dotnet/blob/master/releases/net461/README.md)
+        * [.NET Standard 1.6](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard1.6.md) (.NET Core >=1.0, .NET >=4.6.1, Mono >=4.6 etc)
+        * [.NET Standard 2.0](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md) (.NET Core >=2.0, .NET >=4.6.1, Mono >=5.4 etc)
+    draft: false
+    force_update: true
+    prerelease: false
+    release: "OpenMCDF v$(APPVEYOR_REPO_TAG_NAME)"
+    tag: $(APPVEYOR_REPO_TAG_NAME)
+    on: 
+      appveyor_repo_tag: true
+
+  - 
+    provider: NuGet
+    api_key: 
+      secure: TrtChQUTQ9rD8pffK1A9bjMYyN/8eQUjV+7IKVjS/C37TgXMae46Bzd527bZUVSb
+    artifact: OpenMCDF
+    server:             # remove to push to NuGet.org
+    skip_symbols: false
+    symbol_server:      # remove to push symbols to SymbolSource.org
+    on: 
+      appveyor_repo_tag: true
+
+  -
+    provider: NuGet
+    server: https://ci.appveyor.com/nuget/salaros/api/v2/package
+    symbol_server: https://ci.appveyor.com/nuget/salaros/api/v2/package
+    api_key:
+      secure: 3zmnmVBweTgdk4SBM/rWHdC9JOM9s0pxm1bw1d+WHDo=
+    artifact: OpenMCDF
+
+# Start builds on tags only (GitHub and BitBucket)
+skip_non_tags: false
+
+# Turn off tests
+test: off
