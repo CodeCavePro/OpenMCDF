@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using NUnit.Framework;
 
-namespace OpenMcdf.Extensions.Test
+namespace OpenMcdf.Test
 {
     /// <summary>
     /// Summary description for UnitTest1

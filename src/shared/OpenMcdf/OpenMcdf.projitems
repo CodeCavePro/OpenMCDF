@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CFItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CFStorage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CFStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CFStreamExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompoundFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DirectoryEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Header.cs" />

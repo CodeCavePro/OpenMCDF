@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace OpenMcdf.Extensions
+namespace OpenMcdf
 {
     public static class CFStreamExtension
     {

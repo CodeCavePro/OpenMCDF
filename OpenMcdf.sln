@@ -32,11 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{8DC873
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf", "src\net40\OpenMcdf\OpenMcdf.csproj", "{56E15D4A-8A37-4C7C-BB44-FD59AFF220C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions", "src\net40\OpenMcdf.Extensions\OpenMcdf.Extensions.csproj", "{DB748C1D-D71C-442B-832D-2E33BE816CBB}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{73814657-FC73-4066-AABD-86062F2A132E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Extensions.Test", "tests\OpenMcdf.Extensions.Test\OpenMcdf.Extensions.Test.csproj", "{B9CB103F-0AA3-486D-9C9C-672924B6169C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.MemTest", "tests\OpenMcdf.MemTest\OpenMcdf.MemTest.csproj", "{E2BAD82D-3040-462B-BAA2-6E608A9054F4}"
 EndProject
@@ -46,11 +42,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMcdf.Test", "tests\Open
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf", "src\shared\OpenMcdf\OpenMcdf.shproj", "{E8C5B9B6-6AA3-4284-A4CF-0F2F788B8360}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OpenMcdf.Extensions", "src\shared\OpenMcdf.Extensions\OpenMcdf.Extensions.shproj", "{2AA71E5F-404E-42CE-A681-CF32693D079B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf", "src\netstandard20\OpenMcdf\OpenMcdf.csproj", "{3FC91B43-E065-4479-8C4A-1C8EA6411BD4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenMcdf.Extensions", "src\netstandard20\OpenMcdf.Extensions\OpenMcdf.Extensions.csproj", "{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netstandard", "netstandard", "{29569C63-54A4-4942-B00F-72E10B3D9BC8}"
 EndProject
@@ -58,9 +50,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net40", "net40", "{99956FD6
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\shared\OpenMcdf.Extensions\OpenMcdf.Extensions.projitems*{2aa71e5f-404e-42ce-a681-cf32693d079b}*SharedItemsImports = 13
 		src\shared\OpenMcdf\OpenMcdf.projitems*{56e15d4a-8a37-4c7c-bb44-fd59aff220c1}*SharedItemsImports = 4
-		src\shared\OpenMcdf.Extensions\OpenMcdf.Extensions.projitems*{db748c1d-d71c-442b-832d-2e33be816cbb}*SharedItemsImports = 4
 		src\shared\OpenMcdf\OpenMcdf.projitems*{e8c5b9b6-6aa3-4284-a4cf-0f2f788b8360}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,14 +62,6 @@ Global
 		{56E15D4A-8A37-4C7C-BB44-FD59AFF220C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56E15D4A-8A37-4C7C-BB44-FD59AFF220C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56E15D4A-8A37-4C7C-BB44-FD59AFF220C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DB748C1D-D71C-442B-832D-2E33BE816CBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB748C1D-D71C-442B-832D-2E33BE816CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB748C1D-D71C-442B-832D-2E33BE816CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB748C1D-D71C-442B-832D-2E33BE816CBB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9CB103F-0AA3-486D-9C9C-672924B6169C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9CB103F-0AA3-486D-9C9C-672924B6169C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9CB103F-0AA3-486D-9C9C-672924B6169C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9CB103F-0AA3-486D-9C9C-672924B6169C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E2BAD82D-3040-462B-BAA2-6E608A9054F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E2BAD82D-3040-462B-BAA2-6E608A9054F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2BAD82D-3040-462B-BAA2-6E608A9054F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -96,10 +78,6 @@ Global
 		{3FC91B43-E065-4479-8C4A-1C8EA6411BD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FC91B43-E065-4479-8C4A-1C8EA6411BD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FC91B43-E065-4479-8C4A-1C8EA6411BD4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,13 +85,10 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{8DC8730A-F254-4848-B272-BDFFCB5FDC00} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{56E15D4A-8A37-4C7C-BB44-FD59AFF220C1} = {99956FD6-A1B3-4228-A689-37459E8877F2}
-		{DB748C1D-D71C-442B-832D-2E33BE816CBB} = {99956FD6-A1B3-4228-A689-37459E8877F2}
-		{B9CB103F-0AA3-486D-9C9C-672924B6169C} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{E2BAD82D-3040-462B-BAA2-6E608A9054F4} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{7077508F-B313-4DF6-8855-4764911BE161} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{FD339266-8842-40B4-9230-F8E84FC42AC2} = {73814657-FC73-4066-AABD-86062F2A132E}
 		{3FC91B43-E065-4479-8C4A-1C8EA6411BD4} = {29569C63-54A4-4942-B00F-72E10B3D9BC8}
-		{09CEEAB1-E38B-430B-BAC6-C5A0941F4D00} = {29569C63-54A4-4942-B00F-72E10B3D9BC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C391C94D-1FBE-4F24-9E09-AB72A6FE9F7B}

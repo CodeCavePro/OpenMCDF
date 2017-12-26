@@ -1,56 +1,18 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using HelpersFromTests = OpenMcdf.Test.Helpers;
 
-namespace OpenMcdf.MemTest
+namespace OpenMcdf.PerfTest
 {
     public static class Helpers
     {
-        internal static byte[] GetBuffer(int count)
-        {
-            Random r = new Random();
-            byte[] b = new byte[count];
-            r.NextBytes(b);
-            return b;
-        }
-
-        internal static byte[] GetBuffer(int count, byte c)
-        {
-            byte[] b = new byte[count];
-            for (int i = 0; i < b.Length; i++)
-            {
-                b[i] = c;
-            }
-
-            return b;
-        }
-
-        internal static bool CompareBuffer(byte[] b, byte[] p)
-        {
-            if (b == null && p == null)
-                throw new Exception("Null buffers");
-
-            if (b == null && p != null) return false;
-            if (b != null && p == null) return false;
-
-            if (b.Length != p.Length)
-                return false;
-
-            for (int i = 0; i < b.Length; i++)
-            {
-                if (b[i] != p[i])
-                    return false;
-            }
-
-            return true;
-        }
-
         internal static void StressMemory()
         {
             const int N_LOOP = 20;
             const int MB_SIZE = 10;
 
-            byte[] b = Helpers.GetBuffer(1024 * 1024 * MB_SIZE); //2GB buffer
+            byte[] b = HelpersFromTests.GetBuffer(1024 * 1024 * MB_SIZE); //2GB buffer
             byte[] cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
 
             CompoundFile cf = new CompoundFile(CFSVersion.Ver_4, CFSConfiguration.Default);
@@ -114,7 +76,7 @@ namespace OpenMcdf.MemTest
 
             Stopwatch sw = new Stopwatch();
 
-            byte[] b = Helpers.GetBuffer(1024 * 1024 * 50); //2GB buffer
+            byte[] b = HelpersFromTests.GetBuffer(1024 * 1024 * 50); //2GB buffer
 
             fs = new FileStream("myDummyFile", FileMode.Open);
             sw.Start();
@@ -159,6 +121,19 @@ namespace OpenMcdf.MemTest
 
             //Visit NON-recursively (first level only)
             cfs.VisitEntries(va, false);
+        }
+
+        internal static void CreateFile(string fileName)
+        {
+            const int MAX_STREAM_COUNT = 5000;
+
+            CompoundFile cf = new CompoundFile();
+            for (int i = 0; i < MAX_STREAM_COUNT; i++)
+            {
+                cf.RootStorage.AddStream("Test" + i.ToString()).SetData(Test.Helpers.GetBuffer(300));
+            }
+            cf.Save(fileName);
+            cf.Close();
         }
     }
 }
