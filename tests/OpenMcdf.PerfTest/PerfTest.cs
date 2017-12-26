@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using NBench;
-using NUnit.Framework;
 
 namespace OpenMcdf.PerfTest
 {
@@ -53,16 +52,6 @@ namespace OpenMcdf.PerfTest
             {
                 File.Delete(_fileName);
             }
-        }
-    }
-
-    [SetUpFixture]
-    public class TestSetup
-    {
-        [OneTimeSetUp]
-        public void DeployAssetOnce()
-        {
-            Directory.SetCurrentDirectory(TestContext.CurrentContext.WorkDirectory);
         }
     }
 }

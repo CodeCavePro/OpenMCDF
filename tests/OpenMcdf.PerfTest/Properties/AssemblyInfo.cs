@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OpenMcdfPerfTest")]
+[assembly: AssemblyTitle("OpenMcdfMemTest")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("-")]
-[assembly: AssemblyProduct("OpenMcdfPerfTest")]
-[assembly: AssemblyCopyright("Copyright © - 2012")]
+[assembly: AssemblyCompany("Federico Blaseotto")]
+[assembly: AssemblyProduct("OpenMcdfMemTest")]
+[assembly: AssemblyCopyright("Copyright © 2010-2011, Federico Blaseotto")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c3a84d86-d1be-4fdc-8294-169e1f6747d8")]
+[assembly: Guid("6be95c7d-5e29-4e84-b1d0-ac5a0de6bfe2")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,4 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.5.0.*")]

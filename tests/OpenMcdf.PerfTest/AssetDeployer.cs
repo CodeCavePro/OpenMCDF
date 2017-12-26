@@ -1,7 +1,7 @@
 using System.IO;
 using NUnit.Framework;
 
-namespace OpenMcdf.MemTest
+namespace OpenMcdf.PerfTest
 {
     [SetUpFixture]
     public class AssetDeployer
