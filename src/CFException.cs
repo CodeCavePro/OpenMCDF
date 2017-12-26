@@ -7,7 +7,9 @@
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
 using System;
+#if !NETSTANDARD1_6
 using System.Runtime.Serialization;
+#endif
 
 namespace OpenMcdf
 {
@@ -22,7 +24,7 @@ namespace OpenMcdf
         {
         }
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD1_6
         protected CFException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -56,7 +58,7 @@ namespace OpenMcdf
         {
         }
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD1_6
         protected CFDisposedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -89,7 +91,7 @@ namespace OpenMcdf
         {
         }
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD1_6
         protected CFFileFormatException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -117,7 +119,7 @@ namespace OpenMcdf
     public class CFItemNotFound : CFException
     {
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD1_6
         protected CFItemNotFound(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -154,7 +156,7 @@ namespace OpenMcdf
         {
         }
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD1_6
         protected CFInvalidOperation(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -191,7 +193,7 @@ namespace OpenMcdf
         {
         }
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD1_6
         protected CFDuplicatedItemException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -225,7 +227,7 @@ namespace OpenMcdf
         {
         }
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD1_6
         protected CFCorruptedFileException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
