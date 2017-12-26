@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 
+// ReSharper disable CheckNamespace
+
 [assembly: InternalsVisibleTo("OpenMcdf.Test")]
 [assembly: InternalsVisibleTo("OpenMcdf.Extensions")]
 
