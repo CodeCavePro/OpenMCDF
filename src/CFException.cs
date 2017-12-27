@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 
 namespace OpenMcdf
 {
+    /// <inheritdoc />
     /// <summary>
     /// OpenMCDF base exception.
     /// </summary>
@@ -20,7 +21,6 @@ namespace OpenMcdf
     public class CFException : Exception
     {
         public CFException()
-            : base()
         {
         }
 
@@ -42,6 +42,7 @@ namespace OpenMcdf
         }
     }
 
+    /// <inheritdoc />
     /// <summary>
     /// Raised when a data setter/getter method is invoked
     /// on a stream or storage object after the disposal of the owner
@@ -51,7 +52,6 @@ namespace OpenMcdf
     public class CFDisposedException : CFException
     {
         public CFDisposedException()
-            : base()
         {
         }
 
@@ -73,6 +73,7 @@ namespace OpenMcdf
         }
     }
 
+    /// <inheritdoc />
     /// <summary>
     /// Raised when opening a file with invalid header
     /// or not supported COM/OLE Structured storage version.
@@ -81,7 +82,6 @@ namespace OpenMcdf
     public class CFFileFormatException : CFException
     {
         public CFFileFormatException()
-            : base()
         {
         }
 
@@ -102,6 +102,7 @@ namespace OpenMcdf
         }
     }
 
+    /// <inheritdoc />
     /// <summary>
     /// Raised when a named stream or a storage object
     /// are not found in a parent storage.
@@ -132,6 +133,7 @@ namespace OpenMcdf
         }
     }
 
+    /// <inheritdoc />
     /// <summary>
     /// Raised when a method call is invalid for the current object state
     /// </summary>
@@ -139,7 +141,6 @@ namespace OpenMcdf
     public class CFInvalidOperation : CFException
     {
         public CFInvalidOperation()
-            : base()
         {
         }
 
@@ -161,6 +162,7 @@ namespace OpenMcdf
         }
     }
 
+    /// <inheritdoc />
     /// <summary>
     /// Raised when trying to add a duplicated CFItem
     /// </summary>
@@ -173,7 +175,6 @@ namespace OpenMcdf
     public class CFDuplicatedItemException : CFException
     {
         public CFDuplicatedItemException()
-            : base()
         {
         }
 
@@ -195,6 +196,7 @@ namespace OpenMcdf
         }
     }
 
+    /// <inheritdoc />
     /// <summary>
     /// Raised when trying to load a Compound File with invalid, corrupted or mismatched fields (4.1 - specifications) 
     /// </summary>
@@ -205,7 +207,6 @@ namespace OpenMcdf
     public class CFCorruptedFileException : CFException
     {
         public CFCorruptedFileException()
-            : base()
         {
         }
 

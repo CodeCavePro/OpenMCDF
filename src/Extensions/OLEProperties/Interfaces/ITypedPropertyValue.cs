@@ -8,10 +8,9 @@ namespace OpenMcdf.Extensions.OLEProperties.Interfaces
 
         object PropertyValue { get; set; }
 
-        VTPropertyType VTType
+        VtPropertyType VtType
         {
             get;
-            //set;
         }
     }
 }

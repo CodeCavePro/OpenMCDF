@@ -142,8 +142,7 @@ namespace OpenMcdf.Test.Performance
 
             Stopwatch sw = new Stopwatch();
 
-            using (var cf = new CompoundFile("reportOverwriteMultiple.xls", CFSUpdateMode.Update,
-                CFSConfiguration.SectorRecycle))
+            using (var cf = new CompoundFile("reportOverwriteMultiple.xls", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle))
             {
                 sw.Start();
 

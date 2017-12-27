@@ -14,89 +14,61 @@ using RedBlackTree;
 
 namespace OpenMcdf
 {
-    public enum StgType : int
-    {
-        StgInvalid = 0,
-        StgStorage = 1,
-        StgStream = 2,
-        StgLockbytes = 3,
-        StgProperty = 4,
-        StgRoot = 5
-    }
-
-    public enum StgColor : int
-    {
-        Red = 0,
-        Black = 1
-    }
-
     internal class DirectoryEntry : IDirectoryEntry
     {
         internal const int THIS_IS_GREATER = 1;
         internal const int OTHER_IS_GREATER = -1;
-        private IList<IDirectoryEntry> dirRepository;
+        private readonly IList<IDirectoryEntry> _dirRepository;
 
-        private int sid = -1;
+        public int SID { get; set; } = -1;
 
-        public int SID
-        {
-            get { return sid; }
-            set { sid = value; }
-        }
-
-        internal static Int32 NOSTREAM
+        internal static int nostream
             = unchecked((int) 0xFFFFFFFF);
 
-        private DirectoryEntry(String name, StgType stgType, IList<IDirectoryEntry> dirRepository)
+        private DirectoryEntry(string name, StgType stgType, IList<IDirectoryEntry> dirRepository)
         {
-            this.dirRepository = dirRepository;
+            _dirRepository = dirRepository;
 
-            this.stgType = stgType;
+            StgType = stgType;
 
             switch (stgType)
             {
                 case StgType.StgStream:
 
-                    this.storageCLSID = new Guid("00000000000000000000000000000000");
-                    this.creationDate = new byte[8] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-                    this.modifyDate = new byte[8] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                    _storageCLSID = new Guid("00000000000000000000000000000000");
+                    CreationDate = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                    ModifyDate = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
                     break;
 
                 case StgType.StgStorage:
-                    this.creationDate = BitConverter.GetBytes((DateTime.Now.ToFileTime()));
+                    CreationDate = BitConverter.GetBytes((DateTime.Now.ToFileTime()));
                     break;
 
                 case StgType.StgRoot:
-                    this.creationDate = new byte[8] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-                    this.modifyDate = new byte[8] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                    CreationDate = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                    ModifyDate = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
                     break;
             }
 
-            this.SetEntryName(name);
+            SetEntryName(name);
         }
-
-        private byte[] entryName = new byte[64];
 
         public byte[] EntryName
         {
-            get { return entryName; }
-            //set
-            //{
-            //    entryName = value;
-            //}
-        }
+            get;
+            private set;
+        } = new byte[64];
 
-        public String GetEntryName()
+        public string GetEntryName()
         {
-            if (entryName != null && entryName.Length > 0)
+            if (EntryName != null && EntryName.Length > 0)
             {
-                return Encoding.Unicode.GetString(entryName).Remove((this.nameLength - 1) / 2);
+                return Encoding.Unicode.GetString(EntryName).Remove((_nameLength - 1) / 2);
             }
-            else
-                return String.Empty;
+            return string.Empty;
         }
 
-        public void SetEntryName(String entryName)
+        public void SetEntryName(string entryName)
         {
             if (
                 entryName.Contains(@"\") ||
@@ -111,156 +83,89 @@ namespace OpenMcdf
                 throw new CFException("Entry name MUST be smaller than 31 characters");
 
 
-            byte[] newName = null;
-            byte[] temp = Encoding.Unicode.GetBytes(entryName);
-            newName = new byte[64];
+            var temp = Encoding.Unicode.GetBytes(entryName);
+            var newName = new byte[64];
             Buffer.BlockCopy(temp, 0, newName, 0, temp.Length);
             newName[temp.Length] = 0x00;
             newName[temp.Length + 1] = 0x00;
 
-            this.entryName = newName;
-            this.nameLength = (ushort) (temp.Length + 2);
+            EntryName = newName;
+            _nameLength = (ushort) (temp.Length + 2);
         }
 
-        private ushort nameLength;
+        private ushort _nameLength;
 
         public ushort NameLength
         {
-            get { return nameLength; }
-            set { throw new NotImplementedException(); }
+            get => _nameLength;
+            set => throw new NotImplementedException();
         }
 
-        private StgType stgType = StgType.StgInvalid;
+        public StgType StgType { get; set; }
 
-        public StgType StgType
-        {
-            get { return stgType; }
-            set { stgType = value; }
-        }
+        public StgColor StgColor { get; set; } = StgColor.Black;
 
-        private StgColor stgColor = StgColor.Black;
+        public int LeftSibling { get; set; } = nostream;
 
-        public StgColor StgColor
-        {
-            get { return stgColor; }
-            set { stgColor = value; }
-        }
+        public int RightSibling { get; set; } = nostream;
 
-        private Int32 leftSibling = NOSTREAM;
+        public int Child { get; set; } = nostream;
 
-        public Int32 LeftSibling
-        {
-            get { return leftSibling; }
-            set { leftSibling = value; }
-        }
-
-        private Int32 rightSibling = NOSTREAM;
-
-        public Int32 RightSibling
-        {
-            get { return rightSibling; }
-            set { rightSibling = value; }
-        }
-
-        private Int32 child = NOSTREAM;
-
-        public Int32 Child
-        {
-            get { return child; }
-            set { child = value; }
-        }
-
-        private Guid storageCLSID
+        private Guid _storageCLSID
             = Guid.NewGuid();
 
         public Guid StorageCLSID
         {
-            get { return storageCLSID; }
-            set { this.storageCLSID = value; }
+            get => _storageCLSID;
+            set => _storageCLSID = value;
         }
 
+        public int StateBits { get; set; }
 
-        private Int32 stateBits;
+        public byte[] CreationDate { get; set; } = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-        public Int32 StateBits
-        {
-            get { return stateBits; }
-            set { stateBits = value; }
-        }
+        public byte[] ModifyDate { get; set; } = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-        private byte[] creationDate = new byte[8] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        public int StartSetc { get; set; } = Sector.ENDOFCHAIN;
 
-        public byte[] CreationDate
-        {
-            get { return creationDate; }
-            set { creationDate = value; }
-        }
-
-        private byte[] modifyDate = new byte[8] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-        public byte[] ModifyDate
-        {
-            get { return modifyDate; }
-            set { modifyDate = value; }
-        }
-
-        private Int32 startSetc = Sector.ENDOFCHAIN;
-
-        public Int32 StartSetc
-        {
-            get { return startSetc; }
-            set { startSetc = value; }
-        }
-
-        private long size;
-
-        public long Size
-        {
-            get { return size; }
-            set { size = value; }
-        }
+        public long Size { get; set; }
 
 
         public int CompareTo(object obj)
         {
-            IDirectoryEntry otherDir = obj as IDirectoryEntry;
-
-            if (otherDir == null)
+            if (!(obj is IDirectoryEntry otherDir))
                 throw new CFException("Invalid casting: compared object does not implement IDirectorEntry interface");
 
-            if (this.NameLength > otherDir.NameLength)
+            if (NameLength > otherDir.NameLength)
             {
                 return THIS_IS_GREATER;
             }
-            else if (this.NameLength < otherDir.NameLength)
+            if (NameLength < otherDir.NameLength)
             {
                 return OTHER_IS_GREATER;
             }
-            else
+            var thisName = Encoding.Unicode.GetString(EntryName, 0, NameLength);
+            var otherName = Encoding.Unicode.GetString(otherDir.EntryName, 0, otherDir.NameLength);
+
+            for (var z = 0; z < thisName.Length; z++)
             {
-                String thisName = Encoding.Unicode.GetString(this.EntryName, 0, this.NameLength);
-                String otherName = Encoding.Unicode.GetString(otherDir.EntryName, 0, otherDir.NameLength);
+                var thisChar = char.ToUpperInvariant(thisName[z]);
+                var otherChar = char.ToUpperInvariant(otherName[z]);
 
-                for (int z = 0; z < thisName.Length; z++)
-                {
-                    char thisChar = char.ToUpperInvariant(thisName[z]);
-                    char otherChar = char.ToUpperInvariant(otherName[z]);
-
-                    if (thisChar > otherChar)
-                        return THIS_IS_GREATER;
-                    else if (thisChar < otherChar)
-                        return OTHER_IS_GREATER;
-                }
-
-                return 0;
+                if (thisChar > otherChar)
+                    return THIS_IS_GREATER;
+                if (thisChar < otherChar)
+                    return OTHER_IS_GREATER;
             }
+
+            return 0;
 
             //   return String.Compare(Encoding.Unicode.GetString(this.EntryName).ToUpper(), Encoding.Unicode.GetString(other.EntryName).ToUpper());
         }
 
         public override bool Equals(object obj)
         {
-            return this.CompareTo(obj) == 0;
+            return CompareTo(obj) == 0;
         }
 
         /// <summary>
@@ -268,7 +173,7 @@ namespace OpenMcdf
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns>(not warranted) unique hash for byte array</returns>
-        private static ulong fnv_hash(byte[] buffer)
+        private static ulong FnvHash(byte[] buffer)
         {
             ulong h = 2166136261;
             int i;
@@ -281,26 +186,27 @@ namespace OpenMcdf
 
         public override int GetHashCode()
         {
-            return (int) fnv_hash(this.entryName);
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            return (int) FnvHash(EntryName);
         }
 
         public void Write(Stream stream)
         {
-            StreamRW rw = new StreamRW(stream);
+            var rw = new StreamRW(stream);
 
-            rw.Write(entryName);
-            rw.Write(nameLength);
-            rw.Write((byte) stgType);
-            rw.Write((byte) stgColor);
-            rw.Write(leftSibling);
-            rw.Write(rightSibling);
-            rw.Write(child);
-            rw.Write(storageCLSID.ToByteArray());
-            rw.Write(stateBits);
-            rw.Write(creationDate);
-            rw.Write(modifyDate);
-            rw.Write(startSetc);
-            rw.Write(size);
+            rw.Write(EntryName);
+            rw.Write(_nameLength);
+            rw.Write((byte) StgType);
+            rw.Write((byte) StgColor);
+            rw.Write(LeftSibling);
+            rw.Write(RightSibling);
+            rw.Write(Child);
+            rw.Write(_storageCLSID.ToByteArray());
+            rw.Write(StateBits);
+            rw.Write(CreationDate);
+            rw.Write(ModifyDate);
+            rw.Write(StartSetc);
+            rw.Write(Size);
 
             rw.Close();
         }
@@ -334,122 +240,116 @@ namespace OpenMcdf
 
         public void Read(Stream stream, CFSVersion ver = CFSVersion.Ver_3)
         {
-            StreamRW rw = new StreamRW(stream);
+            var rw = new StreamRW(stream);
 
-            entryName = rw.ReadBytes(64);
-            nameLength = rw.ReadUInt16();
-            stgType = (StgType) rw.ReadByte();
+            EntryName = rw.ReadBytes(64);
+            _nameLength = rw.ReadUInt16();
+            StgType = (StgType) rw.ReadByte();
             //rw.ReadByte();//Ignore color, only black tree
-            stgColor = (StgColor) rw.ReadByte();
-            leftSibling = rw.ReadInt32();
-            rightSibling = rw.ReadInt32();
-            child = rw.ReadInt32();
+            StgColor = (StgColor) rw.ReadByte();
+            LeftSibling = rw.ReadInt32();
+            RightSibling = rw.ReadInt32();
+            Child = rw.ReadInt32();
 
             // Thanks to bugaccount (BugTrack id 3519554)
-            if (stgType == StgType.StgInvalid)
+            if (StgType == StgType.StgInvalid)
             {
-                leftSibling = NOSTREAM;
-                rightSibling = NOSTREAM;
-                child = NOSTREAM;
+                LeftSibling = nostream;
+                RightSibling = nostream;
+                Child = nostream;
             }
 
-            storageCLSID = new Guid(rw.ReadBytes(16));
-            stateBits = rw.ReadInt32();
-            creationDate = rw.ReadBytes(8);
-            modifyDate = rw.ReadBytes(8);
-            startSetc = rw.ReadInt32();
+            _storageCLSID = new Guid(rw.ReadBytes(16));
+            StateBits = rw.ReadInt32();
+            CreationDate = rw.ReadBytes(8);
+            ModifyDate = rw.ReadBytes(8);
+            StartSetc = rw.ReadInt32();
 
             if (ver == CFSVersion.Ver_3)
             {
                 // avoid dirty read for version 3 files (max size: 32bit integer)
                 // where most significant bits are not initialized to zero
 
-                size = rw.ReadInt32();
+                Size = rw.ReadInt32();
                 rw.ReadBytes(4); //discard most significant 4 (possibly) dirty bytes
             }
             else
             {
-                size = rw.ReadInt64();
+                Size = rw.ReadInt64();
             }
         }
 
-        public string Name
-        {
-            get { return GetEntryName(); }
-        }
+        public string Name => GetEntryName();
 
 
-        public IRBNode Left
+        public IRbNode Left
         {
             get
             {
-                if (leftSibling == DirectoryEntry.NOSTREAM)
+                if (LeftSibling == nostream)
                     return null;
 
-                return dirRepository[leftSibling];
+                return _dirRepository[LeftSibling];
             }
             set
             {
-                leftSibling = value != null ? ((IDirectoryEntry) value).SID : DirectoryEntry.NOSTREAM;
+                LeftSibling = value != null ? ((IDirectoryEntry) value).SID : nostream;
 
-                if (leftSibling != DirectoryEntry.NOSTREAM)
-                    dirRepository[leftSibling].Parent = this;
+                if (LeftSibling != nostream)
+                    _dirRepository[LeftSibling].Parent = this;
             }
         }
 
-        public IRBNode Right
+        public IRbNode Right
         {
             get
             {
-                if (rightSibling == DirectoryEntry.NOSTREAM)
+                if (RightSibling == nostream)
                     return null;
 
-                return dirRepository[rightSibling];
+                return _dirRepository[RightSibling];
             }
             set
             {
-                rightSibling = value != null ? ((IDirectoryEntry) value).SID : DirectoryEntry.NOSTREAM;
+                RightSibling = value != null ? ((IDirectoryEntry) value).SID : nostream;
 
-                if (rightSibling != DirectoryEntry.NOSTREAM)
-                    dirRepository[rightSibling].Parent = this;
+                if (RightSibling != nostream)
+                    _dirRepository[RightSibling].Parent = this;
             }
         }
 
         public Color Color
         {
-            get { return (Color) StgColor; }
-            set { StgColor = (StgColor) value; }
+            get => (Color) StgColor;
+            set => StgColor = (StgColor) value;
         }
 
-        private IDirectoryEntry parent = null;
+        private IDirectoryEntry _parent;
 
-        public IRBNode Parent
+        public IRbNode Parent
         {
-            get { return parent; }
-            set { parent = value as IDirectoryEntry; }
+            get => _parent;
+            set => _parent = value as IDirectoryEntry;
         }
 
-        public IRBNode Grandparent()
+        public IRbNode Grandparent()
         {
-            return parent != null ? parent.Parent : null;
+            return _parent?.Parent;
         }
 
-        public IRBNode Sibling()
+        public IRbNode Sibling()
         {
-            if (this == Parent.Left)
-                return Parent.Right;
-            else
-                return Parent.Left;
+            return Equals(this, Parent.Left) ? Parent.Right : Parent.Left;
         }
 
-        public IRBNode Uncle()
+        public IRbNode Uncle()
         {
-            return parent != null ? Parent.Sibling() : null;
+            return _parent != null ? Parent.Sibling() : null;
         }
 
-        internal static IDirectoryEntry New(String name, StgType stgType, IList<IDirectoryEntry> dirRepository)
+        internal static IDirectoryEntry New(string name, StgType stgType, IList<IDirectoryEntry> dirRepository)
         {
-            DirectoryEntry de = null;
+            DirectoryEntry de;
             if (dirRepository != null)
             {
                 de = new DirectoryEntry(name, stgType, dirRepository);
@@ -463,31 +363,28 @@ namespace OpenMcdf
             return de;
         }
 
-        internal static IDirectoryEntry Mock(String name, StgType stgType)
+        internal static IDirectoryEntry Mock(string name, StgType stgType)
         {
-            DirectoryEntry de = new DirectoryEntry(name, stgType, null);
+            var de = new DirectoryEntry(name, stgType, null);
 
             return de;
         }
 
-        internal static IDirectoryEntry TryNew(String name, StgType stgType, IList<IDirectoryEntry> dirRepository)
+        internal static IDirectoryEntry TryNew(string name, StgType stgType, IList<IDirectoryEntry> dirRepository)
         {
-            DirectoryEntry de = new DirectoryEntry(name, stgType, dirRepository);
+            var de = new DirectoryEntry(name, stgType, dirRepository);
 
             // If we are not adding an invalid dirEntry as
-            // in a normal loading from file (invalid dirs MAY pad a sector)
-            if (de != null)
+            // in a normal loading from file (invalid directories MAY pad a sector)
+            // Find first available invalid slot (if any) to reuse it
+            for (var i = 0; i < dirRepository.Count; i++)
             {
-                // Find first available invalid slot (if any) to reuse it
-                for (int i = 0; i < dirRepository.Count; i++)
-                {
-                    if (dirRepository[i].StgType == StgType.StgInvalid)
-                    {
-                        dirRepository[i] = de;
-                        de.SID = i;
-                        return de;
-                    }
-                }
+                if (dirRepository[i].StgType != StgType.StgInvalid)
+                    continue;
+
+                dirRepository[i] = de;
+                de.SID = i;
+                return de;
             }
 
             // No invalid directory entry found
@@ -497,31 +394,30 @@ namespace OpenMcdf
             return de;
         }
 
-
         public override string ToString()
         {
-            return this.Name + " [" + this.sid + "]" + (this.stgType == StgType.StgStream ? "Stream" : "Storage");
+            return Name + " [" + SID + "]" + (StgType == StgType.StgStream ? "Stream" : "Storage");
         }
 
-
-        public void AssignValueTo(IRBNode other)
+        public void AssignValueTo(IRbNode other)
         {
-            DirectoryEntry d = other as DirectoryEntry;
+            if (!(other is DirectoryEntry d))
+                return;
 
-            d.SetEntryName(this.GetEntryName());
+            d.SetEntryName(GetEntryName());
 
-            d.creationDate = new byte[this.creationDate.Length];
-            this.creationDate.CopyTo(d.creationDate, 0);
+            d.CreationDate = new byte[CreationDate.Length];
+            CreationDate.CopyTo(d.CreationDate, 0);
 
-            d.modifyDate = new byte[this.modifyDate.Length];
-            this.modifyDate.CopyTo(d.modifyDate, 0);
+            d.ModifyDate = new byte[ModifyDate.Length];
+            ModifyDate.CopyTo(d.ModifyDate, 0);
 
-            d.size = this.size;
-            d.startSetc = this.startSetc;
-            d.stateBits = this.stateBits;
-            d.stgType = this.stgType;
-            d.storageCLSID = new Guid(this.storageCLSID.ToByteArray());
-            d.Child = this.Child;
+            d.Size = Size;
+            d.StartSetc = StartSetc;
+            d.StateBits = StateBits;
+            d.StgType = StgType;
+            d._storageCLSID = new Guid(_storageCLSID.ToByteArray());
+            d.Child = Child;
         }
     }
 }

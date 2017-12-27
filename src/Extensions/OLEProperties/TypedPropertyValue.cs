@@ -3,43 +3,41 @@ using OpenMcdf.Extensions.OLEProperties.Interfaces;
 
 namespace OpenMcdf.Extensions.OLEProperties
 {
-    public class TypedPropertyValue : ITypedPropertyValue, IBinarySerializable
+    public class TypedPropertyValue : ITypedPropertyValue
     {
-        private VTPropertyType _VTType;
-
-        public VTPropertyType VTType
+        public VtPropertyType VtType
         {
-            get { return _VTType; }
+            get;
             //set { _VTType = value; }
         }
 
-        protected object propertyValue = null;
+        protected object propertyValue;
 
-        public TypedPropertyValue(VTPropertyType vtType)
+        public TypedPropertyValue(VtPropertyType vtType)
         {
-            this._VTType = vtType;
+            VtType = vtType;
         }
 
         public virtual object PropertyValue
         {
-            get { return propertyValue; }
+            get => propertyValue;
 
-            set { propertyValue = value; }
+            set => propertyValue = value;
         }
 
 
         public bool IsArray
         {
-            get { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
 
-            set { throw new NotImplementedException(); }
+            set => throw new NotImplementedException();
         }
 
         public bool IsVector
         {
-            get { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
 
-            set { throw new NotImplementedException(); }
+            set => throw new NotImplementedException();
         }
 
         public virtual void Read(System.IO.BinaryReader br)

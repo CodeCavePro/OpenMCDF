@@ -8,135 +8,27 @@
 
 #define FLAT_WRITE // No optimization on the number of write operations
 
+#pragma warning disable DF0010
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using RedBlackTree;
 
 namespace OpenMcdf
 {
-    internal class CFItemComparer : IComparer<CFItem>
-    {
-        public int Compare(CFItem x, CFItem y)
-        {
-            // X CompareTo Y : X > Y --> 1 ; X < Y  --> -1
-            return (x.DirEntry.CompareTo(y.DirEntry));
-
-            //Compare X < Y --> -1
-        }
-    }
-
+    /// <inheritdoc />
     /// <summary>
-    /// Configuration parameters for the compund files.
-    /// They can be OR-combined to configure 
-    /// <see cref="T:OpenMcdf.CompoundFile">Compound file</see> behaviour.
-    /// All flags are NOT set by Default.
-    /// </summary>
-    [Flags]
-    public enum CFSConfiguration
-    {
-        /// <summary>
-        /// Sector Recycling turn off, 
-        /// free sectors erasing off, 
-        /// format validation exception raised
-        /// </summary>
-        Default = 1,
-
-        /// <summary>
-        /// Sector recycling reduces data writing performances 
-        /// but avoids space wasting in scenarios with frequently
-        /// data manipulation of the same streams.
-        /// </summary>
-        SectorRecycle = 2,
-
-        /// <summary>
-        /// Free sectors are erased to avoid information leakage
-        /// </summary>
-        EraseFreeSectors = 4,
-
-        /// <summary>
-        /// No exception is raised when a validation error occurs.
-        /// This can possibly lead to a security issue but gives 
-        /// a chance to corrupted files to load.
-        /// </summary>
-        NoValidationException = 8,
-
-        /// <summary>
-        /// If this flag is set true,
-        /// backing stream is kept open after CompoundFile disposal
-        /// </summary>
-        LeaveOpen = 16,
-    }
-
-    /// <summary>
-    /// Binary File Format Version. Sector size  is 512 byte for version 3,
-    /// 4096 for version 4
-    /// </summary>
-    public enum CFSVersion : int
-    {
-        /// <summary>
-        /// Compound file version 3 - The default and most common version available. Sector size 512 bytes, 2GB max file size.
-        /// </summary>
-        Ver_3 = 3,
-
-        /// <summary>
-        /// Compound file version 4 - Sector size is 4096 bytes. Using this version could bring some compatibility problem with existing applications.
-        /// </summary>
-        Ver_4 = 4
-    }
-
-    /// <summary>
-    /// Update mode of the compound file.
-    /// Default is ReadOnly.
-    /// </summary>
-    public enum CFSUpdateMode
-    {
-        /// <summary>
-        /// ReadOnly update mode prevents overwriting
-        /// of the opened file. 
-        /// Data changes are allowed but they have to be 
-        /// persisted on a different file when required 
-        /// using <see cref="M:OpenMcdf.CompoundFile.Save">method</see>
-        /// </summary>
-        ReadOnly,
-
-        /// <summary>
-        /// Update mode allows subsequent data changing operations
-        /// to be persisted directly on the opened file or stream
-        /// using the <see cref="M:OpenMcdf.CompoundFile.Commit">Commit</see>
-        /// method when required. Warning: this option may cause existing data loss if misused.
-        /// </summary>
-        Update
-    }
-
-    /// <summary>
-    /// Standard Microsoft&#169; Compound File implementation.
+    /// Standard Microsoft© Compound File implementation.
     /// It is also known as OLE/COM structured storage 
     /// and contains a hierarchy of storage and stream objects providing
-    /// efficent storage of multiple kinds of documents in a single file.
+    /// efficient storage of multiple kinds of documents in a single file.
     /// Version 3 and 4 of specifications are supported.
     /// </summary>
     public class CompoundFile : IDisposable
     {
-        private CFSConfiguration configuration
-            = CFSConfiguration.Default;
-
-        /// <summary>
-        /// Get the configuration parameters of the CompoundFile object.
-        /// </summary>
-        public CFSConfiguration Configuration
-        {
-            get { return configuration; }
-        }
-
-        /// <summary>
-        /// Returns the size of standard sectors switching on CFS version (3 or 4)
-        /// </summary>
-        /// <returns>Standard sector size</returns>
-        internal int GetSectorSize()
-        {
-            return 2 << (header.SectorShift - 1);
-        }
+        #region Constants
 
         /// <summary>
         /// Number of DIFAT entries in the header
@@ -144,29 +36,9 @@ namespace OpenMcdf
         private const int HEADER_DIFAT_ENTRIES_COUNT = 109;
 
         /// <summary>
-        /// Number of FAT entries in a DIFAT Sector
-        /// </summary>
-        private readonly int DIFAT_SECTOR_FAT_ENTRIES_COUNT = 127;
-
-        /// <summary>
-        /// Sectors ID entries in a FAT Sector
-        /// </summary>
-        private readonly int FAT_SECTOR_ENTRIES_COUNT = 128;
-
-        /// <summary>
         /// Sector ID Size (int)
         /// </summary>
         private const int SIZE_OF_SID = 4;
-
-        /// <summary>
-        /// Flag for sector recycling.
-        /// </summary>
-        private bool sectorRecycle = false;
-
-        /// <summary>
-        /// Flag for unallocated sector zeroing out.
-        /// </summary>
-        private bool eraseFreeSectors = false;
 
         /// <summary>
         /// Initial capacity of the flushing queue used
@@ -180,20 +52,110 @@ namespace OpenMcdf
         /// </summary>
         private const int FLUSHING_BUFFER_MAX_SIZE = 1024 * 1024 * 16;
 
+        #endregion
 
-        private SectorCollection sectors = new SectorCollection();
+        /// <summary>
+        /// Flag for sector recycling.
+        /// </summary>
+        private readonly bool _sectorRecycle;
 
+        /// <summary>
+        /// Flag for unallocated sector zeroing out.
+        /// </summary>
+        private readonly bool _eraseFreeSectors;
+
+        /// <summary>
+        /// Number of FAT entries in a DIFAT Sector
+        /// </summary>
+        private readonly int _difatSectorFATEntriesCount;
+
+        /// <summary>
+        /// Sectors ID entries in a FAT Sector
+        /// </summary>
+        private readonly int _fatSectorEntriesCount;
+
+        /// <summary>
+        /// The collection of file sectors.
+        /// </summary>
+        private SectorCollection _sectors = new SectorCollection();
 
         /// <summary>
         /// CompoundFile header
         /// </summary>
-        private Header header;
+        private Header _header;
+
+        private List<IDirectoryEntry> _directoryEntries = new List<IDirectoryEntry>();
+
+        private readonly List<int> _levelSiDs = new List<int>();
+
+        private readonly object _lockObject = new object();
+
+        internal bool TransactionLockAdded { get; private set; }
+
+        internal int LockSectorId { get; set; } = -1;
+
+        internal bool TransactionLockAllocated { get; private set; }
 
         /// <summary>
         /// Compound underlying stream. Null when new CF has been created.
         /// </summary>
-        internal Stream sourceStream = null;
+        internal Stream SourceStream { get; private set; }
 
+        /// <summary>
+        /// Gets the configuration parameters of the CompoundFile object.
+        /// </summary>
+        public CFSConfiguration Configuration { get; }
+
+        /// <summary>
+        /// Gets the update mode of the CompoundFile object.
+        /// </summary>
+        public CFSUpdateMode UpdateMode { get; }
+
+        /// <summary>
+        /// The file name (currently being read or saved)
+        /// </summary>
+        public string FileName { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether [validation exception enabled].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [validation exception enabled]; otherwise, <c>false</c>.
+        /// </value>
+        public bool ValidationExceptionEnabled { get; } = true;
+
+        internal bool IsClosed { get; private set; }
+
+        internal IDirectoryEntry RootEntry => _directoryEntries[0];
+
+        public CFSVersion Version => (CFSVersion)_header.MajorVersion;
+
+        /// <summary>
+        /// The entry point object that represents the 
+        /// root of the structures tree to get or set storage or
+        /// stream data.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// 
+        ///    //Create a compound file
+        ///    string FILENAME = "MyFileName.cfs";
+        ///    CompoundFile ncf = new CompoundFile();
+        ///
+        ///    CFStorage l1 = ncf.RootStorage.AddStorage("Storage Level 1");
+        ///
+        ///    l1.AddStream("l1ns1");
+        ///    l1.AddStream("l1ns2");
+        ///    l1.AddStream("l1ns3");
+        ///    CFStorage l2 = l1.AddStorage("Storage Level 2");
+        ///    l2.AddStream("l2ns1");
+        ///    l2.AddStream("l2ns2");
+        ///
+        ///    ncf.Save(FILENAME);
+        ///    ncf.Close();
+        /// </code>
+        /// </example>
+        public CFStorage RootStorage { get; private set; }
 
         /// <summary>
         /// Create a blank, version 3 compound file.
@@ -221,34 +183,25 @@ namespace OpenMcdf
         /// </example>
         public CompoundFile()
         {
-            this.header = new Header();
-            this.sectorRecycle = false;
+            _header = new Header();
+            _sectorRecycle = false;
 
-            this.sectors.OnVer3SizeLimitReached += new Ver3SizeLimitReached(OnSizeLimitReached);
+            _sectors.OnVer3SizeLimitReached += OnSizeLimitReached;
 
-            DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
-            FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
+            _difatSectorFATEntriesCount = (GetSectorSize() / 4) - 1;
+            _fatSectorEntriesCount = (GetSectorSize() / 4);
 
             //Root -- 
-            IDirectoryEntry de = DirectoryEntry.New("Root Entry", StgType.StgRoot, directoryEntries);
-            rootStorage = new CFStorage(this, de);
-            rootStorage.DirEntry.StgType = StgType.StgRoot;
-            rootStorage.DirEntry.StgColor = StgColor.Black;
-
-            //this.InsertNewDirectoryEntry(rootStorage.DirEntry);
+            var de = DirectoryEntry.New("Root Entry", StgType.StgRoot, _directoryEntries);
+            RootStorage = new CFStorage(this, de)
+            {
+                DirEntry =
+                {
+                    StgType = StgType.StgRoot,
+                    StgColor = StgColor.Black
+                }
+            };
         }
-
-        void OnSizeLimitReached()
-        {
-            Sector rangeLockSector = new Sector(GetSectorSize(), sourceStream);
-            sectors.Add(rangeLockSector);
-
-            rangeLockSector.Type = SectorType.RangeLockSector;
-
-            _transactionLockAdded = true;
-            _lockSectorId = rangeLockSector.Id;
-        }
-
 
         /// <summary>
         /// Create a new, blank, compound file.
@@ -276,30 +229,23 @@ namespace OpenMcdf
         /// </example>
         public CompoundFile(CFSVersion cfsVersion, CFSConfiguration configFlags)
         {
-            this.configuration = configFlags;
+            Configuration = configFlags;
 
-            bool sectorRecycle = configFlags.HasFlag(CFSConfiguration.SectorRecycle);
-            bool eraseFreeSectors = configFlags.HasFlag(CFSConfiguration.EraseFreeSectors);
+            var sectorRecycle = configFlags.HasFlag(CFSConfiguration.SectorRecycle);
+            var eraseFreeSectors = configFlags.HasFlag(CFSConfiguration.EraseFreeSectors);
 
-            this.header = new Header((ushort) cfsVersion);
-            this.sectorRecycle = sectorRecycle;
+            _header = new Header((ushort)cfsVersion);
+            _sectorRecycle = sectorRecycle;
 
-
-            DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
-            FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
+            _difatSectorFATEntriesCount = (GetSectorSize() / 4) - 1;
+            _fatSectorEntriesCount = (GetSectorSize() / 4);
 
             //Root -- 
-            IDirectoryEntry rootDir = DirectoryEntry.New("Root Entry", StgType.StgRoot, directoryEntries);
+            var rootDir = DirectoryEntry.New("Root Entry", StgType.StgRoot, _directoryEntries);
             rootDir.StgColor = StgColor.Black;
-            //this.InsertNewDirectoryEntry(rootDir);
-
-            rootStorage = new CFStorage(this, rootDir);
-
-
-            //
+            RootStorage = new CFStorage(this, rootDir);
         }
-
-
+        
         /// <summary>
         /// Load an existing compound file.
         /// </summary>
@@ -307,7 +253,7 @@ namespace OpenMcdf
         /// <example>
         /// <code>
         /// //A xls file should have a Workbook stream
-        /// String filename = "report.xls";
+        /// string filename = "report.xls";
         ///
         /// CompoundFile cf = new CompoundFile(filename);
         /// CFStream foundStream = cf.RootStorage.GetStream("Workbook");
@@ -326,139 +272,138 @@ namespace OpenMcdf
         /// automatically recognized from the file. Sector recycle is turned off
         /// to achieve the best reading/writing performance in most common scenarios.
         /// </remarks>
-        public CompoundFile(String fileName)
+        public CompoundFile(string fileName)
         {
-            this.sectorRecycle = false;
-            this.updateMode = CFSUpdateMode.ReadOnly;
-            this.eraseFreeSectors = false;
+            _sectorRecycle = false;
+            UpdateMode = CFSUpdateMode.ReadOnly;
+            _eraseFreeSectors = false;
 
             LoadFile(fileName);
 
-            DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
-            FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
+            _difatSectorFATEntriesCount = (GetSectorSize() / 4) - 1;
+            _fatSectorEntriesCount = (GetSectorSize() / 4);
         }
 
-        /// <summary>
-        /// Load an existing compound file.
-        /// </summary>
-        /// <param name="fileName">Compound file to read from</param>
-        /// <param name="sectorRecycle">If true, recycle unused sectors</param>
-        /// <param name="updateMode">Select the update mode of the underlying data file</param>
-        /// <param name="eraseFreeSectors">If true, overwrite with zeros unallocated sectors</param>
+        ///  <summary>
+        ///  Load an existing compound file.
+        ///  </summary>
+        ///  <param name="fileName">Compound file to read from</param>
+        ///  <param name="updateMode">Select the update mode of the underlying data file</param>
+        /// <param name="configParameters"></param>
         /// <example>
-        /// <code>
-        /// String srcFilename = "data_YOU_CAN_CHANGE.xls";
+        ///  <code>
+        ///  string srcFilename = "data_YOU_CAN_CHANGE.xls";
+        ///  
+        ///  CompoundFile cf = new CompoundFile(srcFilename, UpdateMode.Update, true, true);
         /// 
-        /// CompoundFile cf = new CompoundFile(srcFilename, UpdateMode.Update, true, true);
-        ///
-        /// Random r = new Random();
-        ///
-        /// byte[] buffer = GetBuffer(r.Next(3, 4095), 0x0A);
-        ///
-        /// cf.RootStorage.AddStream("MyStream").SetData(buffer);
+        ///  Random r = new Random();
         /// 
-        /// //This will persist data to the underlying media.
-        /// cf.Commit();
-        /// cf.Close();
-        ///
-        /// </code>
-        /// </example>
-        public CompoundFile(String fileName, CFSUpdateMode updateMode, CFSConfiguration configParameters)
+        ///  byte[] buffer = GetBuffer(r.Next(3, 4095), 0x0A);
+        /// 
+        ///  cf.RootStorage.AddStream("MyStream").SetData(buffer);
+        ///  
+        ///  //This will persist data to the underlying media.
+        ///  cf.Commit();
+        ///  cf.Close();
+        /// 
+        ///  </code>
+        ///  </example>
+        public CompoundFile(string fileName, CFSUpdateMode updateMode, CFSConfiguration configParameters)
         {
-            this.validationExceptionEnabled = !configParameters.HasFlag(CFSConfiguration.NoValidationException);
-            this.sectorRecycle = configParameters.HasFlag(CFSConfiguration.SectorRecycle);
-            this.updateMode = updateMode;
-            this.eraseFreeSectors = configParameters.HasFlag(CFSConfiguration.EraseFreeSectors);
+            ValidationExceptionEnabled = !configParameters.HasFlag(CFSConfiguration.NoValidationException);
+            _sectorRecycle = configParameters.HasFlag(CFSConfiguration.SectorRecycle);
+            UpdateMode = updateMode;
+            _eraseFreeSectors = configParameters.HasFlag(CFSConfiguration.EraseFreeSectors);
 
             LoadFile(fileName);
 
-            DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
-            FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
+            _difatSectorFATEntriesCount = (GetSectorSize() / 4) - 1;
+            _fatSectorEntriesCount = (GetSectorSize() / 4);
         }
 
-        private bool validationExceptionEnabled = true;
-
-        public bool ValidationExceptionEnabled
-        {
-            get { return validationExceptionEnabled; }
-        }
-
-
-        /// <summary>
-        /// Load an existing compound file.
-        /// </summary>
-        /// <param name="stream">A stream containing a compound file to read</param>
-        /// <param name="sectorRecycle">If true, recycle unused sectors</param>
-        /// <param name="updateMode">Select the update mode of the underlying data file</param>
-        /// <param name="eraseFreeSectors">If true, overwrite with zeros unallocated sectors</param>
+        ///  <summary>
+        ///  Load an existing compound file.
+        ///  </summary>
+        ///  <param name="stream">A stream containing a compound file to read</param>
+        ///  <param name="updateMode">Select the update mode of the underlying data file</param>
+        /// <param name="configParameters"></param>
         /// <example>
-        /// <code>
+        ///  <code>
+        ///  
+        ///  string filename = "reportREAD.xls";
+        ///    
+        ///  FileStream fs = new FileStream(filename, FileMode.Open);
+        ///  CompoundFile cf = new CompoundFile(fs, UpdateMode.ReadOnly, false, false);
+        ///  CFStream foundStream = cf.RootStorage.GetStream("Workbook");
         /// 
-        /// String filename = "reportREAD.xls";
-        ///   
-        /// FileStream fs = new FileStream(filename, FileMode.Open);
-        /// CompoundFile cf = new CompoundFile(fs, UpdateMode.ReadOnly, false, false);
-        /// CFStream foundStream = cf.RootStorage.GetStream("Workbook");
-        ///
-        /// byte[] temp = foundStream.GetData();
-        ///
-        /// Assert.IsNotNull(temp);
-        ///
-        /// cf.Close();
-        ///
-        /// </code>
-        /// </example>
-        /// <exception cref="T:OpenMcdf.CFException">Raised when trying to open a non-seekable stream</exception>
-        /// <exception cref="T:OpenMcdf.CFException">Raised stream is null</exception>
+        ///  byte[] temp = foundStream.GetData();
+        /// 
+        ///  Assert.IsNotNull(temp);
+        /// 
+        ///  cf.Close();
+        /// 
+        ///  </code>
+        ///  </example>
+        ///  <exception cref="T:OpenMcdf.CFException">Raised when trying to open a non-seekable stream</exception>
+        ///  <exception cref="T:OpenMcdf.CFException">Raised stream is null</exception>
         public CompoundFile(Stream stream, CFSUpdateMode updateMode, CFSConfiguration configParameters)
         {
-            this.validationExceptionEnabled = !configParameters.HasFlag(CFSConfiguration.NoValidationException);
-            this.sectorRecycle = configParameters.HasFlag(CFSConfiguration.SectorRecycle);
-            this.eraseFreeSectors = configParameters.HasFlag(CFSConfiguration.EraseFreeSectors);
-            this.closeStream = !configParameters.HasFlag(CFSConfiguration.LeaveOpen);
+            ValidationExceptionEnabled = !configParameters.HasFlag(CFSConfiguration.NoValidationException);
+            _sectorRecycle = configParameters.HasFlag(CFSConfiguration.SectorRecycle);
+            _eraseFreeSectors = configParameters.HasFlag(CFSConfiguration.EraseFreeSectors);
+            _closeStream = !configParameters.HasFlag(CFSConfiguration.LeaveOpen);
 
-            this.updateMode = updateMode;
+            UpdateMode = updateMode;
             LoadStream(stream);
 
-            DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
-            FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
+            _difatSectorFATEntriesCount = (GetSectorSize() / 4) - 1;
+            _fatSectorEntriesCount = (GetSectorSize() / 4);
         }
 
+        /// <inheritdoc />
+        ///  <summary>
+        ///  Load an existing compound file from a stream.
+        ///  </summary>
+        ///  <param name="stream">Streamed compound file</param>
+        ///  <example>
+        ///  <code>
+        ///  string filename = "reportREAD.xls";
+        ///  FileStream fs = new FileStream(filename, FileMode.Open);
+        ///  CompoundFile cf = new CompoundFile(fs);
+        ///  CFStream foundStream = cf.RootStorage.GetStream("Workbook");
+        ///  byte[] temp = foundStream.GetData();
+        ///  Assert.IsNotNull(temp);
+        ///  cf.Close();
+        ///  </code>
+        ///  </example>
+        ///  <exception cref="T:OpenMcdf.CFException">Raised when trying to open a non-seekable stream</exception>
+        ///  <exception cref="T:OpenMcdf.CFException">Raised stream is null</exception>
+        public CompoundFile(Stream stream) : this(stream, CFSUpdateMode.ReadOnly, CFSConfiguration.Default)
+        {
+
+        }
 
         /// <summary>
-        /// Load an existing compound file from a stream.
+        /// Returns the size of standard sectors switching on CFS version (3 or 4)
         /// </summary>
-        /// <param name="stream">Streamed compound file</param>
-        /// <example>
-        /// <code>
-        /// 
-        /// String filename = "reportREAD.xls";
-        ///   
-        /// FileStream fs = new FileStream(filename, FileMode.Open);
-        /// CompoundFile cf = new CompoundFile(fs);
-        /// CFStream foundStream = cf.RootStorage.GetStream("Workbook");
-        ///
-        /// byte[] temp = foundStream.GetData();
-        ///
-        /// Assert.IsNotNull(temp);
-        ///
-        /// cf.Close();
-        ///
-        /// </code>
-        /// </example>
-        /// <exception cref="T:OpenMcdf.CFException">Raised when trying to open a non-seekable stream</exception>
-        /// <exception cref="T:OpenMcdf.CFException">Raised stream is null</exception>
-        public CompoundFile(Stream stream)
+        /// <returns>Standard sector size</returns>
+        internal int GetSectorSize()
         {
-            LoadStream(stream);
-
-            DIFAT_SECTOR_FAT_ENTRIES_COUNT = (GetSectorSize() / 4) - 1;
-            FAT_SECTOR_ENTRIES_COUNT = (GetSectorSize() / 4);
+            return 2 << (_header.SectorShift - 1);
         }
 
-        private CFSUpdateMode updateMode = CFSUpdateMode.ReadOnly;
-        private String fileName = String.Empty;
+        private void OnSizeLimitReached()
+        {
+            using (var rangeLockSector = new Sector(GetSectorSize(), SourceStream))
+            {
+                _sectors.Add(rangeLockSector);
 
+                rangeLockSector.Type = SectorType.RangeLockSector;
+
+                TransactionLockAdded = true;
+                LockSectorId = rangeLockSector.Id;
+            }
+        }
 
         /// <summary>
         /// Commit data changes since the previously commit operation
@@ -479,7 +424,6 @@ namespace OpenMcdf
         private Queue<Sector> flushingQueue = new Queue<Sector>(FLUSHING_QUEUE_SIZE);
 #endif
 
-
         /// <summary>
         /// Commit data changes since the previously commit operation
         /// to the underlying supporting stream or file on the disk.
@@ -492,34 +436,32 @@ namespace OpenMcdf
         /// </remarks>
         public void Commit(bool releaseMemory)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot commit data");
 
-            if (updateMode != CFSUpdateMode.Update)
+            if (UpdateMode != CFSUpdateMode.Update)
                 throw new CFInvalidOperation("Cannot commit data in Read-Only update mode");
 
-            //try
-            //{
 #if !FLAT_WRITE
 
             int sId = -1;
             int sCount = 0;
             int bufOffset = 0;
 #endif
-            int sSize = GetSectorSize();
+            var sSize = GetSectorSize();
 
-            if (header.MajorVersion != (ushort) CFSVersion.Ver_3)
+            if (_header.MajorVersion != (ushort) CFSVersion.Ver_3)
                 CheckForLockSector();
 
-            sourceStream.Seek(0, SeekOrigin.Begin);
-            sourceStream.Write((byte[]) Array.CreateInstance(typeof(byte), GetSectorSize()), 0, sSize);
+            SourceStream.Seek(0, SeekOrigin.Begin);
+            SourceStream.Write(new byte[GetSectorSize()], 0, sSize);
 
             CommitDirectory();
 
-            bool gap = true;
+            var gap = true;
 
 
-            for (int i = 0; i < sectors.Count; i++)
+            for (var i = 0; i < _sectors.Count; i++)
             {
 #if FLAT_WRITE
 
@@ -527,15 +469,15 @@ namespace OpenMcdf
                 //Here sectors should not be loaded dynamically because
                 //if they are null it means that no change has involved them;
 
-                Sector s = (Sector) sectors[i];
+                var s = _sectors[i];
 
                 if (s != null && s.DirtyFlag)
                 {
                     if (gap)
-                        sourceStream.Seek((long) ((long) (sSize) + (long) i * (long) sSize), SeekOrigin.Begin);
+                        SourceStream.Seek(sSize + i * (long) sSize, SeekOrigin.Begin);
 
-                    sourceStream.Write(s.GetData(), 0, sSize);
-                    sourceStream.Flush();
+                    SourceStream.Write(s.GetData(), 0, sSize);
+                    SourceStream.Flush();
                     s.DirtyFlag = false;
                     gap = false;
                 }
@@ -544,13 +486,11 @@ namespace OpenMcdf
                     gap = true;
                 }
 
-                if (releaseMemory)
-                {
-                    s.ReleaseData();
-                    s = null;
-                    sectors[i] = null;
-                }
+                if (!releaseMemory)
+                    continue;
 
+                s?.ReleaseData();
+                _sectors[i] = null;
 
 #else
                
@@ -636,20 +576,14 @@ namespace OpenMcdf
 #endif
 
             // Seek to beginning position and save header (first 512 or 4096 bytes)
-            sourceStream.Seek(0, SeekOrigin.Begin);
-            header.Write(sourceStream);
+            SourceStream.Seek(0, SeekOrigin.Begin);
+            _header.Write(SourceStream);
 
-            sourceStream.SetLength((sectors.Count + 1) * sSize);
-            sourceStream.Flush();
+            SourceStream.SetLength((_sectors.Count + 1) * sSize);
+            SourceStream.Flush();
 
             if (releaseMemory)
                 GC.Collect();
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw new CFException("Internal error while committing data", ex);
-            //}
         }
 
         /// <summary>
@@ -660,49 +594,49 @@ namespace OpenMcdf
         {
             try
             {
-                this.header = new Header();
-                this.directoryEntries = new List<IDirectoryEntry>();
+                _header = new Header();
+                _directoryEntries = new List<IDirectoryEntry>();
 
-                this.sourceStream = stream;
+                SourceStream = stream;
 
-                header.Read(stream);
+                _header.Read(stream);
 
-                int n_sector = Ceiling(((double) (stream.Length - GetSectorSize()) / (double) GetSectorSize()));
+                var nSector = Ceiling(((stream.Length - GetSectorSize()) / (double) GetSectorSize()));
 
                 if (stream.Length > 0x7FFFFF0)
-                    this._transactionLockAllocated = true;
+                    TransactionLockAllocated = true;
 
 
-                sectors = new SectorCollection();
+                _sectors = new SectorCollection();
                 //sectors = new ArrayList();
-                for (int i = 0; i < n_sector; i++)
+                for (var i = 0; i < nSector; i++)
                 {
-                    sectors.Add(null);
+                    _sectors.Add(null);
                 }
 
                 LoadDirectories();
 
-                this.rootStorage
-                    = new CFStorage(this, directoryEntries[0]);
+                RootStorage
+                    = new CFStorage(this, _directoryEntries[0]);
             }
             catch (Exception)
             {
-                if (stream != null && closeStream)
+                if (stream != null && _closeStream)
                     stream.Close();
 
                 throw;
             }
         }
 
-        private void LoadFile(String fileName)
+        private void LoadFile(string fileName)
         {
-            this.fileName = fileName;
+            FileName = fileName;
 
             FileStream fs = null;
 
             try
             {
-                if (this.updateMode == CFSUpdateMode.ReadOnly)
+                if (UpdateMode == CFSUpdateMode.ReadOnly)
                 {
                     fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 }
@@ -740,28 +674,24 @@ namespace OpenMcdf
         /// Return true if this compound file has been 
         /// loaded from an existing file or stream
         /// </summary>
-        public bool HasSourceStream
-        {
-            get { return sourceStream != null; }
-        }
+        public bool HasSourceStream => SourceStream != null;
 
-
-        private void PersistMiniStreamToStream(List<Sector> miniSectorChain)
+        private void PersistMiniStreamToStream(IList<Sector> miniSectorChain)
         {
-            List<Sector> miniStream
+            var miniStream
                 = GetSectorChain(RootEntry.StartSetc, SectorType.Normal);
 
-            StreamView miniStreamView
+            var miniStreamView
                 = new StreamView(
                     miniStream,
                     GetSectorSize(),
-                    this.rootStorage.Size,
+                    RootStorage.Size,
                     null,
-                    sourceStream);
+                    SourceStream);
 
-            for (int i = 0; i < miniSectorChain.Count; i++)
+            for (var i = 0; i < miniSectorChain.Count; i++)
             {
-                Sector s = miniSectorChain[i];
+                var s = miniSectorChain[i];
 
                 if (s.Id == -1)
                     throw new CFException("Invalid minisector index");
@@ -777,57 +707,57 @@ namespace OpenMcdf
         /// for the new or updated mini sector chain.
         /// </summary>
         /// <param name="sectorChain">The new MINI sector chain</param>
-        private void AllocateMiniSectorChain(List<Sector> sectorChain)
+        private void AllocateMiniSectorChain(IList<Sector> sectorChain)
         {
-            List<Sector> miniFAT
-                = GetSectorChain(header.FirstMiniFATSectorID, SectorType.Normal);
+            var miniFAT
+                = GetSectorChain(_header.FirstMiniFATSectorId, SectorType.Normal);
 
-            List<Sector> miniStream
+            var miniStream
                 = GetSectorChain(RootEntry.StartSetc, SectorType.Normal);
 
-            StreamView miniFATView
+            var miniFATView
                 = new StreamView(
                     miniFAT,
                     GetSectorSize(),
-                    header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE,
+                    _header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE,
                     null,
-                    this.sourceStream,
+                    SourceStream,
                     true
                 );
 
-            StreamView miniStreamView
+            var miniStreamView
                 = new StreamView(
                     miniStream,
                     GetSectorSize(),
-                    this.rootStorage.Size,
+                    RootStorage.Size,
                     null,
-                    sourceStream);
+                    SourceStream);
 
 
             // Set updated/new sectors within the ministream
             // We are writing data in a NORMAL Sector chain.
-            for (int i = 0; i < sectorChain.Count; i++)
+            for (var i = 0; i < sectorChain.Count; i++)
             {
-                Sector s = sectorChain[i];
+                var s = sectorChain[i];
 
                 if (s.Id == -1)
                 {
                     // Allocate, position ministream at the end of already allocated
                     // ministream's sectors
 
-                    miniStreamView.Seek(this.rootStorage.Size + Sector.MINISECTOR_SIZE, SeekOrigin.Begin);
+                    miniStreamView.Seek(RootStorage.Size + Sector.MINISECTOR_SIZE, SeekOrigin.Begin);
                     //miniStreamView.Write(s.GetData(), 0, Sector.MINISECTOR_SIZE);
                     s.Id = (int) (miniStreamView.Position - Sector.MINISECTOR_SIZE) / Sector.MINISECTOR_SIZE;
 
-                    this.rootStorage.DirEntry.Size = miniStreamView.Length;
+                    RootStorage.DirEntry.Size = miniStreamView.Length;
                 }
             }
 
             // Update miniFAT
-            for (int i = 0; i < sectorChain.Count - 1; i++)
+            for (var i = 0; i < sectorChain.Count - 1; i++)
             {
-                Int32 currentId = sectorChain[i].Id;
-                Int32 nextId = sectorChain[i + 1].Id;
+                var currentId = sectorChain[i].Id;
+                var nextId = sectorChain[i + 1].Id;
 
                 miniFATView.Seek(currentId * 4, SeekOrigin.Begin);
                 miniFATView.Write(BitConverter.GetBytes(nextId), 0, 4);
@@ -844,9 +774,9 @@ namespace OpenMcdf
             //Update HEADER and root storage when ministream changes
             if (miniFAT.Count > 0)
             {
-                this.rootStorage.DirEntry.StartSetc = miniStream[0].Id;
-                header.MiniFATSectorsNumber = (uint) miniFAT.Count;
-                header.FirstMiniFATSectorID = miniFAT[0].Id;
+                RootStorage.DirEntry.StartSetc = miniStream[0].Id;
+                _header.MiniFATSectorsNumber = (uint) miniFAT.Count;
+                _header.FirstMiniFATSectorId = miniFAT[0].Id;
             }
         }
 
@@ -855,108 +785,109 @@ namespace OpenMcdf
             if (stream.Size == 0)
                 return;
 
-            List<Sector> sectorChain = null;
+            List<Sector> sectorChain;
 
-            if (stream.Size < header.MinSizeStandardStream)
+            if (stream.Size < _header.MinSizeStandardStream)
             {
                 sectorChain = GetSectorChain(stream.DirEntry.StartSetc, SectorType.Mini);
-                FreeMiniChain(sectorChain, this.eraseFreeSectors);
+                FreeMiniChain(sectorChain, _eraseFreeSectors);
             }
             else
             {
                 sectorChain = GetSectorChain(stream.DirEntry.StartSetc, SectorType.Normal);
-                FreeChain(sectorChain, this.eraseFreeSectors);
+                FreeChain(sectorChain, _eraseFreeSectors);
             }
 
             stream.DirEntry.StartSetc = Sector.ENDOFCHAIN;
             stream.DirEntry.Size = 0;
         }
 
-        private void FreeChain(List<Sector> sectorChain, bool zeroSector)
+        private void FreeChain(IList<Sector> sectorChain, bool zeroSector)
         {
             FreeChain(sectorChain, 0, zeroSector);
         }
 
-        private void FreeChain(List<Sector> sectorChain, int nth_sector_to_remove, bool zeroSector)
+        private void FreeChain(IList<Sector> sectorChain, int nthSectorToRemove, bool zeroSector)
         {
             // Dummy zero buffer
-            byte[] ZEROED_SECTOR = new byte[GetSectorSize()];
+            // ReSharper disable once InconsistentNaming
+            var ZEROED_SECTOR = new byte[GetSectorSize()];
 
-            List<Sector> FAT
+            var fat
                 = GetSectorChain(-1, SectorType.FAT);
 
-            StreamView FATView
-                = new StreamView(FAT, GetSectorSize(), FAT.Count * GetSectorSize(), null, sourceStream);
+            var fatView
+                = new StreamView(fat, GetSectorSize(), fat.Count * GetSectorSize(), null, SourceStream);
 
             // Zeroes out sector data (if required)-------------
             if (zeroSector)
             {
-                for (int i = nth_sector_to_remove; i < sectorChain.Count; i++)
+                for (var i = nthSectorToRemove; i < sectorChain.Count; i++)
                 {
-                    Sector s = sectorChain[i];
+                    var s = sectorChain[i];
                     s.ZeroData();
                 }
             }
 
             // Update FAT marking unallocated sectors ----------
-            for (int i = nth_sector_to_remove; i < sectorChain.Count; i++)
+            for (var i = nthSectorToRemove; i < sectorChain.Count; i++)
             {
-                Int32 currentId = sectorChain[i].Id;
+                var currentId = sectorChain[i].Id;
 
-                FATView.Seek(currentId * 4, SeekOrigin.Begin);
-                FATView.Write(BitConverter.GetBytes(Sector.FREESECT), 0, 4);
+                fatView.Seek(currentId * 4, SeekOrigin.Begin);
+                fatView.Write(BitConverter.GetBytes(Sector.FREESECT), 0, 4);
             }
 
             // Write new end of chain if partial free ----------
-            if (nth_sector_to_remove > 0 && sectorChain.Count > 0)
+            if (nthSectorToRemove > 0 && sectorChain.Count > 0)
             {
-                FATView.Seek(sectorChain[nth_sector_to_remove - 1].Id * 4, SeekOrigin.Begin);
-                FATView.Write(BitConverter.GetBytes(Sector.ENDOFCHAIN), 0, 4);
+                fatView.Seek(sectorChain[nthSectorToRemove - 1].Id * 4, SeekOrigin.Begin);
+                fatView.Write(BitConverter.GetBytes(Sector.ENDOFCHAIN), 0, 4);
             }
         }
 
-        private void FreeMiniChain(List<Sector> sectorChain, bool zeroSector)
+        private void FreeMiniChain(IList<Sector> sectorChain, bool zeroSector)
         {
             FreeMiniChain(sectorChain, 0, zeroSector);
         }
 
-        private void FreeMiniChain(List<Sector> sectorChain, int nth_sector_to_remove, bool zeroSector)
+        private void FreeMiniChain(IList<Sector> sectorChain, int nthSectorToRemove, bool zeroSector)
         {
-            byte[] ZEROED_MINI_SECTOR = new byte[Sector.MINISECTOR_SIZE];
+            var zeroedMiniSector = new byte[Sector.MINISECTOR_SIZE];
 
-            List<Sector> miniFAT
-                = GetSectorChain(header.FirstMiniFATSectorID, SectorType.Normal);
+            var miniFAT
+                = GetSectorChain(_header.FirstMiniFATSectorId, SectorType.Normal);
 
-            List<Sector> miniStream
+            var miniStream
                 = GetSectorChain(RootEntry.StartSetc, SectorType.Normal);
 
-            StreamView miniFATView
-                = new StreamView(miniFAT, GetSectorSize(), header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE, null,
-                    sourceStream);
+            var miniFATView
+                = new StreamView(miniFAT, GetSectorSize(), _header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE, null,
+                    SourceStream);
 
-            StreamView miniStreamView
-                = new StreamView(miniStream, GetSectorSize(), this.rootStorage.Size, null, sourceStream);
+            var miniStreamView
+                = new StreamView(miniStream, GetSectorSize(), RootStorage.Size, null, SourceStream);
 
-            // Set updated/new sectors within the ministream ----------
+            // Set updated/new sectors within the mini-stream ----------
             if (zeroSector)
             {
-                for (int i = nth_sector_to_remove; i < sectorChain.Count; i++)
+                for (var i = nthSectorToRemove; i < sectorChain.Count; i++)
                 {
-                    Sector s = sectorChain[i];
+                    var s = sectorChain[i];
 
-                    if (s.Id != -1)
-                    {
-                        // Overwrite
-                        miniStreamView.Seek(Sector.MINISECTOR_SIZE * s.Id, SeekOrigin.Begin);
-                        miniStreamView.Write(ZEROED_MINI_SECTOR, 0, Sector.MINISECTOR_SIZE);
-                    }
+                    if (s.Id == -1)
+                        continue;
+
+                    // Overwrite
+                    miniStreamView.Seek(Sector.MINISECTOR_SIZE * s.Id, SeekOrigin.Begin);
+                    miniStreamView.Write(zeroedMiniSector, 0, Sector.MINISECTOR_SIZE);
                 }
             }
 
             // Update miniFAT                ---------------------------------------
-            for (int i = nth_sector_to_remove; i < sectorChain.Count; i++)
+            for (var i = nthSectorToRemove; i < sectorChain.Count; i++)
             {
-                Int32 currentId = sectorChain[i].Id;
+                var currentId = sectorChain[i].Id;
 
                 miniFATView.Seek(currentId * 4, SeekOrigin.Begin);
                 miniFATView.Write(BitConverter.GetBytes(Sector.FREESECT), 0, 4);
@@ -967,9 +898,9 @@ namespace OpenMcdf
             //miniFATView.Write(BitConverter.GetBytes(Sector.ENDOFCHAIN), 0, 4);
 
             // Write End of Chain in MiniFAT ---------------------------------------
-            if (nth_sector_to_remove > 0 && sectorChain.Count > 0)
+            if (nthSectorToRemove > 0 && sectorChain.Count > 0)
             {
-                miniFATView.Seek(sectorChain[nth_sector_to_remove - 1].Id * 4, SeekOrigin.Begin);
+                miniFATView.Seek(sectorChain[nthSectorToRemove - 1].Id * 4, SeekOrigin.Begin);
                 miniFATView.Write(BitConverter.GetBytes(Sector.ENDOFCHAIN), 0, 4);
             }
 
@@ -977,12 +908,12 @@ namespace OpenMcdf
             AllocateSectorChain(miniStreamView.BaseSectorChain);
             AllocateSectorChain(miniFATView.BaseSectorChain);
 
-            //Update HEADER and root storage when ministream changes
+            //Update HEADER and root storage when mini-stream changes
             if (miniFAT.Count > 0)
             {
-                this.rootStorage.DirEntry.StartSetc = miniStream[0].Id;
-                header.MiniFATSectorsNumber = (uint) miniFAT.Count;
-                header.FirstMiniFATSectorID = miniFAT[0].Id;
+                RootStorage.DirEntry.StartSetc = miniStream[0].Id;
+                _header.MiniFATSectorsNumber = (uint) miniFAT.Count;
+                _header.FirstMiniFATSectorId = miniFAT[0].Id;
             }
         }
 
@@ -991,18 +922,18 @@ namespace OpenMcdf
         /// for the new or updated sector chain (Normal or Mini sectors)
         /// </summary>
         /// <param name="sectorChain">The new or updated normal or mini sector chain</param>
-        private void SetSectorChain(List<Sector> sectorChain)
+        private void SetSectorChain(IList<Sector> sectorChain)
         {
             if (sectorChain == null || sectorChain.Count == 0)
                 return;
 
-            SectorType _st = sectorChain[0].Type;
+            var st = sectorChain[0].Type;
 
-            if (_st == SectorType.Normal)
+            if (st == SectorType.Normal)
             {
                 AllocateSectorChain(sectorChain);
             }
-            else if (_st == SectorType.Mini)
+            else if (st == SectorType.Mini)
             {
                 AllocateMiniSectorChain(sectorChain);
             }
@@ -1013,23 +944,19 @@ namespace OpenMcdf
         /// for the new or updated sector chain.
         /// </summary>
         /// <param name="sectorChain">The new or updated generic sector chain</param>
-        private void AllocateSectorChain(List<Sector> sectorChain)
+        private void AllocateSectorChain(IList<Sector> sectorChain)
         {
-            foreach (Sector s in sectorChain)
+            foreach (var s in sectorChain)
             {
                 if (s.Id == -1)
                 {
-                    sectors.Add(s);
-                    s.Id = sectors.Count - 1;
+                    _sectors.Add(s);
+                    s.Id = _sectors.Count - 1;
                 }
             }
 
             AllocateFATSectorChain(sectorChain);
         }
-
-        internal bool _transactionLockAdded = false;
-        internal int _lockSectorId = -1;
-        internal bool _transactionLockAllocated = false;
 
         /// <summary>
         /// Check for transaction lock sector addition and mark it in the FAT.
@@ -1037,14 +964,15 @@ namespace OpenMcdf
         private void CheckForLockSector()
         {
             //If transaction lock has been added and not yet allocated in the FAT...
-            if (_transactionLockAdded && !_transactionLockAllocated)
-            {
-                StreamView fatStream = new StreamView(GetFatSectorChain(), GetSectorSize(), sourceStream);
+            if (!TransactionLockAdded || TransactionLockAllocated)
+                return;
 
-                fatStream.Seek(_lockSectorId * 4, SeekOrigin.Begin);
+            using (var fatStream = new StreamView(GetFatSectorChain(), GetSectorSize(), SourceStream))
+            {
+                fatStream.Seek(LockSectorId * 4, SeekOrigin.Begin);
                 fatStream.Write(BitConverter.GetBytes(Sector.ENDOFCHAIN), 0, 4);
 
-                _transactionLockAllocated = true;
+                TransactionLockAllocated = true;
             }
         }
 
@@ -1053,26 +981,26 @@ namespace OpenMcdf
         /// for the new or updated FAT sector chain.
         /// </summary>
         /// <param name="sectorChain">The new or updated generic sector chain</param>
-        private void AllocateFATSectorChain(List<Sector> sectorChain)
+        private void AllocateFATSectorChain(IList<Sector> sectorChain)
         {
-            List<Sector> fatSectors = GetSectorChain(-1, SectorType.FAT);
+            var fatSectors = GetSectorChain(-1, SectorType.FAT);
 
-            StreamView fatStream =
+            var fatStream =
                 new StreamView(
                     fatSectors,
                     GetSectorSize(),
-                    header.FATSectorsNumber * GetSectorSize(),
+                    _header.FATSectorsNumber * GetSectorSize(),
                     null,
-                    sourceStream,
+                    SourceStream,
                     true
                 );
 
             // Write FAT chain values --
 
-            for (int i = 0; i < sectorChain.Count - 1; i++)
+            for (var i = 0; i < sectorChain.Count - 1; i++)
             {
-                Sector sN = sectorChain[i + 1];
-                Sector sC = sectorChain[i];
+                var sN = sectorChain[i + 1];
+                var sC = sectorChain[i];
 
                 fatStream.Seek(sC.Id * 4, SeekOrigin.Begin);
                 fatStream.Write(BitConverter.GetBytes(sN.Id), 0, 4);
@@ -1088,118 +1016,120 @@ namespace OpenMcdf
         /// <summary>
         /// Setup the DIFAT sector chain
         /// </summary>
-        /// <param name="FATsectorChain">A FAT sector chain</param>
-        private void AllocateDIFATSectorChain(List<Sector> FATsectorChain)
+        /// <param name="faTsectorChain">A FAT sector chain</param>
+        private void AllocateDIFATSectorChain(IList<Sector> faTsectorChain)
         {
             // Get initial sector's count
-            header.FATSectorsNumber = FATsectorChain.Count;
+            _header.FATSectorsNumber = faTsectorChain.Count;
 
             // Allocate Sectors
-            foreach (Sector s in FATsectorChain)
+            foreach (var s in faTsectorChain)
             {
-                if (s.Id == -1)
-                {
-                    sectors.Add(s);
-                    s.Id = sectors.Count - 1;
-                    s.Type = SectorType.FAT;
-                }
+                if (s.Id != -1)
+                    continue;
+
+                _sectors.Add(s);
+                s.Id = _sectors.Count - 1;
+                s.Type = SectorType.FAT;
             }
 
             // Sector count...
-            int nCurrentSectors = sectors.Count;
+            var nCurrentSectors = _sectors.Count;
 
             // Temp DIFAT count
-            int nDIFATSectors = (int) header.DIFATSectorsNumber;
+            var nDIFATSectors = (int) _header.DIFATSectorsNumber;
 
-            if (FATsectorChain.Count > HEADER_DIFAT_ENTRIES_COUNT)
+            if (faTsectorChain.Count > HEADER_DIFAT_ENTRIES_COUNT)
             {
-                nDIFATSectors = Ceiling((double) (FATsectorChain.Count - HEADER_DIFAT_ENTRIES_COUNT) /
-                                        DIFAT_SECTOR_FAT_ENTRIES_COUNT);
-                nDIFATSectors = LowSaturation(nDIFATSectors - (int) header.DIFATSectorsNumber); //required DIFAT
+                nDIFATSectors = Ceiling((double) (faTsectorChain.Count - HEADER_DIFAT_ENTRIES_COUNT) /
+                                        _difatSectorFATEntriesCount);
+                nDIFATSectors = LowSaturation(nDIFATSectors - (int) _header.DIFATSectorsNumber); //required DIFAT
             }
 
             // ...sum with new required DIFAT sectors count
             nCurrentSectors += nDIFATSectors;
 
             // ReCheck FAT bias
-            while (header.FATSectorsNumber * FAT_SECTOR_ENTRIES_COUNT < nCurrentSectors)
+            while (_header.FATSectorsNumber * _fatSectorEntriesCount < nCurrentSectors)
             {
-                Sector extraFATSector = new Sector(GetSectorSize(), sourceStream);
-                sectors.Add(extraFATSector);
+                var extraFATSector = new Sector(GetSectorSize(), SourceStream);
+                _sectors.Add(extraFATSector);
 
-                extraFATSector.Id = sectors.Count - 1;
+                extraFATSector.Id = _sectors.Count - 1;
                 extraFATSector.Type = SectorType.FAT;
 
-                FATsectorChain.Add(extraFATSector);
+                faTsectorChain.Add(extraFATSector);
 
-                header.FATSectorsNumber++;
+                _header.FATSectorsNumber++;
                 nCurrentSectors++;
 
                 //... so, adding a FAT sector may induce DIFAT sectors to increase by one
                 // and consequently this may induce ANOTHER FAT sector (TO-THINK: May this condition occure ?)
-                if (nDIFATSectors * DIFAT_SECTOR_FAT_ENTRIES_COUNT <
-                    (header.FATSectorsNumber > HEADER_DIFAT_ENTRIES_COUNT
-                        ? header.FATSectorsNumber - HEADER_DIFAT_ENTRIES_COUNT
+                if (nDIFATSectors * _difatSectorFATEntriesCount >=
+                    (_header.FATSectorsNumber > HEADER_DIFAT_ENTRIES_COUNT
+                        ? _header.FATSectorsNumber - HEADER_DIFAT_ENTRIES_COUNT
                         : 0))
                 {
-                    nDIFATSectors++;
-                    nCurrentSectors++;
+                    continue;
                 }
+
+                nDIFATSectors++;
+                nCurrentSectors++;
             }
 
 
-            List<Sector> difatSectors =
+            var difatSectors =
                 GetSectorChain(-1, SectorType.DIFAT);
 
-            StreamView difatStream
-                = new StreamView(difatSectors, GetSectorSize(), sourceStream);
+            var difatStream
+                = new StreamView(difatSectors, GetSectorSize(), SourceStream);
 
             // Write DIFAT Sectors (if required)
             // Save room for the following chaining
-            for (int i = 0; i < FATsectorChain.Count; i++)
+            for (var i = 0; i < faTsectorChain.Count; i++)
             {
                 if (i < HEADER_DIFAT_ENTRIES_COUNT)
                 {
-                    header.DIFAT[i] = FATsectorChain[i].Id;
+                    _header.DIFAT[i] = faTsectorChain[i].Id;
                 }
                 else
                 {
                     // room for DIFAT chaining at the end of any DIFAT sector (4 bytes)
                     if (i != HEADER_DIFAT_ENTRIES_COUNT &&
-                        (i - HEADER_DIFAT_ENTRIES_COUNT) % DIFAT_SECTOR_FAT_ENTRIES_COUNT == 0)
+                        (i - HEADER_DIFAT_ENTRIES_COUNT) % _difatSectorFATEntriesCount == 0)
                     {
-                        byte[] temp = new byte[sizeof(int)];
+                        var temp = new byte[sizeof(int)];
                         difatStream.Write(temp, 0, sizeof(int));
                     }
 
-                    difatStream.Write(BitConverter.GetBytes(FATsectorChain[i].Id), 0, sizeof(int));
+                    difatStream.Write(BitConverter.GetBytes(faTsectorChain[i].Id), 0, sizeof(int));
                 }
             }
 
             // Allocate room for DIFAT sectors
-            for (int i = 0; i < difatStream.BaseSectorChain.Count; i++)
+            foreach (var sec in difatStream.BaseSectorChain)
             {
-                if (difatStream.BaseSectorChain[i].Id == -1)
-                {
-                    sectors.Add(difatStream.BaseSectorChain[i]);
-                    difatStream.BaseSectorChain[i].Id = sectors.Count - 1;
-                    difatStream.BaseSectorChain[i].Type = SectorType.DIFAT;
-                }
+                if (sec.Id != -1)
+                    continue;
+
+                _sectors.Add(sec);
+                sec.Id = _sectors.Count - 1;
+                sec.Type = SectorType.DIFAT;
             }
 
-            header.DIFATSectorsNumber = (uint) nDIFATSectors;
+            _header.DIFATSectorsNumber = (uint) nDIFATSectors;
 
 
             // Chain first sector
             if (difatStream.BaseSectorChain != null && difatStream.BaseSectorChain.Count > 0)
             {
-                header.FirstDIFATSectorID = difatStream.BaseSectorChain[0].Id;
+                _header.FirstDIFATSectorId = difatStream.BaseSectorChain[0].Id;
 
                 // Update header information
-                header.DIFATSectorsNumber = (uint) difatStream.BaseSectorChain.Count;
+                _header.DIFATSectorsNumber = (uint) difatStream.BaseSectorChain.Count;
 
                 // Write chaining information at the end of DIFAT Sectors
-                for (int i = 0; i < difatStream.BaseSectorChain.Count - 1; i++)
+                for (var i = 0; i < difatStream.BaseSectorChain.Count - 1; i++)
                 {
                     Buffer.BlockCopy(
                         BitConverter.GetBytes(difatStream.BaseSectorChain[i + 1].Id),
@@ -1218,20 +1148,20 @@ namespace OpenMcdf
                 );
             }
             else
-                header.FirstDIFATSectorID = Sector.ENDOFCHAIN;
+                _header.FirstDIFATSectorId = Sector.ENDOFCHAIN;
 
             // Mark DIFAT Sectors in FAT
-            StreamView fatSv =
-                new StreamView(FATsectorChain, GetSectorSize(), header.FATSectorsNumber * GetSectorSize(), null,
-                    sourceStream);
+            var fatSv =
+                new StreamView(faTsectorChain, GetSectorSize(), _header.FATSectorsNumber * GetSectorSize(), null,
+                    SourceStream);
 
-            for (int i = 0; i < header.DIFATSectorsNumber; i++)
+            for (var i = 0; i < _header.DIFATSectorsNumber; i++)
             {
                 fatSv.Seek(difatStream.BaseSectorChain[i].Id * 4, SeekOrigin.Begin);
                 fatSv.Write(BitConverter.GetBytes(Sector.DIFSECT), 0, 4);
             }
 
-            for (int i = 0; i < header.FATSectorsNumber; i++)
+            for (var i = 0; i < _header.FATSectorsNumber; i++)
             {
                 fatSv.Seek(fatSv.BaseSectorChain[i].Id * 4, SeekOrigin.Begin);
                 fatSv.Write(BitConverter.GetBytes(Sector.FATSECT), 0, 4);
@@ -1240,9 +1170,8 @@ namespace OpenMcdf
             //fatSv.Seek(fatSv.BaseSectorChain[fatSv.BaseSectorChain.Count - 1].Id * 4, SeekOrigin.Begin);
             //fatSv.Write(BitConverter.GetBytes(Sector.ENDOFCHAIN), 0, 4);
 
-            header.FATSectorsNumber = fatSv.BaseSectorChain.Count;
+            _header.FATSectorsNumber = fatSv.BaseSectorChain.Count;
         }
-
 
         /// <summary>
         /// Get the DIFAT Sector chain
@@ -1250,59 +1179,56 @@ namespace OpenMcdf
         /// <returns>A list of DIFAT sectors</returns>
         private List<Sector> GetDifatSectorChain()
         {
-            int validationCount = 0;
+            int validationCount;
 
-            List<Sector> result
+            var result
                 = new List<Sector>();
 
-            int nextSecID
-                = Sector.ENDOFCHAIN;
+            if (_header.DIFATSectorsNumber == 0)
+                return result;
 
-            if (header.DIFATSectorsNumber != 0)
+            validationCount = (int) _header.DIFATSectorsNumber;
+
+            if (!(_sectors[_header.FirstDIFATSectorId] is Sector s)) //Lazy loading
             {
-                validationCount = (int) header.DIFATSectorsNumber;
-
-                Sector s = sectors[header.FirstDIFATSectorID] as Sector;
-
-                if (s == null) //Lazy loading
+                s = new Sector(GetSectorSize(), SourceStream)
                 {
-                    s = new Sector(GetSectorSize(), sourceStream);
-                    s.Type = SectorType.DIFAT;
-                    s.Id = header.FirstDIFATSectorID;
-                    sectors[header.FirstDIFATSectorID] = s;
+                    Type = SectorType.DIFAT,
+                    Id = _header.FirstDIFATSectorId
+                };
+                _sectors[_header.FirstDIFATSectorId] = s;
+            }
+
+            result.Add(s);
+
+            while (validationCount >= 0)
+            {
+                var nextSecId = BitConverter.ToInt32(s.GetData(), GetSectorSize() - 4);
+
+                // Strictly speaking, the following condition is not correct from
+                // a specification point of view:
+                // only ENDOFCHAIN should break DIFAT chain but 
+                // a lot of existing compound files use FREESECT as DIFAT chain termination
+                if (nextSecId == Sector.FREESECT || nextSecId == Sector.ENDOFCHAIN) break;
+
+                validationCount--;
+
+                if (validationCount < 0)
+                {
+                    Close();
+                    throw new CFCorruptedFileException("DIFAT sectors count mismatched. Corrupted compound file");
+                }
+
+                s = _sectors[nextSecId];
+
+                if (s == null)
+                {
+                    s = new Sector(GetSectorSize(), SourceStream);
+                    s.Id = nextSecId;
+                    _sectors[nextSecId] = s;
                 }
 
                 result.Add(s);
-
-                while (true && validationCount >= 0)
-                {
-                    nextSecID = BitConverter.ToInt32(s.GetData(), GetSectorSize() - 4);
-
-                    // Strictly speaking, the following condition is not correct from
-                    // a specification point of view:
-                    // only ENDOFCHAIN should break DIFAT chain but 
-                    // a lot of existing compound files use FREESECT as DIFAT chain termination
-                    if (nextSecID == Sector.FREESECT || nextSecID == Sector.ENDOFCHAIN) break;
-
-                    validationCount--;
-
-                    if (validationCount < 0)
-                    {
-                        this.Close();
-                        throw new CFCorruptedFileException("DIFAT sectors count mismatched. Corrupted compound file");
-                    }
-
-                    s = sectors[nextSecID] as Sector;
-
-                    if (s == null)
-                    {
-                        s = new Sector(GetSectorSize(), sourceStream);
-                        s.Id = nextSecID;
-                        sectors[nextSecID] = s;
-                    }
-
-                    result.Add(s);
-                }
             }
 
             return result;
@@ -1314,30 +1240,29 @@ namespace OpenMcdf
         /// <returns>List of FAT sectors</returns>
         private List<Sector> GetFatSectorChain()
         {
-            int N_HEADER_FAT_ENTRY = 109; //Number of FAT sectors id in the header
+            const int nHeaderFATEntry = 109; //Number of FAT sectors id in the header
 
-            List<Sector> result
+            var result
                 = new List<Sector>();
 
-            int nextSecID
-                = Sector.ENDOFCHAIN;
+            int nextSecId;
 
-            List<Sector> difatSectors = GetDifatSectorChain();
+            var difatSectors = GetDifatSectorChain();
 
-            int idx = 0;
+            var idx = 0;
 
             // Read FAT entries from the header Fat entry array (max 109 entries)
-            while (idx < header.FATSectorsNumber && idx < N_HEADER_FAT_ENTRY)
+            while (idx < _header.FATSectorsNumber && idx < nHeaderFATEntry)
             {
-                nextSecID = header.DIFAT[idx];
-                Sector s = sectors[nextSecID] as Sector;
+                nextSecId = _header.DIFAT[idx];
+                var s = _sectors[nextSecId];
 
                 if (s == null)
                 {
-                    s = new Sector(GetSectorSize(), sourceStream);
-                    s.Id = nextSecID;
+                    s = new Sector(GetSectorSize(), SourceStream);
+                    s.Id = nextSecId;
                     s.Type = SectorType.FAT;
-                    sectors[nextSecID] = s;
+                    _sectors[nextSecId] = s;
                 }
 
                 result.Add(s);
@@ -1348,27 +1273,27 @@ namespace OpenMcdf
             //Is there any DIFAT sector containing other FAT entries ?
             if (difatSectors.Count > 0)
             {
-                StreamView difatStream
+                var difatStream
                     = new StreamView
                     (
                         difatSectors,
                         GetSectorSize(),
-                        header.FATSectorsNumber > N_HEADER_FAT_ENTRY
-                            ? (header.FATSectorsNumber - N_HEADER_FAT_ENTRY) * 4
+                        _header.FATSectorsNumber > nHeaderFATEntry
+                            ? (_header.FATSectorsNumber - nHeaderFATEntry) * 4
                             : 0,
                         null,
-                        sourceStream
+                        SourceStream
                     );
 
-                byte[] nextDIFATSectorBuffer = new byte[4];
+                var nextDIFATSectorBuffer = new byte[4];
 
                 difatStream.Read(nextDIFATSectorBuffer, 0, 4);
-                nextSecID = BitConverter.ToInt32(nextDIFATSectorBuffer, 0);
+                nextSecId = BitConverter.ToInt32(nextDIFATSectorBuffer, 0);
 
-                int i = 0;
-                int nFat = N_HEADER_FAT_ENTRY;
+                var i = 0;
+                var nFat = nHeaderFATEntry;
 
-                while (nFat < header.FATSectorsNumber)
+                while (nFat < _header.FATSectorsNumber)
                 {
                     if (difatStream.Position == ((GetSectorSize() - 4) + i * GetSectorSize()))
                     {
@@ -1377,20 +1302,20 @@ namespace OpenMcdf
                         continue;
                     }
 
-                    Sector s = sectors[nextSecID] as Sector;
+                    var s = _sectors[nextSecId];
 
                     if (s == null)
                     {
-                        s = new Sector(GetSectorSize(), sourceStream);
+                        s = new Sector(GetSectorSize(), SourceStream);
                         s.Type = SectorType.FAT;
-                        s.Id = nextSecID;
-                        sectors[nextSecID] = s; //UUU
+                        s.Id = nextSecId;
+                        _sectors[nextSecId] = s; //UUU
                     }
 
                     result.Add(s);
 
                     difatStream.Read(nextDIFATSectorBuffer, 0, 4);
-                    nextSecID = BitConverter.ToInt32(nextDIFATSectorBuffer, 0);
+                    nextSecId = BitConverter.ToInt32(nextDIFATSectorBuffer, 0);
                     nFat++;
                 }
             }
@@ -1401,49 +1326,48 @@ namespace OpenMcdf
         /// <summary>
         /// Get a standard sector chain
         /// </summary>
-        /// <param name="secID">First SecID of the required chain</param>
+        /// <param name="secId">First SecID of the required chain</param>
         /// <returns>A list of sectors</returns>
-        private List<Sector> GetNormalSectorChain(int secID)
+        private List<Sector> GetNormalSectorChain(int secId)
         {
-            List<Sector> result
+            var result
                 = new List<Sector>();
 
-            int nextSecID = secID;
+            var nextSecId = secId;
 
-            List<Sector> fatSectors = GetFatSectorChain();
+            var fatSectors = GetFatSectorChain();
 
-            StreamView fatStream
-                = new StreamView(fatSectors, GetSectorSize(), fatSectors.Count * GetSectorSize(), null, sourceStream);
+            var fatStream
+                = new StreamView(fatSectors, GetSectorSize(), fatSectors.Count * GetSectorSize(), null, SourceStream);
 
             while (true)
             {
-                if (nextSecID == Sector.ENDOFCHAIN) break;
+                if (nextSecId == Sector.ENDOFCHAIN) break;
 
-                if (nextSecID < 0)
+                if (nextSecId < 0)
                     throw new CFCorruptedFileException(
-                        String.Format("Next Sector ID reference is below zero. NextID : {0}", nextSecID));
+                        string.Format("Next Sector ID reference is below zero. NextID : {0}", nextSecId));
 
-                if (nextSecID >= sectors.Count)
-                    throw new CFCorruptedFileException(String.Format(
+                if (nextSecId >= _sectors.Count)
+                    throw new CFCorruptedFileException(string.Format(
                         "Next Sector ID reference an out of range sector. NextID : {0} while sector count {1}",
-                        nextSecID, sectors.Count));
+                        nextSecId, _sectors.Count));
 
-                Sector s = sectors[nextSecID] as Sector;
-                if (s == null)
+                if (!(_sectors[nextSecId] is Sector s))
                 {
-                    s = new Sector(GetSectorSize(), sourceStream);
-                    s.Id = nextSecID;
+                    s = new Sector(GetSectorSize(), SourceStream);
+                    s.Id = nextSecId;
                     s.Type = SectorType.Normal;
-                    sectors[nextSecID] = s;
+                    _sectors[nextSecId] = s;
                 }
 
                 result.Add(s);
 
-                fatStream.Seek(nextSecID * 4, SeekOrigin.Begin);
-                int next = fatStream.ReadInt32();
+                fatStream.Seek(nextSecId * 4, SeekOrigin.Begin);
+                var next = fatStream.ReadInt32();
 
-                if (next != nextSecID)
-                    nextSecID = next;
+                if (next != nextSecId)
+                    nextSecId = next;
                 else
                     throw new CFCorruptedFileException("Cyclic sector chain found. File is corrupted");
             }
@@ -1455,63 +1379,63 @@ namespace OpenMcdf
         /// <summary>
         /// Get a mini sector chain
         /// </summary>
-        /// <param name="secID">First SecID of the required chain</param>
+        /// <param name="secId">First SecID of the required chain</param>
         /// <returns>A list of mini sectors (64 bytes)</returns>
-        private List<Sector> GetMiniSectorChain(int secID)
+        private List<Sector> GetMiniSectorChain(int secId)
         {
-            List<Sector> result
+            var result
                 = new List<Sector>();
 
-            if (secID != Sector.ENDOFCHAIN)
+            //if (secId != Sector.ENDOFCHAIN)
             {
-                int nextSecID = secID;
+                int nextSecId;
 
-                List<Sector> miniFAT = GetNormalSectorChain(header.FirstMiniFATSectorID);
-                List<Sector> miniStream = GetNormalSectorChain(RootEntry.StartSetc);
+                var miniFAT = GetNormalSectorChain(_header.FirstMiniFATSectorId);
+                var miniStream = GetNormalSectorChain(RootEntry.StartSetc);
 
-                StreamView miniFATView
-                    = new StreamView(miniFAT, GetSectorSize(), header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE,
-                        null, sourceStream);
+                var miniFATView
+                    = new StreamView(miniFAT, GetSectorSize(), _header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE,
+                        null, SourceStream);
 
-                StreamView miniStreamView =
-                    new StreamView(miniStream, GetSectorSize(), rootStorage.Size, null, sourceStream);
+                var miniStreamView =
+                    new StreamView(miniStream, GetSectorSize(), RootStorage.Size, null, SourceStream);
 
-                BinaryReader miniFATReader = new BinaryReader(miniFATView);
+                var miniFATReader = new BinaryReader(miniFATView);
 
-                nextSecID = secID;
+                nextSecId = secId;
 
                 while (true)
                 {
-                    if (nextSecID == Sector.ENDOFCHAIN)
+                    if (nextSecId == Sector.ENDOFCHAIN)
                         break;
 
-                    Sector ms = new Sector(Sector.MINISECTOR_SIZE, sourceStream);
-                    byte[] temp = new byte[Sector.MINISECTOR_SIZE];
+                    var ms = new Sector(Sector.MINISECTOR_SIZE, SourceStream);
+                    // ReSharper disable once UnusedVariable
+                    var temp = new byte[Sector.MINISECTOR_SIZE];
 
-                    ms.Id = nextSecID;
+                    ms.Id = nextSecId;
                     ms.Type = SectorType.Mini;
 
-                    miniStreamView.Seek(nextSecID * Sector.MINISECTOR_SIZE, SeekOrigin.Begin);
+                    miniStreamView.Seek(nextSecId * Sector.MINISECTOR_SIZE, SeekOrigin.Begin);
                     miniStreamView.Read(ms.GetData(), 0, Sector.MINISECTOR_SIZE);
 
                     result.Add(ms);
 
-                    miniFATView.Seek(nextSecID * 4, SeekOrigin.Begin);
-                    nextSecID = miniFATReader.ReadInt32();
+                    miniFATView.Seek(nextSecId * 4, SeekOrigin.Begin);
+                    nextSecId = miniFATReader.ReadInt32();
                 }
             }
             return result;
         }
 
-
         /// <summary>
         /// Get a sector chain from a compound file given the first sector ID
         /// and the required sector type.
         /// </summary>
-        /// <param name="secID">First chain sector's id </param>
+        /// <param name="secId">First chain sector's id </param>
         /// <param name="chainType">Type of Sectors in the required chain (mini sectors, normal sectors or FAT)</param>
         /// <returns>A list of Sectors as the result of their concatenation</returns>
-        internal List<Sector> GetSectorChain(int secID, SectorType chainType)
+        internal List<Sector> GetSectorChain(int secId, SectorType chainType)
         {
             switch (chainType)
             {
@@ -1522,53 +1446,15 @@ namespace OpenMcdf
                     return GetFatSectorChain();
 
                 case SectorType.Normal:
-                    return GetNormalSectorChain(secID);
+                    return GetNormalSectorChain(secId);
 
                 case SectorType.Mini:
-                    return GetMiniSectorChain(secID);
+                    return GetMiniSectorChain(secId);
 
                 default:
                     throw new CFException("Unsupproted chain type");
             }
         }
-
-        private CFStorage rootStorage;
-
-        /// <summary>
-        /// The entry point object that represents the 
-        /// root of the structures tree to get or set storage or
-        /// stream data.
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// 
-        ///    //Create a compound file
-        ///    string FILENAME = "MyFileName.cfs";
-        ///    CompoundFile ncf = new CompoundFile();
-        ///
-        ///    CFStorage l1 = ncf.RootStorage.AddStorage("Storage Level 1");
-        ///
-        ///    l1.AddStream("l1ns1");
-        ///    l1.AddStream("l1ns2");
-        ///    l1.AddStream("l1ns3");
-        ///    CFStorage l2 = l1.AddStorage("Storage Level 2");
-        ///    l2.AddStream("l2ns1");
-        ///    l2.AddStream("l2ns2");
-        ///
-        ///    ncf.Save(FILENAME);
-        ///    ncf.Close();
-        /// </code>
-        /// </example>
-        public CFStorage RootStorage
-        {
-            get { return rootStorage as CFStorage; }
-        }
-
-        public CFSVersion Version
-        {
-            get { return (CFSVersion) this.header.MajorVersion; }
-        }
-
 
         /// <summary>
         /// Reset a directory entry setting it to StgInvalid in the Directory.
@@ -1576,134 +1462,104 @@ namespace OpenMcdf
         /// <param name="sid">Sid of the directory to invalidate</param>
         internal void ResetDirectoryEntry(int sid)
         {
-            directoryEntries[sid].SetEntryName(String.Empty);
-            directoryEntries[sid].Left = null;
-            directoryEntries[sid].Right = null;
-            directoryEntries[sid].Parent = null;
-            directoryEntries[sid].StgType = StgType.StgInvalid;
+            _directoryEntries[sid].SetEntryName(string.Empty);
+            _directoryEntries[sid].Left = null;
+            _directoryEntries[sid].Right = null;
+            _directoryEntries[sid].Parent = null;
+            _directoryEntries[sid].StgType = StgType.StgInvalid;
         }
 
-
-        //internal class NodeFactory : IRBTreeDeserializer<CFItem>
-        //{
-
-        //    public RBNode<CFItem> DeserizlizeFromValues()
-        //    {
-        //           RBNode<CFItem> node = new RBNode<CFItem>(value,(Color)value.DirEntry.StgColor,
-        //    }
-        //}
-
-        internal RBTree CreateNewTree()
+        internal RbTree CreateNewTree()
         {
-            RBTree bst = new RBTree();
+            var bst = new RbTree();
             //bst.NodeInserted += OnNodeInsert;
             //bst.NodeOperation += OnNodeOperation;
             //bst.NodeDeleted += new Action<RBNode<CFItem>>(OnNodeDeleted);
             //  bst.ValueAssignedAction += new Action<RBNode<CFItem>, CFItem>(OnValueAssigned);
             return bst;
         }
-
-        //void OnValueAssigned(RBNode<CFItem> node, CFItem from)
-        //{
-        //    if (from.DirEntry != null && from.DirEntry.LeftSibling != DirectoryEntry.NOSTREAM)
-
-        //    if (from.DirEntry != null && from.DirEntry.LeftSibling != DirectoryEntry.NOSTREAM)
-        //        node.Value.DirEntry.LeftSibling = from.DirEntry.LeftSibling;
-
-        //    if (from.DirEntry != null && from.DirEntry.RightSibling != DirectoryEntry.NOSTREAM)
-        //        node.Value.DirEntry.RightSibling = from.DirEntry.RightSibling;
-        //}
-
-
-        internal RBTree GetChildrenTree(int sid)
+        
+        internal RbTree GetChildrenTree(int sid)
         {
-            RBTree bst = new RBTree();
+            var bst = new RbTree();
 
 
             // Load children from their original tree.
-            DoLoadChildren(bst, directoryEntries[sid]);
-            //bst = DoLoadChildrenTrusted(directoryEntries[sid]);
-
-            //bst.Print();
-            //bst.Print();
-            //Trace.WriteLine("#### After rethreading");
+            DoLoadChildren(bst, _directoryEntries[sid]);
 
             return bst;
         }
 
-        private RBTree DoLoadChildrenTrusted(IDirectoryEntry de)
+        internal RbTree DoLoadChildrenTrusted(IDirectoryEntry de)
         {
-            RBTree bst = null;
+            RbTree bst = null;
 
-            if (de.Child != DirectoryEntry.NOSTREAM)
+            if (de.Child != DirectoryEntry.nostream)
             {
-                bst = new RBTree(directoryEntries[de.Child]);
+                bst = new RbTree(_directoryEntries[de.Child]);
             }
 
             return bst;
         }
 
-
-        private void DoLoadChildren(RBTree bst, IDirectoryEntry de)
+        private void DoLoadChildren(RbTree bst, IDirectoryEntry de)
         {
-            if (de.Child != DirectoryEntry.NOSTREAM)
+            if (de.Child != DirectoryEntry.nostream)
             {
-                if (directoryEntries[de.Child].StgType == StgType.StgInvalid) return;
+                if (_directoryEntries[de.Child].StgType == StgType.StgInvalid) return;
 
-                LoadSiblings(bst, directoryEntries[de.Child]);
-                NullifyChildNodes(directoryEntries[de.Child]);
-                bst.Insert(directoryEntries[de.Child]);
+                LoadSiblings(bst, _directoryEntries[de.Child]);
+                NullifyChildNodes(_directoryEntries[de.Child]);
+                bst.Insert(_directoryEntries[de.Child]);
             }
         }
 
-        private void NullifyChildNodes(IDirectoryEntry de)
+        private static void NullifyChildNodes(IRbNode de)
         {
             de.Parent = null;
             de.Left = null;
             de.Right = null;
         }
 
-        private List<int> levelSIDs = new List<int>();
-
         // Doubling methods allows iterative behavior while avoiding
         // to insert duplicate items
-        private void LoadSiblings(RBTree bst, IDirectoryEntry de)
+        private void LoadSiblings(RbTree bst, IDirectoryEntry de)
         {
-            levelSIDs.Clear();
+            _levelSiDs.Clear();
 
-            if (de.LeftSibling != DirectoryEntry.NOSTREAM)
+            if (de.LeftSibling != DirectoryEntry.nostream)
             {
                 // If there're more left siblings load them...
-                DoLoadSiblings(bst, directoryEntries[de.LeftSibling]);
+                DoLoadSiblings(bst, _directoryEntries[de.LeftSibling]);
                 //NullifyChildNodes(directoryEntries[de.LeftSibling]);
             }
 
-            if (de.RightSibling != DirectoryEntry.NOSTREAM)
+            if (de.RightSibling != DirectoryEntry.nostream)
             {
-                levelSIDs.Add(de.RightSibling);
+                _levelSiDs.Add(de.RightSibling);
 
                 // If there're more right siblings load them...
-                DoLoadSiblings(bst, directoryEntries[de.RightSibling]);
+                DoLoadSiblings(bst, _directoryEntries[de.RightSibling]);
                 //NullifyChildNodes(directoryEntries[de.RightSibling]);
             }
         }
 
-        private void DoLoadSiblings(RBTree bst, IDirectoryEntry de)
+        private void DoLoadSiblings(RbTree bst, IDirectoryEntry de)
         {
             if (ValidateSibling(de.LeftSibling))
             {
-                levelSIDs.Add(de.LeftSibling);
+                _levelSiDs.Add(de.LeftSibling);
 
                 // If there're more left siblings load them...
-                DoLoadSiblings(bst, directoryEntries[de.LeftSibling]);
+                DoLoadSiblings(bst, _directoryEntries[de.LeftSibling]);
             }
 
             if (ValidateSibling(de.RightSibling))
             {
-                levelSIDs.Add(de.RightSibling);
+                _levelSiDs.Add(de.RightSibling);
 
                 // If there're more right siblings load them...
-                DoLoadSiblings(bst, directoryEntries[de.RightSibling]);
+                DoLoadSiblings(bst, _directoryEntries[de.RightSibling]);
             }
 
             NullifyChildNodes(de);
@@ -1712,47 +1568,44 @@ namespace OpenMcdf
 
         private bool ValidateSibling(int sid)
         {
-            if (sid != DirectoryEntry.NOSTREAM)
+            if (sid != DirectoryEntry.nostream)
             {
                 // if this siblings id does not overflow current list
-                if (sid >= directoryEntries.Count)
+                if (sid >= _directoryEntries.Count)
                 {
-                    if (this.validationExceptionEnabled)
+                    if (ValidationExceptionEnabled)
                     {
                         //this.Close();
                         throw new CFCorruptedFileException("A Directory Entry references the non-existent sid number " +
-                                                           sid.ToString());
+                                                           sid);
                     }
-                    else
-                        return false;
+                    return false;
                 }
 
                 //if this sibling is valid...
-                if (directoryEntries[sid].StgType == StgType.StgInvalid)
+                if (_directoryEntries[sid].StgType == StgType.StgInvalid)
                 {
-                    if (this.validationExceptionEnabled)
+                    if (ValidationExceptionEnabled)
                     {
                         //this.Close();
                         throw new CFCorruptedFileException(
                             "A Directory Entry has a valid reference to an Invalid Storage Type directory [" + sid +
                             "]");
                     }
-                    else
-                        return false;
+                    return false;
                 }
 
-                if (!Enum.IsDefined(typeof(StgType), directoryEntries[sid].StgType))
+                if (!Enum.IsDefined(typeof(StgType), _directoryEntries[sid].StgType))
                 {
-                    if (this.validationExceptionEnabled)
+                    if (ValidationExceptionEnabled)
                     {
                         //this.Close();
                         throw new CFCorruptedFileException("A Directory Entry has an invalid Storage Type");
                     }
-                    else
-                        return false;
+                    return false;
                 }
 
-                if (levelSIDs.Contains(sid))
+                if (_levelSiDs.Contains(sid))
                     throw new CFCorruptedFileException("Cyclic reference of directory item");
 
                 return true; //No fault condition encountered for sid being validated
@@ -1761,89 +1614,86 @@ namespace OpenMcdf
             return false;
         }
 
-
         /// <summary>
         /// Load directory entries from compound file. Header and FAT MUST be already loaded.
         /// </summary>
         private void LoadDirectories()
         {
-            List<Sector> directoryChain
-                = GetSectorChain(header.FirstDirectorySectorID, SectorType.Normal);
+            var directoryChain
+                = GetSectorChain(_header.FirstDirectorySectorId, SectorType.Normal);
 
-            if (header.FirstDirectorySectorID == Sector.ENDOFCHAIN)
-                header.FirstDirectorySectorID = directoryChain[0].Id;
+            if (_header.FirstDirectorySectorId == Sector.ENDOFCHAIN)
+                _header.FirstDirectorySectorId = directoryChain[0].Id;
 
-            StreamView dirReader
+            var dirReader
                 = new StreamView(directoryChain, GetSectorSize(), directoryChain.Count * GetSectorSize(), null,
-                    sourceStream);
+                    SourceStream);
 
 
             while (dirReader.Position < directoryChain.Count * GetSectorSize())
             {
-                IDirectoryEntry de
-                    = DirectoryEntry.New(String.Empty, StgType.StgInvalid, directoryEntries);
+                var de
+                    = DirectoryEntry.New(string.Empty, StgType.StgInvalid, _directoryEntries);
 
                 //We are not inserting dirs. Do not use 'InsertNewDirectoryEntry'
-                de.Read(dirReader, this.Version);
+                de.Read(dirReader, Version);
             }
         }
-
 
         /// <summary>
         ///  Commit directory entries change on the Current Source stream
         /// </summary>
         private void CommitDirectory()
         {
-            const int DIRECTORY_SIZE = 128;
+            const int directorySize = 128;
 
-            List<Sector> directorySectors
-                = GetSectorChain(header.FirstDirectorySectorID, SectorType.Normal);
+            var directorySectors
+                = GetSectorChain(_header.FirstDirectorySectorId, SectorType.Normal);
 
-            StreamView sv = new StreamView(directorySectors, GetSectorSize(), 0, null, sourceStream);
+            var sv = new StreamView(directorySectors, GetSectorSize(), 0, null, SourceStream);
 
-            foreach (IDirectoryEntry di in directoryEntries)
+            foreach (var di in _directoryEntries)
             {
                 di.Write(sv);
             }
 
-            int delta = directoryEntries.Count;
+            var delta = _directoryEntries.Count;
 
-            while (delta % (GetSectorSize() / DIRECTORY_SIZE) != 0)
+            while (delta % (GetSectorSize() / directorySize) != 0)
             {
-                IDirectoryEntry dummy = DirectoryEntry.New(String.Empty, StgType.StgInvalid, directoryEntries);
+                var dummy = DirectoryEntry.New(string.Empty, StgType.StgInvalid, _directoryEntries);
                 dummy.Write(sv);
                 delta++;
             }
 
-            foreach (Sector s in directorySectors)
+            foreach (var s in directorySectors)
             {
                 s.Type = SectorType.Directory;
             }
 
             AllocateSectorChain(directorySectors);
 
-            header.FirstDirectorySectorID = directorySectors[0].Id;
+            _header.FirstDirectorySectorId = directorySectors[0].Id;
 
             //Version 4 supports directory sectors count
-            if (header.MajorVersion == 3)
+            if (_header.MajorVersion == 3)
             {
-                header.DirectorySectorsNumber = 0;
+                _header.DirectorySectorsNumber = 0;
             }
             else
             {
-                header.DirectorySectorsNumber = directorySectors.Count;
+                _header.DirectorySectorsNumber = directorySectors.Count;
             }
         }
-
 
         /// <summary>
         /// Saves the in-memory image of Compound File to a file.
         /// </summary>
         /// <param name="fileName">File name to write the compound file to</param>
         /// <exception cref="T:OpenMcdf.CFException">Raised if destination file is not seekable</exception>
-        public void Save(String fileName)
+        public void Save(string fileName)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFException("Compound File closed: cannot save data");
 
             FileStream fs = null;
@@ -1859,11 +1709,8 @@ namespace OpenMcdf
             }
             finally
             {
-                if (fs != null)
-                    fs.Flush();
-
-                if (fs != null)
-                    fs.Close();
+                fs?.Flush();
+                fs?.Close();
             }
         }
 
@@ -1893,14 +1740,14 @@ namespace OpenMcdf
         /// </example>
         public void Save(Stream stream)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot save data");
 
             if (!stream.CanSeek)
                 throw new CFException("Cannot save on a non-seekable stream");
 
             CheckForLockSector();
-            int sSize = GetSectorSize();
+            var sSize = GetSectorSize();
 
             try
             {
@@ -1908,9 +1755,9 @@ namespace OpenMcdf
 
                 CommitDirectory();
 
-                for (int i = 0; i < sectors.Count; i++)
+                for (var i = 0; i < _sectors.Count; i++)
                 {
-                    Sector s = sectors[i] as Sector;
+                    var s = _sectors[i];
 
                     if (s == null)
                     {
@@ -1919,8 +1766,7 @@ namespace OpenMcdf
                         // sectors because we are NOT modifying the source
                         // in a differential way but ALL sectors need to be 
                         // persisted on the destination stream
-                        s = new Sector(sSize, sourceStream);
-                        s.Id = i;
+                        s = new Sector(sSize, SourceStream) {Id = i};
 
                         //sectors[i] = s;
                     }
@@ -1932,14 +1778,13 @@ namespace OpenMcdf
                 }
 
                 stream.Seek(0, SeekOrigin.Begin);
-                header.Write(stream);
+                _header.Write(stream);
             }
             catch (Exception ex)
             {
                 throw new CFException("Internal error while saving compound file to stream ", ex);
             }
         }
-
 
         /// <summary>
         /// Scan FAT o miniFAT for free sectors to reuse.
@@ -1948,30 +1793,30 @@ namespace OpenMcdf
         /// <returns>A Queue of available sectors or minisectors already allocated</returns>
         internal Queue<Sector> FindFreeSectors(SectorType sType)
         {
-            Queue<Sector> freeList = new Queue<Sector>();
+            var freeList = new Queue<Sector>();
 
             if (sType == SectorType.Normal)
             {
-                List<Sector> FatChain = GetSectorChain(-1, SectorType.FAT);
-                StreamView fatStream = new StreamView(FatChain, GetSectorSize(),
-                    header.FATSectorsNumber * GetSectorSize(), null, sourceStream);
+                var fatChain = GetSectorChain(-1, SectorType.FAT);
+                var fatStream = new StreamView(fatChain, GetSectorSize(),
+                    _header.FATSectorsNumber * GetSectorSize(), null, SourceStream);
 
-                int idx = 0;
+                var idx = 0;
 
-                while (idx < sectors.Count)
+                while (idx < _sectors.Count)
                 {
-                    int id = fatStream.ReadInt32();
+                    var id = fatStream.ReadInt32();
 
                     if (id == Sector.FREESECT)
                     {
-                        if (sectors[idx] == null)
+                        if (_sectors[idx] == null)
                         {
-                            Sector s = new Sector(GetSectorSize(), sourceStream);
+                            var s = new Sector(GetSectorSize(), SourceStream);
                             s.Id = idx;
-                            sectors[idx] = s;
+                            _sectors[idx] = s;
                         }
 
-                        freeList.Enqueue(sectors[idx] as Sector);
+                        freeList.Enqueue(_sectors[idx]);
                     }
 
                     idx++;
@@ -1979,33 +1824,34 @@ namespace OpenMcdf
             }
             else
             {
-                List<Sector> miniFAT
-                    = GetSectorChain(header.FirstMiniFATSectorID, SectorType.Normal);
+                var miniFAT
+                    = GetSectorChain(_header.FirstMiniFATSectorId, SectorType.Normal);
 
-                StreamView miniFATView
-                    = new StreamView(miniFAT, GetSectorSize(), header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE,
-                        null, sourceStream);
+                var miniFATView
+                    = new StreamView(miniFAT, GetSectorSize(), _header.MiniFATSectorsNumber * Sector.MINISECTOR_SIZE,
+                        null, SourceStream);
 
-                List<Sector> miniStream
+                var miniStream
                     = GetSectorChain(RootEntry.StartSetc, SectorType.Normal);
 
-                StreamView miniStreamView
-                    = new StreamView(miniStream, GetSectorSize(), rootStorage.Size, null, sourceStream);
+                var miniStreamView
+                    = new StreamView(miniStream, GetSectorSize(), RootStorage.Size, null, SourceStream);
 
-                int idx = 0;
+                var idx = 0;
 
-                int nMinisectors = (int) (miniStreamView.Length / Sector.MINISECTOR_SIZE);
+                var nMinisectors = (int) (miniStreamView.Length / Sector.MINISECTOR_SIZE);
 
                 while (idx < nMinisectors)
                 {
                     //AssureLength(miniStreamView, (int)miniFATView.Length);
 
-                    int nextId = miniFATView.ReadInt32();
+                    var nextId = miniFATView.ReadInt32();
 
                     if (nextId == Sector.FREESECT)
                     {
-                        Sector ms = new Sector(Sector.MINISECTOR_SIZE, sourceStream);
-                        byte[] temp = new byte[Sector.MINISECTOR_SIZE];
+                        var ms = new Sector(Sector.MINISECTOR_SIZE, SourceStream);
+                        // ReSharper disable once UnusedVariable
+                        var temp = new byte[Sector.MINISECTOR_SIZE];
 
                         ms.Id = idx;
                         ms.Type = SectorType.Mini;
@@ -2025,9 +1871,10 @@ namespace OpenMcdf
 
         /// <summary>
         /// INTERNAL DEVELOPMENT. DO NOT CALL.
-        /// <param name="directoryEntry"></param>
+        /// <param name="cfItem"></param>
         /// <param name="buffer"></param>
-        internal void AppendData(CFItem cfItem, Byte[] buffer)
+        /// </summary>
+        internal void AppendData(CFItem cfItem, byte[] buffer)
         {
             WriteData(cfItem, cfItem.Size, buffer);
         }
@@ -2042,47 +1889,47 @@ namespace OpenMcdf
             if (cfItem.Size == length)
                 return;
 
-            SectorType newSectorType = SectorType.Normal;
-            int newSectorSize = GetSectorSize();
+            var newSectorType = SectorType.Normal;
+            var newSectorSize = GetSectorSize();
 
-            if (length < header.MinSizeStandardStream)
+            if (length < _header.MinSizeStandardStream)
             {
                 newSectorType = SectorType.Mini;
                 newSectorSize = Sector.MINISECTOR_SIZE;
             }
 
-            SectorType oldSectorType = SectorType.Normal;
-            int oldSectorSize = GetSectorSize();
+            var oldSectorType = SectorType.Normal;
+            var oldSectorSize = GetSectorSize();
 
-            if (cfItem.Size < header.MinSizeStandardStream)
+            if (cfItem.Size < _header.MinSizeStandardStream)
             {
                 oldSectorType = SectorType.Mini;
                 oldSectorSize = Sector.MINISECTOR_SIZE;
             }
 
-            long oldSize = cfItem.Size;
+            var oldSize = cfItem.Size;
 
 
             // Get Sector chain and delta size induced by client
-            List<Sector> sectorChain = GetSectorChain(cfItem.DirEntry.StartSetc, oldSectorType);
-            long delta = length - cfItem.Size;
+            var sectorChain = GetSectorChain(cfItem.DirEntry.StartSetc, oldSectorType);
+            var delta = length - cfItem.Size;
 
             // Check for transition ministream -> stream:
             // Only in this case we need to free old sectors,
             // otherwise they will be overwritten.
 
-            bool transitionToMini = false;
-            bool transitionToNormal = false;
+            var transitionToMini = false;
+            var transitionToNormal = false;
             List<Sector> oldChain = null;
 
             if (cfItem.DirEntry.StartSetc != Sector.ENDOFCHAIN)
             {
                 if (
-                    (length < header.MinSizeStandardStream && cfItem.DirEntry.Size >= header.MinSizeStandardStream)
-                    || (length >= header.MinSizeStandardStream && cfItem.DirEntry.Size < header.MinSizeStandardStream)
+                    (length < _header.MinSizeStandardStream && cfItem.DirEntry.Size >= _header.MinSizeStandardStream)
+                    || (length >= _header.MinSizeStandardStream && cfItem.DirEntry.Size < _header.MinSizeStandardStream)
                 )
                 {
-                    if (cfItem.DirEntry.Size < header.MinSizeStandardStream)
+                    if (cfItem.DirEntry.Size < _header.MinSizeStandardStream)
                     {
                         transitionToNormal = true;
                         oldChain = sectorChain;
@@ -2099,29 +1946,30 @@ namespace OpenMcdf
 
 
             Queue<Sector> freeList = null;
-            StreamView sv = null;
+            StreamView sv;
 
             if (!transitionToMini && !transitionToNormal) //############  NO TRANSITION
             {
                 if (delta > 0) // Enlarging stream...
                 {
-                    if (this.sectorRecycle)
+                    if (_sectorRecycle)
                         freeList = FindFreeSectors(newSectorType); // Collect available free sectors
 
-                    sv = new StreamView(sectorChain, newSectorSize, length, freeList, sourceStream);
+                    // ReSharper disable once UnusedVariable
+                    sv = new StreamView(sectorChain, newSectorSize, length, freeList, SourceStream);
 
                     //Set up  destination chain
                     SetSectorChain(sectorChain);
                 }
                 else if (delta < 0) // Reducing size...
                 {
-                    int nSec = (int) Math.Floor(((double) (Math.Abs(delta)) /
+                    var nSec = (int) Math.Floor(((double) (Math.Abs(delta)) /
                                                  newSectorSize)); //number of sectors to mark as free
 
                     if (newSectorSize == Sector.MINISECTOR_SIZE)
-                        FreeMiniChain(sectorChain, nSec, this.eraseFreeSectors);
+                        FreeMiniChain(sectorChain, nSec, _eraseFreeSectors);
                     else
-                        FreeChain(sectorChain, nSec, this.eraseFreeSectors);
+                        FreeChain(sectorChain, nSec, _eraseFreeSectors);
                 }
 
                 if (sectorChain.Count > 0)
@@ -2141,23 +1989,23 @@ namespace OpenMcdf
 
                 // Collect available MINI free sectors
 
-                if (this.sectorRecycle)
+                if (_sectorRecycle)
                     freeList = FindFreeSectors(SectorType.Mini);
 
-                sv = new StreamView(oldChain, oldSectorSize, oldSize, null, sourceStream);
+                sv = new StreamView(oldChain, oldSectorSize, oldSize, null, SourceStream);
 
                 // Reset start sector and size of dir entry
                 cfItem.DirEntry.StartSetc = Sector.ENDOFCHAIN;
                 cfItem.DirEntry.Size = 0;
 
-                List<Sector> newChain = GetMiniSectorChain(Sector.ENDOFCHAIN);
-                StreamView destSv = new StreamView(newChain, Sector.MINISECTOR_SIZE, length, freeList, sourceStream);
+                var newChain = GetMiniSectorChain(Sector.ENDOFCHAIN);
+                var destSv = new StreamView(newChain, Sector.MINISECTOR_SIZE, length, freeList, SourceStream);
 
                 // Buffered trimmed copy from old (larger) to new (smaller)
-                int cnt = 4096 < length ? 4096 : (int) length;
+                var cnt = 4096 < length ? 4096 : (int) length;
 
-                byte[] buf = new byte[4096];
-                long toRead = length;
+                var buf = new byte[4096];
+                var toRead = length;
 
                 //Copy old to new chain
                 while (toRead > cnt)
@@ -2171,7 +2019,7 @@ namespace OpenMcdf
                 destSv.Write(buf, 0, (int) toRead);
 
                 //Free old chain
-                FreeChain(oldChain, this.eraseFreeSectors);
+                FreeChain(oldChain, _eraseFreeSectors);
 
                 //Set up destination chain
                 AllocateMiniSectorChain(destSv.BaseSectorChain);
@@ -2191,22 +2039,22 @@ namespace OpenMcdf
                     cfItem.DirEntry.Size = 0;
                 }
             }
-            else if (transitionToNormal) //############## TRANSITION TO NORMAL STREAM
+            else //############## TRANSITION TO NORMAL STREAM
             {
                 // Transition Mini chain -> Normal chain
 
-                if (this.sectorRecycle)
+                if (_sectorRecycle)
                     freeList = FindFreeSectors(SectorType.Normal); // Collect available Normal free sectors
 
-                sv = new StreamView(oldChain, oldSectorSize, oldSize, null, sourceStream);
+                sv = new StreamView(oldChain, oldSectorSize, oldSize, null, SourceStream);
 
-                List<Sector> newChain = GetNormalSectorChain(Sector.ENDOFCHAIN);
-                StreamView destSv = new StreamView(newChain, GetSectorSize(), length, freeList, sourceStream);
+                var newChain = GetNormalSectorChain(Sector.ENDOFCHAIN);
+                var destSv = new StreamView(newChain, GetSectorSize(), length, freeList, SourceStream);
 
-                int cnt = 256 < length ? 256 : (int) length;
+                var cnt = 256 < length ? 256 : (int) length;
 
-                byte[] buf = new byte[256];
-                long toRead = Math.Min(length, cfItem.Size);
+                var buf = new byte[256];
+                var toRead = Math.Min(length, cfItem.Size);
 
                 //Copy old to new chain
                 while (toRead > cnt)
@@ -2220,8 +2068,9 @@ namespace OpenMcdf
                 destSv.Write(buf, 0, (int) toRead);
 
                 //Free old mini chain
-                int oldChainCount = oldChain.Count;
-                FreeMiniChain(oldChain, this.eraseFreeSectors);
+                // ReSharper disable once UnusedVariable
+                var oldChainCount = oldChain.Count;
+                FreeMiniChain(oldChain, _eraseFreeSectors);
 
                 //Set up normal destination chain
                 AllocateSectorChain(destSv.BaseSectorChain);
@@ -2256,35 +2105,35 @@ namespace OpenMcdf
             if (buffer.Length == 0) return;
 
             // Get delta size induced by client
-            long delta = (position + count) - cfItem.Size < 0 ? 0 : (position + count) - cfItem.Size;
-            long newLength = cfItem.Size + delta;
+            var delta = (position + count) - cfItem.Size < 0 ? 0 : (position + count) - cfItem.Size;
+            var newLength = cfItem.Size + delta;
 
             SetStreamLength(cfItem, newLength);
 
             // Calculate NEW sectors SIZE
-            SectorType _st = SectorType.Normal;
-            int _sectorSize = GetSectorSize();
+            var st = SectorType.Normal;
+            var sectorSize = GetSectorSize();
 
-            if (cfItem.Size < header.MinSizeStandardStream)
+            if (cfItem.Size < _header.MinSizeStandardStream)
             {
-                _st = SectorType.Mini;
-                _sectorSize = Sector.MINISECTOR_SIZE;
+                st = SectorType.Mini;
+                sectorSize = Sector.MINISECTOR_SIZE;
             }
 
-            List<Sector> sectorChain = GetSectorChain(cfItem.DirEntry.StartSetc, _st);
-            StreamView sv = new StreamView(sectorChain, _sectorSize, newLength, null, sourceStream);
+            var sectorChain = GetSectorChain(cfItem.DirEntry.StartSetc, st);
+            var sv = new StreamView(sectorChain, sectorSize, newLength, null, SourceStream);
 
             sv.Seek(position, SeekOrigin.Begin);
             sv.Write(buffer, offset, count);
 
-            if (cfItem.Size < header.MinSizeStandardStream)
+            if (cfItem.Size < _header.MinSizeStandardStream)
             {
                 PersistMiniStreamToStream(sv.BaseSectorChain);
                 //SetSectorChain(sv.BaseSectorChain);
             }
         }
 
-        internal void WriteData(CFItem cfItem, Byte[] buffer)
+        internal void WriteData(CFItem cfItem, byte[] buffer)
         {
             WriteData(cfItem, 0, buffer);
         }
@@ -2292,99 +2141,96 @@ namespace OpenMcdf
         /// <summary>
         /// Check file size limit ( 2GB for version 3 )
         /// </summary>
-        private void CheckFileLength()
+        internal void CheckFileLength()
         {
             throw new NotImplementedException();
         }
-
 
         internal int ReadData(CFStream cFStream, long position, byte[] buffer, int count)
         {
             if (count > buffer.Length)
                 throw new ArgumentException("count parameter exceeds buffer size");
 
-            IDirectoryEntry de = cFStream.DirEntry;
+            var de = cFStream.DirEntry;
 
-            count = (int) Math.Min((long) (de.Size - position), (long) count);
+            count = (int) Math.Min(de.Size - position, count);
 
-            StreamView sView = null;
+            StreamView sView;
 
-
-            if (de.Size < header.MinSizeStandardStream)
+            if (de.Size < _header.MinSizeStandardStream)
             {
                 sView
                     = new StreamView(GetSectorChain(de.StartSetc, SectorType.Mini), Sector.MINISECTOR_SIZE, de.Size,
-                        null, sourceStream);
+                        null, SourceStream);
             }
             else
             {
                 sView = new StreamView(GetSectorChain(de.StartSetc, SectorType.Normal), GetSectorSize(), de.Size, null,
-                    sourceStream);
+                    SourceStream);
             }
 
 
             sView.Seek(position, SeekOrigin.Begin);
-            int result = sView.Read(buffer, 0, count);
+            var result = sView.Read(buffer, 0, count);
 
             return result;
         }
 
         internal int ReadData(CFStream cFStream, long position, byte[] buffer, int offset, int count)
         {
-            IDirectoryEntry de = cFStream.DirEntry;
+            var de = cFStream.DirEntry;
 
-            count = (int) Math.Min((long) (de.Size - offset), (long) count);
+            count = (int) Math.Min(de.Size - offset, count);
 
-            StreamView sView = null;
+            StreamView sView;
 
 
-            if (de.Size < header.MinSizeStandardStream)
+            if (de.Size < _header.MinSizeStandardStream)
             {
                 sView
                     = new StreamView(GetSectorChain(de.StartSetc, SectorType.Mini), Sector.MINISECTOR_SIZE, de.Size,
-                        null, sourceStream);
+                        null, SourceStream);
             }
             else
             {
                 sView = new StreamView(GetSectorChain(de.StartSetc, SectorType.Normal), GetSectorSize(), de.Size, null,
-                    sourceStream);
+                    SourceStream);
             }
 
 
             sView.Seek(position, SeekOrigin.Begin);
-            int result = sView.Read(buffer, offset, count);
+            var result = sView.Read(buffer, offset, count);
 
             return result;
         }
 
-
         internal byte[] GetData(CFStream cFStream)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot access data");
 
-            byte[] result = null;
+            byte[] result;
 
-            IDirectoryEntry de = cFStream.DirEntry;
+            var de = cFStream.DirEntry;
 
             //IDirectoryEntry root = directoryEntries[0];
 
-            if (de.Size < header.MinSizeStandardStream)
+            if (de.Size < _header.MinSizeStandardStream)
             {
-                StreamView miniView
+                var miniView
                     = new StreamView(GetSectorChain(de.StartSetc, SectorType.Mini), Sector.MINISECTOR_SIZE, de.Size,
-                        null, sourceStream);
+                        null, SourceStream);
 
-                BinaryReader br = new BinaryReader(miniView);
+                var br = new BinaryReader(miniView);
 
                 result = br.ReadBytes((int) de.Size);
                 br.Close();
             }
             else
             {
-                StreamView sView
+                var sView
                     = new StreamView(GetSectorChain(de.StartSetc, SectorType.Normal), GetSectorSize(), de.Size, null,
-                        sourceStream);
+                        SourceStream);
 
                 result = new byte[(int) de.Size];
 
@@ -2396,28 +2242,28 @@ namespace OpenMcdf
 
         public byte[] GetDataBySID(int sid)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot access data");
             if (sid < 0)
                 return null;
-            byte[] result = null;
+            byte[] result;
             try
             {
-                IDirectoryEntry de = directoryEntries[sid];
-                if (de.Size < header.MinSizeStandardStream)
+                var de = _directoryEntries[sid];
+                if (de.Size < _header.MinSizeStandardStream)
                 {
-                    StreamView miniView
+                    var miniView
                         = new StreamView(GetSectorChain(de.StartSetc, SectorType.Mini), Sector.MINISECTOR_SIZE, de.Size,
-                            null, sourceStream);
-                    BinaryReader br = new BinaryReader(miniView);
+                            null, SourceStream);
+                    var br = new BinaryReader(miniView);
                     result = br.ReadBytes((int) de.Size);
                     br.Close();
                 }
                 else
                 {
-                    StreamView sView
+                    var sView
                         = new StreamView(GetSectorChain(de.StartSetc, SectorType.Normal), GetSectorSize(), de.Size,
-                            null, sourceStream);
+                            null, SourceStream);
                     result = new byte[(int) de.Size];
                     sView.Read(result, 0, result.Length);
                 }
@@ -2429,29 +2275,29 @@ namespace OpenMcdf
             return result;
         }
 
-        public Guid getGuidBySID(int sid)
+        public Guid GetGuidBySID(int sid)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot access data");
             if (sid < 0)
                 throw new CFException("Invalid SID");
-            IDirectoryEntry de = directoryEntries[sid];
+            var de = _directoryEntries[sid];
             return de.StorageCLSID;
         }
 
-        public Guid getGuidForStream(int sid)
+        public Guid GetGuidForStream(int sid)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot access data");
             if (sid < 0)
                 throw new CFException("Invalid SID");
-            Guid g = new Guid("00000000000000000000000000000000");
+            var g = new Guid("00000000000000000000000000000000");
             //find first storage containing a non-zero CLSID before SID in directory structure
-            for (int i = sid - 1; i >= 0; i--)
+            for (var i = sid - 1; i >= 0; i--)
             {
-                if (directoryEntries[i].StorageCLSID != g && directoryEntries[i].StgType == StgType.StgStorage)
+                if (_directoryEntries[i].StorageCLSID != g && _directoryEntries[i].StgType == StgType.StgStorage)
                 {
-                    return directoryEntries[i].StorageCLSID;
+                    return _directoryEntries[i].StorageCLSID;
                 }
             }
             return g;
@@ -2467,33 +2313,32 @@ namespace OpenMcdf
             return i > 0 ? i : 0;
         }
 
-
         internal void InvalidateDirectoryEntry(int sid)
         {
-            if (sid >= directoryEntries.Count)
+            if (sid >= _directoryEntries.Count)
                 throw new CFException("Invalid SID of the directory entry to remove");
 
             //Random r = new Random();
-            directoryEntries[sid].SetEntryName("_DELETED_NAME_" + sid.ToString());
-            directoryEntries[sid].StgType = StgType.StgInvalid;
+            _directoryEntries[sid].SetEntryName("_DELETED_NAME_" + sid);
+            _directoryEntries[sid].StgType = StgType.StgInvalid;
         }
 
         internal void FreeAssociatedData(int sid)
         {
             // Clear the associated stream (or ministream) if required
-            if (directoryEntries[sid].Size > 0) //thanks to Mark Bosold for this !
+            if (_directoryEntries[sid].Size > 0) //thanks to Mark Bosold for this !
             {
-                if (directoryEntries[sid].Size < header.MinSizeStandardStream)
+                if (_directoryEntries[sid].Size < _header.MinSizeStandardStream)
                 {
-                    List<Sector> miniChain
-                        = GetSectorChain(directoryEntries[sid].StartSetc, SectorType.Mini);
-                    FreeMiniChain(miniChain, this.eraseFreeSectors);
+                    var miniChain
+                        = GetSectorChain(_directoryEntries[sid].StartSetc, SectorType.Mini);
+                    FreeMiniChain(miniChain, _eraseFreeSectors);
                 }
                 else
                 {
-                    List<Sector> chain
-                        = GetSectorChain(directoryEntries[sid].StartSetc, SectorType.Normal);
-                    FreeChain(chain, this.eraseFreeSectors);
+                    var chain
+                        = GetSectorChain(_directoryEntries[sid].StartSetc, SectorType.Normal);
+                    FreeChain(chain, _eraseFreeSectors);
                 }
             }
         }
@@ -2509,7 +2354,7 @@ namespace OpenMcdf
         /// </summary>
         /// <example>
         /// <code>
-        ///    const String FILENAME = "CompoundFile.cfs";
+        ///    const string FILENAME = "CompoundFile.cfs";
         ///    CompoundFile cf = new CompoundFile(FILENAME);
         ///
         ///    CFStorage st = cf.RootStorage.GetStorage("MyStorage");
@@ -2530,21 +2375,21 @@ namespace OpenMcdf
         /// </example>
         public void Close()
         {
-            this.Close(true);
+#pragma warning disable CS0618 // Type or member is obsolete
+            Close(true);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
-        private bool closeStream = true;
+        private bool _closeStream = true;
 
         [Obsolete("Use flag LeaveOpen in CompoundFile constructor")]
         public void Close(bool closeStream)
         {
-            this.closeStream = closeStream;
+            _closeStream = closeStream;
             ((IDisposable) this).Dispose();
         }
 
         #region IDisposable Members
-
-        private bool _disposed; //false
 
         void IDisposable.Dispose()
         {
@@ -2554,8 +2399,6 @@ namespace OpenMcdf
 
         #endregion
 
-        private object lockObject = new Object();
-
         /// <summary>
         /// When called from user code, release all resources, otherwise, in the case runtime called it,
         /// only unmanagd resources are released.
@@ -2563,132 +2406,95 @@ namespace OpenMcdf
         /// <param name="disposing">If true, method has been called from User code, if false it's been called from .net runtime</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!IsClosed)
             {
-                lock (lockObject)
+                lock (_lockObject)
                 {
                     if (disposing)
                     {
                         // Call from user code...
 
-                        if (sectors != null)
+                        if (_sectors != null)
                         {
-                            sectors.Clear();
-                            sectors = null;
+                            _sectors.Clear();
+                            _sectors = null;
                         }
 
-                        this.rootStorage = null; // Some problem releasing resources...
-                        this.header = null;
-                        this.directoryEntries.Clear();
-                        this.directoryEntries = null;
-                        this.fileName = null;
+                        RootStorage = null; // Some problem releasing resources...
+                        _header = null;
+                        _directoryEntries.Clear();
+                        _directoryEntries = null;
+                        FileName = null;
                         //this.lockObject = null;
 #if !FLAT_WRITE
                             this.buffer = null;
 #endif
                     }
 
-                    if (this.sourceStream != null && closeStream &&
-                        !configuration.HasFlag(CFSConfiguration.LeaveOpen))
-                        this.sourceStream.Close();
+                    if (SourceStream != null && _closeStream &&
+                        !Configuration.HasFlag(CFSConfiguration.LeaveOpen))
+                        SourceStream.Close();
                 }
             }
 
-            _disposed = true;
+            IsClosed = true;
         }
-
-        internal bool IsClosed
-        {
-            get { return _disposed; }
-        }
-
-        private List<IDirectoryEntry> directoryEntries
-            = new List<IDirectoryEntry>();
 
         internal IList<IDirectoryEntry> GetDirectories()
         {
-            return directoryEntries;
+            return _directoryEntries;
         }
 
-        //internal List<IDirectoryEntry> DirectoryEntries
-        //{
-        //    get { return directoryEntries; }
-        //}
-
-
-        internal IDirectoryEntry RootEntry
+        private IEnumerable<IDirectoryEntry> FindDirectoryEntries(string entryName)
         {
-            get { return directoryEntries[0]; }
+            return _directoryEntries.Where(d => d.GetEntryName() == entryName && d.StgType != StgType.StgInvalid).ToList();
         }
-
-        private IList<IDirectoryEntry> FindDirectoryEntries(String entryName)
-        {
-            List<IDirectoryEntry> result = new List<IDirectoryEntry>();
-
-            foreach (IDirectoryEntry d in directoryEntries)
-            {
-                if (d.GetEntryName() == entryName && d.StgType != StgType.StgInvalid)
-                    result.Add(d);
-            }
-
-            return result;
-        }
-
 
         /// <summary>
         /// Get a list of all entries with a given name contained in the document.
         /// </summary>
-        /// <param name="entryName">Name of entries to retrive</param>
+        /// <param name="entryName">Name of entries to retrieve</param>
         /// <returns>A list of name-matching entries</returns>
         /// <remarks>This function is aimed to speed up entity lookup in 
         /// flat-structure files (only one or little more known entries)
         /// without the performance penalty related to entities hierarchy constraints.
         /// There is no implied hierarchy in the returned list.
         /// </remarks>
-        public IList<CFItem> GetAllNamedEntries(String entryName)
+        public IList<CFItem> GetAllNamedEntries(string entryName)
         {
-            IList<IDirectoryEntry> r = FindDirectoryEntries(entryName);
-            List<CFItem> result = new List<CFItem>();
+            var dirEntries = FindDirectoryEntries(entryName);
 
-            foreach (IDirectoryEntry id in r)
-            {
-                if (id.GetEntryName() == entryName && id.StgType != StgType.StgInvalid)
-                {
-                    CFItem i = id.StgType == StgType.StgStorage
-                        ? (CFItem) new CFStorage(this, id)
-                        : (CFItem) new CFStream(this, id);
-                    result.Add(i);
-                }
-            }
-
-            return result;
+            return (from id in dirEntries
+                    where id.GetEntryName() == entryName && id.StgType != StgType.StgInvalid
+                select id.StgType == StgType.StgStorage
+                    ? new CFStorage(this, id)
+                    : (CFItem) new CFStream(this, id)).ToList();
         }
 
         public int GetNumDirectories()
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot access data");
-            return directoryEntries.Count;
+            return _directoryEntries.Count;
         }
 
         public string GetNameDirEntry(int id)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot access data");
             if (id < 0)
                 throw new CFException("Invalid Storage ID");
-            return directoryEntries[id].Name;
+            return _directoryEntries[id].Name;
         }
 
         public StgType GetStorageType(int id)
         {
-            if (_disposed)
+            if (IsClosed)
                 throw new CFDisposedException("Compound File closed: cannot access data");
             if (id < 0)
                 throw new CFException("Invalid Storage ID");
-            return directoryEntries[id].StgType;
+            return _directoryEntries[id].StgType;
         }
-
 
         /// <summary>
         /// Compress free space by removing unallocated sectors from compound file
@@ -2702,7 +2508,7 @@ namespace OpenMcdf
         /// 
         ///  //This code has been extracted from unit test
         ///  
-        ///    String FILENAME = "MultipleStorage3.cfs";
+        ///    string FILENAME = "MultipleStorage3.cfs";
         ///
         ///    FileInfo srcFile = new FileInfo(FILENAME);
         ///
@@ -2726,37 +2532,40 @@ namespace OpenMcdf
         ///
         /// </code>
         /// </example>
-        public static void ShrinkCompoundFile(Stream s)
+        public static void ShrinkCompoundFile(Stream stream)
         {
-            CompoundFile cf = new CompoundFile(s);
+            var cf = new CompoundFile(stream, CFSUpdateMode.Update, CFSConfiguration.LeaveOpen);
 
-            if (cf.header.MajorVersion != (ushort) CFSVersion.Ver_3)
+            if (cf._header.MajorVersion != (ushort) CFSVersion.Ver_3)
                 throw new CFException(
                     "Current implementation of free space compression does not support version 4 of Compound File Format");
 
-            using (CompoundFile tempCF = new CompoundFile((CFSVersion) cf.header.MajorVersion, cf.Configuration))
+            using (var tempCF = new CompoundFile((CFSVersion) cf._header.MajorVersion, cf.Configuration))
             {
                 //Copy Root CLSID
                 tempCF.RootStorage.CLSID = new Guid(cf.RootStorage.CLSID.ToByteArray());
 
                 DoCompression(cf.RootStorage, tempCF.RootStorage);
 
-                MemoryStream tmpMS = new MemoryStream((int) cf.sourceStream.Length); //This could be a problem for v4
+                //This could be a problem for v4
+                using (var tmpMs = new MemoryStream((int) cf.SourceStream.Length))
+                {
+                    tempCF.Save(tmpMs);
+                    tempCF.Close();
 
-                tempCF.Save(tmpMS);
-                tempCF.Close();
+                    // If we were based on a writable stream, we update
+                    // the stream and do reload from the compressed one...
 
-                // If we were based on a writable stream, we update
-                // the stream and do reload from the compressed one...
+                    stream.Seek(0, SeekOrigin.Begin);
+                    tmpMs.WriteTo(stream);
 
-                s.Seek(0, SeekOrigin.Begin);
-                tmpMS.WriteTo(s);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    stream.SetLength(tmpMs.Length);
 
-                s.Seek(0, SeekOrigin.Begin);
-                s.SetLength(tmpMS.Length);
+                    tmpMs.Close();
+                }
 
-                tmpMS.Close();
-                cf.Close(false);
+                cf.Close();
             }
         }
 
@@ -2771,7 +2580,7 @@ namespace OpenMcdf
         /// 
         ///  //This code has been extracted from unit test
         ///  
-        ///    String FILENAME = "MultipleStorage3.cfs";
+        ///    string FILENAME = "MultipleStorage3.cfs";
         ///
         ///    FileInfo srcFile = new FileInfo(FILENAME);
         ///
@@ -2795,11 +2604,13 @@ namespace OpenMcdf
         ///
         /// </code>
         /// </example>
-        public static void ShrinkCompoundFile(String fileName)
+        public static void ShrinkCompoundFile(string fileName)
         {
-            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite);
-            ShrinkCompoundFile(fs);
-            fs.Close();
+            using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite))
+            {
+                ShrinkCompoundFile(fs);
+                fs.Close();
+            }
         }
 
         /// <summary>
@@ -2809,25 +2620,30 @@ namespace OpenMcdf
         /// <param name="currDstStorage">Current cloned destination storage</param>
         private static void DoCompression(CFStorage currSrcStorage, CFStorage currDstStorage)
         {
-            Action<CFItem> va =
-                delegate(CFItem item)
+            void Va(CFItem item)
+            {
+                if (item.IsStream)
                 {
-                    if (item.IsStream)
-                    {
-                        CFStream itemAsStream = item as CFStream;
-                        CFStream st = ((CFStorage) currDstStorage).AddStream(itemAsStream.Name);
-                        st.SetData(itemAsStream.GetData());
-                    }
-                    else if (item.IsStorage)
-                    {
-                        CFStorage itemAsStorage = item as CFStorage;
-                        CFStorage strg = ((CFStorage) currDstStorage).AddStorage(itemAsStorage.Name);
-                        strg.CLSID = new Guid(itemAsStorage.CLSID.ToByteArray());
-                        DoCompression(itemAsStorage, strg); // recursion, one level deeper
-                    }
-                };
+                    var itemAsStream = item as CFStream;
+                    if (itemAsStream == null)
+                        return;
 
-            currSrcStorage.VisitEntries(va, false);
+                    var st = currDstStorage.AddStream(itemAsStream.Name);
+                    st.SetData(itemAsStream.GetData());
+                }
+                else if (item.IsStorage)
+                {
+                    var itemAsStorage = item as CFStorage;
+                    if (itemAsStorage == null)
+                        return;
+
+                    var strg = currDstStorage.AddStorage(itemAsStorage.Name);
+                    strg.CLSID = new Guid(itemAsStorage.CLSID.ToByteArray());
+                    DoCompression(itemAsStorage, strg); // recursion, one level deeper
+                }
+            }
+
+            currSrcStorage.VisitEntries(Va, false);
         }
     }
 }

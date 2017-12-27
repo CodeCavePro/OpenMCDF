@@ -9,9 +9,9 @@ namespace OpenMcdf.Extensions.OLEProperties
         public uint SystemIdentifier { get; set; }
         public Guid CLSID { get; set; }
         public uint NumPropertySets { get; set; }
-        public Guid FMTID0 { get; set; }
+        public Guid Fmtid0 { get; set; }
         public uint Offset0 { get; set; }
-        public Guid FMTID1 { get; set; }
+        public Guid Fmtid1 { get; set; }
         public uint Offset1 { get; set; }
         public PropertySet PropertySet0 { get; set; }
         public PropertySet PropertySet1 { get; set; }
@@ -23,31 +23,33 @@ namespace OpenMcdf.Extensions.OLEProperties
             SystemIdentifier = br.ReadUInt32();
             CLSID = new Guid(br.ReadBytes(16));
             NumPropertySets = br.ReadUInt32();
-            FMTID0 = new Guid(br.ReadBytes(16));
+            Fmtid0 = new Guid(br.ReadBytes(16));
             Offset0 = br.ReadUInt32();
 
             if (NumPropertySets == 2)
             {
-                FMTID1 = new Guid(br.ReadBytes(16));
+                Fmtid1 = new Guid(br.ReadBytes(16));
                 Offset1 = br.ReadUInt32();
             }
 
-            PropertySet0 = new PropertySet();
-            PropertySet0.Size = br.ReadUInt32();
-            PropertySet0.NumProperties = br.ReadUInt32();
+            PropertySet0 = new PropertySet
+            {
+                Size = br.ReadUInt32(),
+                NumProperties = br.ReadUInt32()
+            };
 
             // Read property offsets
-            for (int i = 0; i < PropertySet0.NumProperties; i++)
+            for (var i = 0; i < PropertySet0.NumProperties; i++)
             {
-                PropertyIdentifierAndOffset pio = new PropertyIdentifierAndOffset();
+                var pio = new PropertyIdentifierAndOffset();
                 pio.PropertyIdentifier = (PropertyIdentifiersSummaryInfo) br.ReadUInt32();
                 pio.Offset = br.ReadUInt32();
                 PropertySet0.PropertyIdentifierAndOffsets.Add(pio);
             }
 
             // Read properties
-            PropertyReader pr = new PropertyReader();
-            for (int i = 0; i < PropertySet0.NumProperties; i++)
+            var pr = new PropertyReader();
+            for (var i = 0; i < PropertySet0.NumProperties; i++)
             {
                 br.BaseStream.Seek(Offset0 + PropertySet0.PropertyIdentifierAndOffsets[i].Offset,
                     System.IO.SeekOrigin.Begin);

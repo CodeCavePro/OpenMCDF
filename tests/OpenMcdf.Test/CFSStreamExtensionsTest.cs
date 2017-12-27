@@ -16,7 +16,7 @@ namespace OpenMcdf.Test
         {
             CompoundFile cf = new CompoundFile("MultipleStorage.cfs");
 
-            Stream s = cf.RootStorage.GetStorage("MyStorage").GetStream("MyStream").AsIOStream();
+            Stream s = cf.RootStorage.GetStorage("MyStorage").GetStream("MyStream").AsIoStream();
             BinaryReader br = new BinaryReader(s);
             byte[] result = br.ReadBytes(32);
             Assert.IsTrue(Helpers.CompareBuffer(Helpers.GetBuffer(32, 1), result));
@@ -28,14 +28,14 @@ namespace OpenMcdf.Test
             const String cmp = "Hello World of BinaryWriter !";
 
             CompoundFile cf = new CompoundFile();
-            Stream s = cf.RootStorage.AddStream("ANewStream").AsIOStream();
+            Stream s = cf.RootStorage.AddStream("ANewStream").AsIoStream();
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write(cmp);
             cf.Save("$ACFFile.cfs");
             cf.Close();
 
             cf = new CompoundFile("$ACFFile.cfs");
-            BinaryReader br = new BinaryReader(cf.RootStorage.GetStream("ANewStream").AsIOStream());
+            BinaryReader br = new BinaryReader(cf.RootStorage.GetStream("ANewStream").AsIoStream());
             String st = br.ReadString();
             Assert.IsTrue(st == cmp);
             cf.Close();

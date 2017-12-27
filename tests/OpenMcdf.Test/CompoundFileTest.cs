@@ -783,9 +783,9 @@ namespace OpenMcdf.Test
         public void Test_PR_13()
         {
             CompoundFile cf = new CompoundFile("report.xls");
-            Guid g = cf.getGuidBySID(0);
+            Guid g = cf.GetGuidBySID(0);
             Assert.IsNotNull(g);
-            g = cf.getGuidForStream(3);
+            g = cf.GetGuidForStream(3);
             Assert.IsNotNull(g);
             Assert.IsTrue(!String.IsNullOrEmpty(cf.GetNameDirEntry(2)));
             Assert.IsTrue(cf.GetNumDirectories() > 0);

@@ -6,14 +6,12 @@
  * 
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
-
 using System;
 using RedBlackTree;
 
-
 namespace OpenMcdf
 {
-    internal interface IDirectoryEntry : IComparable, IRBNode
+    internal interface IDirectoryEntry : IRbNode
     {
         int Child { get; set; }
         byte[] CreationDate { get; set; }

@@ -1,114 +1,112 @@
-using System;
-
 namespace OpenMcdf.Extensions.OLEProperties
 {
     public enum PropertyIdentifiersSummaryInfo : uint
     {
         CodePageString = 0x00000001,
-        PIDSI_TITLE = 0x00000002,
-        PIDSI_SUBJECT = 0x00000003,
-        PIDSI_AUTHOR = 0x00000004,
-        PIDSI_KEYWORDS = 0x00000005,
-        PIDSI_COMMENTS = 0x00000006,
-        PIDSI_TEMPLATE = 0x00000007,
-        PIDSI_LASTAUTHOR = 0x00000008,
-        PIDSI_REVNUMBER = 0x00000009,
-        PIDSI_APPNAME = 0x00000012,
-        PIDSI_EDITTIME = 0x0000000A,
-        PIDSI_LASTPRINTED = 0x0000000B,
-        PIDSI_CREATE_DTM = 0x0000000C,
-        PIDSI_LASTSAVE_DTM = 0x0000000D,
-        PIDSI_PAGECOUNT = 0x0000000E,
-        PIDSI_WORDCOUNT = 0x0000000F,
-        PIDSI_CHARCOUNT = 0x00000010,
-        PIDSI_DOC_SECURITY = 0x00000013
+        PidsiTitle = 0x00000002,
+        PidsiSubject = 0x00000003,
+        PidsiAuthor = 0x00000004,
+        PidsiKeywords = 0x00000005,
+        PidsiComments = 0x00000006,
+        PidsiTemplate = 0x00000007,
+        PidsiLastauthor = 0x00000008,
+        PidsiRevnumber = 0x00000009,
+        PidsiAppname = 0x00000012,
+        PidsiEdittime = 0x0000000A,
+        PidsiLastprinted = 0x0000000B,
+        PidsiCreateDtm = 0x0000000C,
+        PidsiLastsaveDtm = 0x0000000D,
+        PidsiPagecount = 0x0000000E,
+        PidsiWordcount = 0x0000000F,
+        PidsiCharcount = 0x00000010,
+        PidsiDocSecurity = 0x00000013
     }
 
     public enum PropertyIdentifiersDocumentSummaryInfo : uint
     {
         CodePageString = 0x00000001,
-        PIDDSI_CATEGORY = 0x00000002, //Category VT_LPSTR
-        PIDDSI_PRESFORMAT = 0x00000003, //PresentationTarget	VT_LPSTR
-        PIDDSI_BYTECOUNT = 0x00000004, //Bytes   	VT_I4
-        PIDDSI_LINECOUNT = 0x00000005, // Lines   	VT_I4
-        PIDDSI_PARCOUNT = 0x00000006, // Paragraphs 	VT_I4
-        PIDDSI_SLIDECOUNT = 0x00000007, // Slides 	VT_I4
-        PIDDSI_NOTECOUNT = 0x00000008, // Notes  	VT_I4
-        PIDDSI_HIDDENCOUNT = 0x00000009, // HiddenSlides   	VT_I4
-        PIDDSI_MMCLIPCOUNT = 0x0000000A, // MMClips	VT_I4
-        PIDDSI_SCALE = 0x0000000B, //ScaleCrop  VT_BOOL
-        PIDDSI_HEADINGPAIR = 0x0000000C, // HeadingPairs VT_VARIANT | VT_VECTOR
-        PIDDSI_DOCPARTS = 0x0000000D, //TitlesofParts   	VT_VECTOR | VT_LPSTR
-        PIDDSI_MANAGER = 0x0000000E, //	  Manager VT_LPSTR
-        PIDDSI_COMPANY = 0x0000000F, // Company	VT_LPSTR
-        PIDDSI_LINKSDIRTY = 0x00000010, //LinksUpToDate   	VT_BOOL
+        PiddsiCategory = 0x00000002, //Category VT_LPSTR
+        PiddsiPresformat = 0x00000003, //PresentationTarget	VT_LPSTR
+        PiddsiBytecount = 0x00000004, //Bytes   	VT_I4
+        PiddsiLinecount = 0x00000005, // Lines   	VT_I4
+        PiddsiParcount = 0x00000006, // Paragraphs 	VT_I4
+        PiddsiSlidecount = 0x00000007, // Slides 	VT_I4
+        PiddsiNotecount = 0x00000008, // Notes  	VT_I4
+        PiddsiHiddencount = 0x00000009, // HiddenSlides   	VT_I4
+        PiddsiMmclipcount = 0x0000000A, // MMClips	VT_I4
+        PiddsiScale = 0x0000000B, //ScaleCrop  VT_BOOL
+        PiddsiHeadingpair = 0x0000000C, // HeadingPairs VT_VARIANT | VT_VECTOR
+        PiddsiDocparts = 0x0000000D, //TitlesofParts   	VT_VECTOR | VT_LPSTR
+        PiddsiManager = 0x0000000E, //	  Manager VT_LPSTR
+        PiddsiCompany = 0x0000000F, // Company	VT_LPSTR
+        PiddsiLinksdirty = 0x00000010, //LinksUpToDate   	VT_BOOL
     }
 
     public static class Extensions
     {
-        public static String GetDescription(this PropertyIdentifiersSummaryInfo identifier)
+        public static string GetDescription(this PropertyIdentifiersSummaryInfo identifier)
         {
             switch (identifier)
             {
                 case PropertyIdentifiersSummaryInfo.CodePageString:
                     return "CodePage";
-                case PropertyIdentifiersSummaryInfo.PIDSI_TITLE:
+                case PropertyIdentifiersSummaryInfo.PidsiTitle:
                     return "Title";
-                case PropertyIdentifiersSummaryInfo.PIDSI_SUBJECT:
+                case PropertyIdentifiersSummaryInfo.PidsiSubject:
                     return "Subject";
-                case PropertyIdentifiersSummaryInfo.PIDSI_AUTHOR:
+                case PropertyIdentifiersSummaryInfo.PidsiAuthor:
                     return "Author";
-                case PropertyIdentifiersSummaryInfo.PIDSI_LASTAUTHOR:
+                case PropertyIdentifiersSummaryInfo.PidsiLastauthor:
                     return "Last Author";
-                case PropertyIdentifiersSummaryInfo.PIDSI_APPNAME:
+                case PropertyIdentifiersSummaryInfo.PidsiAppname:
                     return "Application Name";
-                case PropertyIdentifiersSummaryInfo.PIDSI_CREATE_DTM:
+                case PropertyIdentifiersSummaryInfo.PidsiCreateDtm:
                     return "Create Time";
-                case PropertyIdentifiersSummaryInfo.PIDSI_LASTSAVE_DTM:
+                case PropertyIdentifiersSummaryInfo.PidsiLastsaveDtm:
                     return "Last Modified Time";
-                case PropertyIdentifiersSummaryInfo.PIDSI_KEYWORDS:
+                case PropertyIdentifiersSummaryInfo.PidsiKeywords:
                     return "Keywords";
-                case PropertyIdentifiersSummaryInfo.PIDSI_DOC_SECURITY:
+                case PropertyIdentifiersSummaryInfo.PidsiDocSecurity:
                     return "Document Security";
-                default: return String.Empty;
+                default: return string.Empty;
             }
         }
 
-        public static String GetDescription(this PropertyIdentifiersDocumentSummaryInfo identifier)
+        public static string GetDescription(this PropertyIdentifiersDocumentSummaryInfo identifier)
         {
             switch (identifier)
             {
                 case PropertyIdentifiersDocumentSummaryInfo.CodePageString:
                     return "CodePage";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_CATEGORY:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiCategory:
                     return "Category";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_COMPANY:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiCompany:
                     return "Company";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_DOCPARTS:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiDocparts:
                     return "Titles of Parts";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_HEADINGPAIR:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiHeadingpair:
                     return "Heading Pairs";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_HIDDENCOUNT:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiHiddencount:
                     return "Hidden Slides";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_LINECOUNT:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiLinecount:
                     return "Line Count";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_LINKSDIRTY:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiLinksdirty:
                     return "Links up to date";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_MANAGER:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiManager:
                     return "Manager";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_MMCLIPCOUNT:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiMmclipcount:
                     return "MMClips";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_NOTECOUNT:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiNotecount:
                     return "Notes";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_PARCOUNT:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiParcount:
                     return "Paragraphs";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_PRESFORMAT:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiPresformat:
                     return "Presenteation Target";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_SCALE:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiScale:
                     return "Scale";
-                case PropertyIdentifiersDocumentSummaryInfo.PIDDSI_SLIDECOUNT:
+                case PropertyIdentifiersDocumentSummaryInfo.PiddsiSlidecount:
                     return "Slides";
-                default: return String.Empty;
+                default: return string.Empty;
             }
         }
     }

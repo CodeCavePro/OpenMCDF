@@ -7,43 +7,31 @@ namespace OpenMcdf.Extensions
     {
         private class StreamDecorator : Stream
         {
-            private CFStream cfStream;
-            private long position = 0;
+            private CFStream _cfStream;
+            private long _position;
 
             public StreamDecorator(CFStream cfstream)
             {
-                this.cfStream = cfstream;
+                _cfStream = cfstream;
             }
 
-            public override bool CanRead
-            {
-                get { return true; }
-            }
+            public override bool CanRead => true;
 
-            public override bool CanSeek
-            {
-                get { return true; }
-            }
+            public override bool CanSeek => true;
 
-            public override bool CanWrite
-            {
-                get { return true; }
-            }
+            public override bool CanWrite => true;
 
             public override void Flush()
             {
                 // nothing to do;
             }
 
-            public override long Length
-            {
-                get { return cfStream.Size; }
-            }
+            public override long Length => _cfStream.Size;
 
             public override long Position
             {
-                get { return position; }
-                set { position = value; }
+                get => _position;
+                set => _position = value;
             }
 
             public override int Read(byte[] buffer, int offset, int count)
@@ -57,11 +45,11 @@ namespace OpenMcdf.Extensions
                 if (offset < 0 || count < 0)
                     throw new ArgumentOutOfRangeException("Offset and Count parameters must be non-negative numbers");
 
-                if (position >= cfStream.Size)
+                if (_position >= _cfStream.Size)
                     return 0;
 
-                count = this.cfStream.Read(buffer, position, offset, count);
-                position += count;
+                count = _cfStream.Read(buffer, _position, offset, count);
+                _position += count;
                 return count;
             }
 
@@ -70,30 +58,30 @@ namespace OpenMcdf.Extensions
                 switch (origin)
                 {
                     case SeekOrigin.Begin:
-                        position = offset;
+                        _position = offset;
                         break;
                     case SeekOrigin.Current:
-                        position += offset;
+                        _position += offset;
                         break;
                     case SeekOrigin.End:
-                        position -= offset;
+                        _position -= offset;
                         break;
                     default:
                         throw new Exception("Invalid origin selected");
                 }
 
-                return position;
+                return _position;
             }
 
             public override void SetLength(long value)
             {
-                this.cfStream.Resize(value);
+                _cfStream.Resize(value);
             }
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                this.cfStream.Write(buffer, position, offset, count);
-                position += count;
+                _cfStream.Write(buffer, _position, offset, count);
+                _position += count;
             }
 
 #if !NETSTANDARD1_6 && !NETSTANDARD2_0
@@ -110,7 +98,7 @@ namespace OpenMcdf.Extensions
         /// </summary>
         /// <param name="cfStream">Current <see cref="T:OpenMcdf.CFStream">CFStream</see> object</param>
         /// <returns>A <see cref="T:System.IO.Stream">Stream</see> object representing structured stream data</returns>
-        public static Stream AsIOStream(this CFStream cfStream)
+        public static Stream AsIoStream(this CFStream cfStream)
         {
             return new StreamDecorator(cfStream);
         }
@@ -121,7 +109,7 @@ namespace OpenMcdf.Extensions
         /// </summary>
         /// <param name="cfStream"></param>
         /// <returns>A <see cref="T:OpenMcdf.Extensions.OLEProperties.PropertySetStream">OLE Propertie stream</see></returns>
-        public static OLEProperties.PropertySetStream AsOLEProperties(this CFStream cfStream)
+        public static OLEProperties.PropertySetStream AsOleProperties(this CFStream cfStream)
         {
             var result = new OLEProperties.PropertySetStream();
             result.Read(new BinaryReader(new StreamDecorator(cfStream)));

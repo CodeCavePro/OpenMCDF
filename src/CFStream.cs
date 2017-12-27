@@ -6,7 +6,6 @@
  * 
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
-using System;
 using System.IO;
 
 namespace OpenMcdf
@@ -24,7 +23,7 @@ namespace OpenMcdf
             if (dirEntry == null || dirEntry.SID < 0)
                 throw new CFException("Attempting to add a CFStream using an uninitialized directory");
 
-            this.DirEntry = dirEntry;
+            DirEntry = dirEntry;
         }
 
         /// <summary>
@@ -40,12 +39,12 @@ namespace OpenMcdf
         /// </example>
         /// <param name="data">Data bytes to write to this stream</param>
         /// <remarks>Existing associated data will be lost after method invocation</remarks>
-        public void SetData(Byte[] data)
+        public void SetData(byte[] data)
         {
             CheckDisposed();
 
-            this.CompoundFile.FreeData(this);
-            this.CompoundFile.WriteData(this, data);
+            CompoundFile.FreeData(this);
+            CompoundFile.WriteData(this, data);
         }
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace OpenMcdf
         /// its current size</remarks>
         public void Write(byte[] data, long position)
         {
-            this.Write(data, position, 0, data.Length);
+            Write(data, position, 0, data.Length);
         }
 
         /// <summary>
@@ -74,7 +73,7 @@ namespace OpenMcdf
         internal void Write(byte[] data, long position, int offset, int count)
         {
             CheckDisposed();
-            this.CompoundFile.WriteData(this, data, position, offset, count);
+            CompoundFile.WriteData(this, data, position, offset, count);
         }
 
         /// <summary>
@@ -100,16 +99,16 @@ namespace OpenMcdf
         /// Append data can also be invoked on streams with no data in order
         /// to simplify its use inside loops.
         /// </remarks>
-        public void Append(Byte[] data)
+        public void Append(byte[] data)
         {
             CheckDisposed();
-            if (this.Size > 0)
+            if (Size > 0)
             {
-                this.CompoundFile.AppendData(this, data);
+                CompoundFile.AppendData(this, data);
             }
             else
             {
-                this.CompoundFile.WriteData(this, data);
+                CompoundFile.WriteData(this, data);
             }
         }
 
@@ -127,16 +126,15 @@ namespace OpenMcdf
         /// <exception cref="T:OpenMcdf.CFDisposedException">
         /// Raised when the owner compound file has been closed.
         /// </exception>
-        public Byte[] GetData()
+        public byte[] GetData()
         {
             CheckDisposed();
 
-            return this.CompoundFile.GetData(this);
+            return CompoundFile.GetData(this);
         }
 
         /// <summary>
         /// Read <paramref name="count"/> bytes associated with the stream object, starting from
-        /// a provided <paramref name="offset"/>. Method returns the effective count of bytes 
         /// read.
         /// </summary>
         /// <param name="buffer">Array of bytes that will contain stream data</param>
@@ -157,14 +155,14 @@ namespace OpenMcdf
         ///  item.Read(buffer, 0, 2048);
         ///  Assert.IsTrue(Helpers.CompareBuffer(b, buffer));
         /// </code>
-        /// </example>
+        /// 
         /// <exception cref="T:OpenMcdf.CFDisposedException">
         /// Raised when the owner compound file has been closed.
         /// </exception>
         public int Read(byte[] buffer, long position, int count)
         {
             CheckDisposed();
-            return this.CompoundFile.ReadData(this, position, buffer, 0, count);
+            return CompoundFile.ReadData(this, position, buffer, 0, count);
         }
 
         /// <summary>
@@ -191,14 +189,14 @@ namespace OpenMcdf
         ///  item.Read(buffer, 0, 2048);
         ///  Assert.IsTrue(Helpers.CompareBuffer(b, buffer));
         /// </code>
-        /// </example>
+        ///
         /// <exception cref="T:OpenMcdf.CFDisposedException">
         /// Raised when the owner compound file has been closed.
         /// </exception>
         internal int Read(byte[] buffer, long position, int offset, int count)
         {
             CheckDisposed();
-            return this.CompoundFile.ReadData(this, position, buffer, offset, count);
+            return CompoundFile.ReadData(this, position, buffer, offset, count);
         }
 
 
@@ -214,7 +212,7 @@ namespace OpenMcdf
         {
             CheckDisposed();
 
-            byte[] buffer = new byte[input.Length];
+            var buffer = new byte[input.Length];
 
             if (input.CanSeek)
             {
@@ -222,7 +220,7 @@ namespace OpenMcdf
             }
 
             input.Read(buffer, 0, (int) input.Length);
-            this.SetData(buffer);
+            SetData(buffer);
         }
 
         /// <summary>
@@ -231,7 +229,7 @@ namespace OpenMcdf
         /// <param name="length">New length to assign to this stream</param>
         public void Resize(long length)
         {
-            this.CompoundFile.SetStreamLength(this, length);
+            CompoundFile.SetStreamLength(this, length);
         }
     }
 }

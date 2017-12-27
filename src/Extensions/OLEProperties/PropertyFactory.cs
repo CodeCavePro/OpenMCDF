@@ -7,49 +7,38 @@ namespace OpenMcdf.Extensions.OLEProperties
 {
     internal class PropertyFactory
     {
-        private PropertyContext ctx;
-
-        public PropertyFactory(PropertyContext ctx)
+        public ITypedPropertyValue NewProperty(VtPropertyType vType, PropertyContext ctx)
         {
-            this.ctx = ctx;
-        }
-
-        private PropertyFactory()
-        {
-        }
-
-        public ITypedPropertyValue NewProperty(VTPropertyType vType, PropertyContext ctx)
-        {
-            ITypedPropertyValue pr = null;
+            ITypedPropertyValue pr;
 
             switch (vType)
             {
-                case VTPropertyType.VT_I2:
-                    pr = new VT_I2_Property(vType);
+                case VtPropertyType.VtI2:
+                    pr = new VtI2Property(vType);
                     break;
-                case VTPropertyType.VT_I4:
-                    pr = new VT_I4_Property(vType);
+                case VtPropertyType.VtI4:
+                    pr = new VtI4Property(vType);
                     break;
-                case VTPropertyType.VT_R4:
-                    pr = new VT_R4_Property(vType);
+                case VtPropertyType.VtR4:
+                    pr = new VtR4Property(vType);
                     break;
-                case VTPropertyType.VT_LPSTR:
-                    pr = new VT_LPSTR_Property(vType, ctx.CodePage);
+                case VtPropertyType.VtLpstr:
+                    pr = new VtLpstrProperty(vType, ctx.CodePage);
                     break;
-                case VTPropertyType.VT_FILETIME:
-                    pr = new VT_FILETIME_Property(vType);
+                case VtPropertyType.VtFiletime:
+                    pr = new VtFiletimeProperty(vType);
                     break;
-                case VTPropertyType.VT_DECIMAL:
-                    pr = new VT_DECIMAL_Property(vType);
+                case VtPropertyType.VtDecimal:
+                    pr = new VtDecimalProperty(vType);
                     break;
-                case VTPropertyType.VT_BOOL:
-                    pr = new VT_BOOL_Property(vType);
+                case VtPropertyType.VtBool:
+                    pr = new VtBoolProperty(vType);
                     break;
-                case VTPropertyType.VT_VECTOR_HEADER:
-                    pr = new VT_VectorHeader(vType);
+                case VtPropertyType.VtVectorHeader:
+                    pr = new VtVectorHeader(vType);
                     break;
-                case VTPropertyType.VT_EMPTY:
-                    pr = new VT_EMPTY_Property(vType);
+                case VtPropertyType.VtEmpty:
+                    pr = new VtEmptyProperty(vType);
                     break;
                 default:
                     throw new Exception("Unrecognized property type");
@@ -61,9 +50,9 @@ namespace OpenMcdf.Extensions.OLEProperties
 
         #region Property implementations
 
-        private class VT_EMPTY_Property : TypedPropertyValue
+        internal class VtEmptyProperty : TypedPropertyValue
         {
-            public VT_EMPTY_Property(VTPropertyType vType) : base(vType)
+            public VtEmptyProperty(VtPropertyType vType) : base(vType)
             {
             }
 
@@ -77,9 +66,9 @@ namespace OpenMcdf.Extensions.OLEProperties
             }
         }
 
-        private class VT_I2_Property : TypedPropertyValue
+        internal class VtI2Property : TypedPropertyValue
         {
-            public VT_I2_Property(VTPropertyType vType) : base(vType)
+            public VtI2Property(VtPropertyType vType) : base(vType)
             {
             }
 
@@ -94,9 +83,9 @@ namespace OpenMcdf.Extensions.OLEProperties
             }
         }
 
-        private class VT_I4_Property : TypedPropertyValue
+        internal class VtI4Property : TypedPropertyValue
         {
-            public VT_I4_Property(VTPropertyType vType) : base(vType)
+            public VtI4Property(VtPropertyType vType) : base(vType)
             {
             }
 
@@ -111,9 +100,9 @@ namespace OpenMcdf.Extensions.OLEProperties
             }
         }
 
-        private class VT_R4_Property : TypedPropertyValue
+        internal class VtR4Property : TypedPropertyValue
         {
-            public VT_R4_Property(VTPropertyType vType) : base(vType)
+            public VtR4Property(VtPropertyType vType) : base(vType)
             {
             }
 
@@ -124,13 +113,13 @@ namespace OpenMcdf.Extensions.OLEProperties
 
             public override void Write(BinaryWriter bw)
             {
-                bw.Write((Single) propertyValue);
+                bw.Write((float) propertyValue);
             }
         }
 
-        private class VT_R8_Property : TypedPropertyValue
+        internal class VtR8Property : TypedPropertyValue
         {
-            public VT_R8_Property(VTPropertyType vType) : base(vType)
+            public VtR8Property(VtPropertyType vType) : base(vType)
             {
             }
 
@@ -141,38 +130,36 @@ namespace OpenMcdf.Extensions.OLEProperties
 
             public override void Write(BinaryWriter bw)
             {
-                bw.Write((Double) propertyValue);
+                bw.Write((double) propertyValue);
             }
         }
 
-        private class VT_CY_Property : TypedPropertyValue
+        internal class VtCyProperty : TypedPropertyValue
         {
-            public VT_CY_Property(VTPropertyType vType) : base(vType)
+            public VtCyProperty(VtPropertyType vType) : base(vType)
             {
             }
 
             public override void Read(BinaryReader br)
             {
-                Int64 temp = br.ReadInt64();
-
-                propertyValue = (double) (temp /= 10000);
+                propertyValue = br.ReadInt64() / 10000;
             }
 
             public override void Write(BinaryWriter bw)
             {
-                bw.Write((Int64) propertyValue * 10000);
+                bw.Write((long) propertyValue * 10000);
             }
         }
 
-        private class VT_DATE_Property : TypedPropertyValue
+        internal class VtDateProperty : TypedPropertyValue
         {
-            public VT_DATE_Property(VTPropertyType vType) : base(vType)
+            public VtDateProperty(VtPropertyType vType) : base(vType)
             {
             }
 
             public override void Read(BinaryReader br)
             {
-                Double temp = br.ReadDouble();
+                var temp = br.ReadDouble();
 
 #if NETSTANDARD1_6
                 propertyValue = DateTimeExtensions.FromOADate(temp);
@@ -187,46 +174,46 @@ namespace OpenMcdf.Extensions.OLEProperties
             }
         }
 
-        private class VT_LPSTR_Property : TypedPropertyValue
+        internal class VtLpstrProperty : TypedPropertyValue
         {
-            private uint size = 0;
-            private byte[] data;
-            private int codePage;
+            private uint _size;
+            private byte[] _data;
+            private readonly int _codePage;
 
-            public VT_LPSTR_Property(VTPropertyType vType, int codePage) : base(vType)
+            public VtLpstrProperty(VtPropertyType vType, int codePage) : base(vType)
             {
-                codePage = codePage;
+                _codePage = codePage;
             }
 
             public override void Read(BinaryReader br)
             {
-                size = br.ReadUInt32();
-                data = br.ReadBytes((int) size);
-                propertyValue = Encoding.GetEncoding(codePage).GetString(data);
-                int m = (int) size % 4;
+                _size = br.ReadUInt32();
+                _data = br.ReadBytes((int) _size);
+                propertyValue = Encoding.GetEncoding(_codePage).GetString(_data);
+                var m = (int) _size % 4;
                 br.ReadBytes(m); // padding
             }
 
             public override void Write(BinaryWriter bw)
             {
-                data = Encoding.GetEncoding(codePage).GetBytes((String) propertyValue);
-                size = (uint) data.Length;
-                int m = (int) size % 4;
-                bw.Write(data);
-                for (int i = 0; i < m; i++) // padding
+                _data = Encoding.GetEncoding(_codePage).GetBytes((string) propertyValue);
+                _size = (uint) _data.Length;
+                var m = (int) _size % 4;
+                bw.Write(_data);
+                for (var i = 0; i < m; i++) // padding
                     bw.Write(0);
             }
         }
 
-        private class VT_FILETIME_Property : TypedPropertyValue
+        internal class VtFiletimeProperty : TypedPropertyValue
         {
-            public VT_FILETIME_Property(VTPropertyType vType) : base(vType)
+            public VtFiletimeProperty(VtPropertyType vType) : base(vType)
             {
             }
 
             public override void Read(BinaryReader br)
             {
-                Int64 tmp = br.ReadInt64();
+                var tmp = br.ReadInt64();
                 propertyValue = DateTime.FromFileTime(tmp);
             }
 
@@ -236,21 +223,21 @@ namespace OpenMcdf.Extensions.OLEProperties
             }
         }
 
-        private class VT_DECIMAL_Property : TypedPropertyValue
+        internal class VtDecimalProperty : TypedPropertyValue
         {
-            public VT_DECIMAL_Property(VTPropertyType vType) : base(vType)
+            public VtDecimalProperty(VtPropertyType vType) : base(vType)
             {
             }
 
             public override void Read(BinaryReader br)
             {
-                Decimal d;
+                decimal d;
 
                 br.ReadInt16(); // wReserved
-                byte scale = br.ReadByte();
-                byte sign = br.ReadByte();
+                var scale = br.ReadByte();
+                var sign = br.ReadByte();
 
-                uint u = br.ReadUInt32();
+                var u = br.ReadUInt32();
                 d = Convert.ToDecimal(Math.Pow(2, 64)) * u;
                 d += br.ReadUInt64();
 
@@ -267,22 +254,22 @@ namespace OpenMcdf.Extensions.OLEProperties
             }
         }
 
-        private class VT_BOOL_Property : TypedPropertyValue
+        internal class VtBoolProperty : TypedPropertyValue
         {
-            public VT_BOOL_Property(VTPropertyType vType) : base(vType)
+            public VtBoolProperty(VtPropertyType vType) : base(vType)
             {
             }
 
             public override void Read(BinaryReader br)
             {
-                propertyValue = br.ReadUInt16() == (ushort) 0xFFFF ? true : false;
+                propertyValue = br.ReadUInt16() == 0xFFFF;
                 //br.ReadUInt16();//padding
             }
         }
 
-        private class VT_VectorHeader : TypedPropertyValue
+        internal class VtVectorHeader : TypedPropertyValue
         {
-            public VT_VectorHeader(VTPropertyType vType) : base(vType)
+            public VtVectorHeader(VtPropertyType vType) : base(vType)
             {
             }
 

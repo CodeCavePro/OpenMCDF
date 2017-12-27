@@ -1,48 +1,48 @@
 namespace OpenMcdf.Extensions.OLEProperties
 {
-    public enum VTPropertyType : ushort
+    public enum VtPropertyType : ushort
     {
-        VT_EMPTY = 0x0000,
-        VT_NULL = 0x0001,
-        VT_I2 = 0x0002,
-        VT_I4 = 0x0003,
-        VT_R4 = 0x0004,
-        VT_R8 = 0x0005,
-        VT_CY = 0x0006,
-        VT_DATE = 0x0007,
-        VT_BSTR = 0x0008,
-        VT_ERROR = 0x000A,
-        VT_BOOL = 0x000B,
-        VT_DECIMAL = 0x000E,
-        VT_I1 = 0x0010,
-        VT_UI1 = 0x0011,
-        VT_UI2 = 0x0012,
-        VT_UI4 = 0x0013,
-        VT_I8 = 0x0014, // MUST be an 8-byte signed integer. 
-        VT_UI8 = 0x0015, // MUST be an 8-byte unsigned integer. 
-        VT_INT = 0x0016, // MUST be a 4-byte signed integer. 
-        VT_UINT = 0x0017, // MUST be a 4-byte unsigned integer. 
-        VT_LPSTR = 0x001E, // MUST be a CodePageString. 
-        VT_LPWSTR = 0x001F, // MUST be a UnicodeString. 
-        VT_FILETIME = 0x0040, // MUST be a FILETIME (Packet Version). 
-        VT_BLOB = 0x0041, // MUST be a BLOB. 
+        VtEmpty = 0x0000,
+        VtNull = 0x0001,
+        VtI2 = 0x0002,
+        VtI4 = 0x0003,
+        VtR4 = 0x0004,
+        VtR8 = 0x0005,
+        VtCy = 0x0006,
+        VtDate = 0x0007,
+        VtBstr = 0x0008,
+        VtError = 0x000A,
+        VtBool = 0x000B,
+        VtDecimal = 0x000E,
+        VtI1 = 0x0010,
+        VtUi1 = 0x0011,
+        VtUi2 = 0x0012,
+        VtUi4 = 0x0013,
+        VtI8 = 0x0014, // MUST be an 8-byte signed integer. 
+        VtUi8 = 0x0015, // MUST be an 8-byte unsigned integer. 
+        VtInt = 0x0016, // MUST be a 4-byte signed integer. 
+        VtUint = 0x0017, // MUST be a 4-byte unsigned integer. 
+        VtLpstr = 0x001E, // MUST be a CodePageString. 
+        VtLpwstr = 0x001F, // MUST be a UnicodeString. 
+        VtFiletime = 0x0040, // MUST be a FILETIME (Packet Version). 
+        VtBlob = 0x0041, // MUST be a BLOB. 
 
-        VT_STREAM =
+        VtStream =
             0x0042, // MUST be an IndirectPropertyName. The storage representing the (non-simple) property set MUST have a stream element with this name. 
 
-        VT_STORAGE =
+        VtStorage =
             0x0043, // MUST be an IndirectPropertyName. The storage representing the (non-simple) property set MUST have a storage element with this name. 
 
-        VT_STREAMED_OBJECT =
+        VtStreamedObject =
             0x0044, // MUST be an IndirectPropertyName. The storage representing the (non-simple) property set MUST have a stream element with this name. 
 
-        VT_STORED_OBJECT =
+        VtStoredObject =
             0x0045, // MUST be an IndirectPropertyName. The storage representing the (non-simple) property set MUST have a storage element with this name. 
-        VT_BLOB_OBJECT = 0x0046, //MUST be a BLOB. 
-        VT_CF = 0x0047, //MUST be a ClipboardData. 
-        VT_CLSID = 0x0048, //MUST be a GUID (Packet Version)
-        VT_VERSIONED_STREAM = 0x0049, //MUST be a Verisoned Stream, NOT allowed in simple property
-        VT_VECTOR_HEADER = 0x1000, //--- NOT NORMATIVE
-        VT_ARRAY_HEADER = 0x2000, //--- NOT NORMATIVE
+        VtBlobObject = 0x0046, //MUST be a BLOB. 
+        VtCF = 0x0047, //MUST be a ClipboardData. 
+        VtCLSID = 0x0048, //MUST be a GUID (Packet Version)
+        VtVersionedStream = 0x0049, //MUST be a Versioned Stream, NOT allowed in simple property
+        VtVectorHeader = 0x1000, //--- NOT NORMATIVE
+        VtArrayHeader = 0x2000, //--- NOT NORMATIVE
     }
 }
