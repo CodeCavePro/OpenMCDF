@@ -559,10 +559,8 @@ namespace OpenMcdf.Test
 
             //##############
 
-            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs",
-                CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle))
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle | CFSConfiguration.LeaveOpen))
             {
-
                 var myStream = cf.RootStorage.GetStream("C");
                 var data = myStream.GetData();
                 Console.WriteLine(data[0] + " : " + data[data.Length - 1]);

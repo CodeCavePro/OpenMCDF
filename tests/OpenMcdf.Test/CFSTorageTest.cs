@@ -310,7 +310,7 @@ namespace OpenMcdf.Test
                 cf.Close();
             }
 
-            using (var cf = new CompoundFile("$Hel1"))
+            using (var cf = new CompoundFile("$Hel1", CFSUpdateMode.ReadOnly, CFSConfiguration.Default))
             {
                 IList<CFItem> i = cf.GetAllNamedEntries("Level2Stream");
                 Assert.IsNotNull(i[0]);
