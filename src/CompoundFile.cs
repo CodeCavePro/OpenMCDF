@@ -2563,43 +2563,38 @@ namespace OpenMcdf
         /// <param name="disposing">If true, method has been called from User code, if false it's been called from .net runtime</param>
         protected virtual void Dispose(bool disposing)
         {
-            try
+            if (!_disposed)
             {
-                if (!_disposed)
+                lock (lockObject)
                 {
-                    lock (lockObject)
+                    if (disposing)
                     {
-                        if (disposing)
+                        // Call from user code...
+
+                        if (sectors != null)
                         {
-                            // Call from user code...
+                            sectors.Clear();
+                            sectors = null;
+                        }
 
-                            if (sectors != null)
-                            {
-                                sectors.Clear();
-                                sectors = null;
-                            }
-
-                            this.rootStorage = null; // Some problem releasing resources...
-                            this.header = null;
-                            this.directoryEntries.Clear();
-                            this.directoryEntries = null;
-                            this.fileName = null;
-                            //this.lockObject = null;
+                        this.rootStorage = null; // Some problem releasing resources...
+                        this.header = null;
+                        this.directoryEntries.Clear();
+                        this.directoryEntries = null;
+                        this.fileName = null;
+                        //this.lockObject = null;
 #if !FLAT_WRITE
                             this.buffer = null;
 #endif
-                        }
-
-                        if (this.sourceStream != null && closeStream &&
-                            !configuration.HasFlag(CFSConfiguration.LeaveOpen))
-                            this.sourceStream.Close();
                     }
+
+                    if (this.sourceStream != null && closeStream &&
+                        !configuration.HasFlag(CFSConfiguration.LeaveOpen))
+                        this.sourceStream.Close();
                 }
             }
-            finally
-            {
-                _disposed = true;
-            }
+
+            _disposed = true;
         }
 
         internal bool IsClosed
