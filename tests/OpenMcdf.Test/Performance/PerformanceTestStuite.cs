@@ -6,7 +6,7 @@ using NBench.Sdk;
 using NBench.Sdk.Compiler;
 using NUnit.Framework;
 
-namespace OpenMcdf.PerfTest
+namespace OpenMcdf.Test.Performance
 {
     public abstract class PerformanceTestStuite<T>
     {

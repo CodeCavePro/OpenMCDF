@@ -2,11 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using NBench;
-using HelpersFromTests = OpenMcdf.Test.Helpers;
 
-// This project is used for profiling memory and performances of OpenMCDF.
-
-namespace OpenMcdf.PerfTest
+namespace OpenMcdf.Test.Performance
 {
     public class MemoryTest : PerformanceTestStuite<MemoryTest>
     {
@@ -28,16 +25,16 @@ namespace OpenMcdf.PerfTest
         {
             const int N_FACTOR = 1000;
 
-            byte[] bA = HelpersFromTests.GetBuffer(20 * 1024 * N_FACTOR, 0x0A);
-            byte[] bB = HelpersFromTests.GetBuffer(5 * 1024, 0x0B);
-            byte[] bC = HelpersFromTests.GetBuffer(5 * 1024, 0x0C);
-            byte[] bD = HelpersFromTests.GetBuffer(5 * 1024, 0x0D);
-            byte[] bE = HelpersFromTests.GetBuffer(8 * 1024 * N_FACTOR + 1, 0x1A);
-            byte[] bF = HelpersFromTests.GetBuffer(16 * 1024 * N_FACTOR, 0x1B);
-            byte[] bG = HelpersFromTests.GetBuffer(14 * 1024 * N_FACTOR, 0x1C);
-            byte[] bH = HelpersFromTests.GetBuffer(12 * 1024 * N_FACTOR, 0x1D);
-            byte[] bE2 = HelpersFromTests.GetBuffer(8 * 1024 * N_FACTOR, 0x2A);
-            byte[] bMini = HelpersFromTests.GetBuffer(1027, 0xEE);
+            byte[] bA = Helpers.GetBuffer(20 * 1024 * N_FACTOR, 0x0A);
+            byte[] bB = Helpers.GetBuffer(5 * 1024, 0x0B);
+            byte[] bC = Helpers.GetBuffer(5 * 1024, 0x0C);
+            byte[] bD = Helpers.GetBuffer(5 * 1024, 0x0D);
+            byte[] bE = Helpers.GetBuffer(8 * 1024 * N_FACTOR + 1, 0x1A);
+            byte[] bF = Helpers.GetBuffer(16 * 1024 * N_FACTOR, 0x1B);
+            byte[] bG = Helpers.GetBuffer(14 * 1024 * N_FACTOR, 0x1C);
+            byte[] bH = Helpers.GetBuffer(12 * 1024 * N_FACTOR, 0x1D);
+            byte[] bE2 = Helpers.GetBuffer(8 * 1024 * N_FACTOR, 0x2A);
+            byte[] bMini = Helpers.GetBuffer(1027, 0xEE);
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -154,7 +151,7 @@ namespace OpenMcdf.PerfTest
 
                 for (int i = 0; i < 1000; i++)
                 {
-                    byte[] buffer = HelpersFromTests.GetBuffer(r.Next(100, 3500), 0x0A);
+                    byte[] buffer = Helpers.GetBuffer(r.Next(100, 3500), 0x0A);
 
                     if (i > 0)
                     {

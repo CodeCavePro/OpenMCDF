@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using NBench;
 
-namespace OpenMcdf.PerfTest
+namespace OpenMcdf.Test.Performance
 {
     public class PerfTest : PerformanceTestStuite<PerfTest>
     {

@@ -363,21 +363,14 @@ namespace OpenMcdf.Test
             //Test Phase 3
             using (var cfTest = new CompoundFile("6_Streams.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.Default))
             {
-                bool catched = false;
-
                 try
                 {
                     var testSt = cfTest.RootStorage.GetStream("D");
                 }
                 catch (Exception ex)
                 {
-                    if (ex is CFItemNotFound)
-                        catched = true;
+                    Assert.IsInstanceOf<CFItemNotFound>(ex);
                 }
-
-                Assert.IsTrue(catched);
-
-                catched = false;
 
                 try
                 {
@@ -385,13 +378,12 @@ namespace OpenMcdf.Test
                 }
                 catch (Exception ex)
                 {
-                    if (ex is CFItemNotFound)
-                        catched = true;
+                    Assert.IsInstanceOf<CFItemNotFound>(ex);
                 }
-
-                Assert.IsTrue(catched);
-
-                cfTest.Close(true);
+                finally
+                {
+                    cfTest.Close();
+                }
             }
 
             //##########
