@@ -263,79 +263,84 @@ namespace OpenMcdf.Test
             //############
 
             // Phase 1
-            var cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.SectorRecycle);
-            cf.RootStorage.AddStream("A").SetData(bA);
-            cf.Save("OneStream.cfs");
-            cf.Close();
+            using (var cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.SectorRecycle))
+            {
+                cf.RootStorage.AddStream("A").SetData(bA);
+                cf.Save("OneStream.cfs");
+                cf.Close();
+            }
 
             // Test Phase 1
-            var cfTest = new CompoundFile("OneStream.cfs");
-            CFStream testSt = cfTest.RootStorage.GetStream("A");
+            using (var cfTest = new CompoundFile("OneStream.cfs"))
+            {
+                CFStream testSt = cfTest.RootStorage.GetStream("A");
 
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bA.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bA, testSt.GetData()));
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bA.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bA, testSt.GetData()));
 
-            cfTest.Close();
+                cfTest.Close();
+            }
 
             //###########
 
             //Phase 2
-            cf = new CompoundFile("OneStream.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle);
+            using (var cf = new CompoundFile("OneStream.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle))
+            {
+                cf.RootStorage.AddStream("B").SetData(bB);
+                cf.RootStorage.AddStream("C").SetData(bC);
+                cf.RootStorage.AddStream("D").SetData(bD);
+                cf.RootStorage.AddStream("E").SetData(bE);
+                cf.RootStorage.AddStream("F").SetData(bF);
+                cf.RootStorage.AddStream("G").SetData(bG);
+                cf.RootStorage.AddStream("H").SetData(bH);
 
-            cf.RootStorage.AddStream("B").SetData(bB);
-            cf.RootStorage.AddStream("C").SetData(bC);
-            cf.RootStorage.AddStream("D").SetData(bD);
-            cf.RootStorage.AddStream("E").SetData(bE);
-            cf.RootStorage.AddStream("F").SetData(bF);
-            cf.RootStorage.AddStream("G").SetData(bG);
-            cf.RootStorage.AddStream("H").SetData(bH);
-
-            cf.Save("8_Streams.cfs");
-            cf.Close();
+                cf.Save("8_Streams.cfs");
+                cf.Close();
+            }
 
             // Test Phase 2
 
 
-            cfTest = new CompoundFile("8_Streams.cfs");
+            using (var cfTest = new CompoundFile("8_Streams.cfs"))
+            {
+                CFStream testSt = cfTest.RootStorage.GetStream("B");
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bB.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bB, testSt.GetData()));
 
-            testSt = cfTest.RootStorage.GetStream("B");
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bB.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bB, testSt.GetData()));
+                testSt = cfTest.RootStorage.GetStream("C");
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bC.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bC, testSt.GetData()));
 
-            testSt = cfTest.RootStorage.GetStream("C");
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bC.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bC, testSt.GetData()));
+                testSt = cfTest.RootStorage.GetStream("D");
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bD.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bD, testSt.GetData()));
 
-            testSt = cfTest.RootStorage.GetStream("D");
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bD.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bD, testSt.GetData()));
+                testSt = cfTest.RootStorage.GetStream("E");
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bE.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bE, testSt.GetData()));
 
-            testSt = cfTest.RootStorage.GetStream("E");
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bE.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bE, testSt.GetData()));
+                testSt = cfTest.RootStorage.GetStream("F");
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bF.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bF, testSt.GetData()));
 
-            testSt = cfTest.RootStorage.GetStream("F");
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bF.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bF, testSt.GetData()));
+                testSt = cfTest.RootStorage.GetStream("G");
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bG.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bG, testSt.GetData()));
 
-            testSt = cfTest.RootStorage.GetStream("G");
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bG.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bG, testSt.GetData()));
+                testSt = cfTest.RootStorage.GetStream("H");
+                Assert.IsNotNull(testSt);
+                Assert.IsTrue(testSt.Size == bH.Length);
+                Assert.IsTrue(Helpers.CompareBuffer(bH, testSt.GetData()));
 
-            testSt = cfTest.RootStorage.GetStream("H");
-            Assert.IsNotNull(testSt);
-            Assert.IsTrue(testSt.Size == bH.Length);
-            Assert.IsTrue(Helpers.CompareBuffer(bH, testSt.GetData()));
-
-            cfTest.Close();
-
+                cfTest.Close();
+            }
 
             File.Copy("8_Streams.cfs", "6_Streams.cfs", true);
             File.Delete("8_Streams.cfs");
@@ -343,50 +348,51 @@ namespace OpenMcdf.Test
             //###########
 
             Trace.Listeners.Add(new ConsoleTraceListener());
-            // Phase 3
-            cf = new CompoundFile("6_Streams.cfs", CFSUpdateMode.Update,
-                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
-            cf.RootStorage.Delete("D");
-            cf.RootStorage.Delete("G");
-            cf.Commit();
 
-            cf.Close();
+            // Phase 3
+            using (var cf = new CompoundFile("6_Streams.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors))
+            {
+                cf.RootStorage.Delete("D");
+                cf.RootStorage.Delete("G");
+                cf.Commit();
+
+                cf.Close();
+            }
 
             //Test Phase 3
-
-
-            cfTest = new CompoundFile("6_Streams.cfs");
-
-
-            bool catched = false;
-
-            try
+            using (var cfTest = new CompoundFile("6_Streams.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.Default))
             {
-                testSt = cfTest.RootStorage.GetStream("D");
+                bool catched = false;
+
+                try
+                {
+                    var testSt = cfTest.RootStorage.GetStream("D");
+                }
+                catch (Exception ex)
+                {
+                    if (ex is CFItemNotFound)
+                        catched = true;
+                }
+
+                Assert.IsTrue(catched);
+
+                catched = false;
+
+                try
+                {
+                    var testSt = cfTest.RootStorage.GetStream("G");
+                }
+                catch (Exception ex)
+                {
+                    if (ex is CFItemNotFound)
+                        catched = true;
+                }
+
+                Assert.IsTrue(catched);
+
+                cfTest.Close(true);
             }
-            catch (Exception ex)
-            {
-                if (ex is CFItemNotFound)
-                    catched = true;
-            }
-
-            Assert.IsTrue(catched);
-
-            catched = false;
-
-            try
-            {
-                testSt = cfTest.RootStorage.GetStream("G");
-            }
-            catch (Exception ex)
-            {
-                if (ex is CFItemNotFound)
-                    catched = true;
-            }
-
-            Assert.IsTrue(catched);
-
-            cfTest.Close();
 
             //##########
 
@@ -399,52 +405,66 @@ namespace OpenMcdf.Test
 
             Assert.IsTrue(new FileInfo("6_Streams_Shrinked.cfs").Length < new FileInfo("6_Streams.cfs").Length);
 
-            cfTest = new CompoundFile("6_Streams_Shrinked.cfs");
-            Action<CFItem> va = delegate(CFItem item)
+            using (var cfTest = new CompoundFile("6_Streams_Shrinked.cfs"))
             {
-                if (item.IsStream)
+                Action<CFItem> va = delegate(CFItem item)
                 {
-                    CFStream ia = item as CFStream;
-                    Assert.IsNotNull(ia);
-                    Assert.IsTrue(ia.Size > 0);
-                    byte[] d = ia.GetData();
-                    Assert.IsNotNull(d);
-                    Assert.IsTrue(d.Length > 0);
-                    Assert.IsTrue(d.Length == ia.Size);
-                }
-            };
+                    if (item.IsStream)
+                    {
+                        CFStream ia = item as CFStream;
+                        Assert.IsNotNull(ia);
+                        Assert.IsTrue(ia.Size > 0);
+                        byte[] d = ia.GetData();
+                        Assert.IsNotNull(d);
+                        Assert.IsTrue(d.Length > 0);
+                        Assert.IsTrue(d.Length == ia.Size);
+                    }
+                };
 
-            cfTest.RootStorage.VisitEntries(va, true);
-            cfTest.Close();
+                cfTest.RootStorage.VisitEntries(va, true);
+                cfTest.Close();
+            }
 
             //##########
 
             //Phase 5
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            cf.RootStorage.AddStream("ZZZ").SetData(bF);
-            cf.RootStorage.GetStream("E").Append(bE2);
-            cf.Commit();
-            cf.Close();
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
+                cf.RootStorage.AddStream("ZZZ").SetData(bF);
+                cf.RootStorage.GetStream("E").Append(bE2);
+                cf.Commit();
+                cf.Close();
+            }
 
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            cf.RootStorage.CLSID = new Guid("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-            cf.Commit();
-            cf.Close();
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
+                cf.RootStorage.CLSID = new Guid("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                cf.Commit();
+                cf.Close();
+            }
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            cf.RootStorage.AddStorage("MyStorage").AddStream("ZIP").Append(bE);
-            cf.Commit();
-            cf.Close();
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
+                cf.RootStorage.AddStorage("MyStorage").AddStream("ZIP").Append(bE);
+                cf.Commit();
+                cf.Close();
+            }
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            cf.RootStorage.AddStorage("AnotherStorage").AddStream("ANS").Append(bE);
-            cf.RootStorage.Delete("MyStorage");
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
+                cf.RootStorage.AddStorage("AnotherStorage").AddStream("ANS").Append(bE);
+                cf.RootStorage.Delete("MyStorage");
 
 
-            cf.Commit();
-            cf.Close();
+                cf.Commit();
+                cf.Close();
+            }
 
             //Test Phase 5
 
@@ -452,86 +472,107 @@ namespace OpenMcdf.Test
 
             //Phase 6
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            CFStorage root = cf.RootStorage;
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
+                CFStorage root = cf.RootStorage;
 
-            root.AddStorage("MiniStorage").AddStream("miniSt").Append(bMini);
+                root.AddStorage("MiniStorage").AddStream("miniSt").Append(bMini);
 
-            cf.RootStorage.GetStorage("MiniStorage").AddStream("miniSt2").Append(bMini);
-            cf.Commit();
-            cf.Close();
+                cf.RootStorage.GetStorage("MiniStorage").AddStream("miniSt2").Append(bMini);
+                cf.Commit();
+                cf.Close();
+            }
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            cf.RootStorage.GetStorage("MiniStorage").Delete("miniSt");
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
+                cf.RootStorage.GetStorage("MiniStorage").Delete("miniSt");
 
 
-            cf.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").Append(bE);
+                cf.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").Append(bE);
 
-            cf.Commit();
-            cf.Close();
+                cf.Commit();
+                cf.Close();
+            }
 
             //Test Phase 6
 
-            cfTest = new CompoundFile("6_Streams_Shrinked.cfs");
-            byte[] d2 = cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").GetData();
-            Assert.IsTrue(d2.Length == (bE.Length + bMini.Length));
-
-            int cnt = 1;
-            byte[] buf = new byte[cnt];
-            cnt = cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").Read(buf, bMini.Length, cnt);
-
-            Assert.IsTrue(cnt == 1);
-            Assert.IsTrue(buf[0] == 0x1A);
-
-            cnt = 1;
-            cnt = cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").Read(buf, bMini.Length - 1, cnt);
-            Assert.IsTrue(cnt == 1);
-            Assert.IsTrue(buf[0] == 0xEE);
-
-            try
+            using (var cfTest = new CompoundFile("6_Streams_Shrinked.cfs"))
             {
-                cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt");
-            }
-            catch (Exception ex)
-            {
-                Assert.IsTrue(ex is CFItemNotFound);
-            }
+                byte[] d2 = cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2")
+                    .GetData();
+                Assert.IsTrue(d2.Length == (bE.Length + bMini.Length));
 
-            cfTest.Close();
+                int cnt = 1;
+                byte[] buf = new byte[cnt];
+                cnt = cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2")
+                    .Read(buf, bMini.Length, cnt);
+
+                Assert.IsTrue(cnt == 1);
+                Assert.IsTrue(buf[0] == 0x1A);
+
+                cnt = 1;
+                cnt = cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2")
+                    .Read(buf, bMini.Length - 1, cnt);
+                Assert.IsTrue(cnt == 1);
+                Assert.IsTrue(buf[0] == 0xEE);
+
+                try
+                {
+                    cfTest.RootStorage.GetStorage("MiniStorage").GetStream("miniSt");
+                }
+                catch (Exception ex)
+                {
+                    Assert.IsTrue(ex is CFItemNotFound);
+                }
+
+                cfTest.Close();
+            }
 
             //##############
 
             //Phase 7
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
 
-            cf.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").SetData(bA);
-            cf.Commit();
-            cf.Close();
+                cf.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").SetData(bA);
+                cf.Commit();
+                cf.Close();
+            }
 
 
             //Test Phase 7
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            d2 = cf.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").GetData();
-            Assert.IsNotNull(d2);
-            Assert.IsTrue(d2.Length == bA.Length);
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
+            {
+                var d2 = cf.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2")
+                    .GetData();
+                Assert.IsNotNull(d2);
+                Assert.IsTrue(d2.Length == bA.Length);
 
-            cf.Close();
+                cf.Close();
+            }
 
             //##############
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle);
+            using (var cf = new CompoundFile("6_Streams_Shrinked.cfs",
+                CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle))
+            {
 
-            var myStream = cf.RootStorage.GetStream("C");
-            var data = myStream.GetData();
-            Console.WriteLine(data[0] + " : " + data[data.Length - 1]);
+                var myStream = cf.RootStorage.GetStream("C");
+                var data = myStream.GetData();
+                Console.WriteLine(data[0] + " : " + data[data.Length - 1]);
 
-            myStream = cf.RootStorage.GetStream("B");
-            data = myStream.GetData();
-            Console.WriteLine(data[0] + " : " + data[data.Length - 1]);
+                myStream = cf.RootStorage.GetStream("B");
+                data = myStream.GetData();
+                Console.WriteLine(data[0] + " : " + data[data.Length - 1]);
 
-            cf.Close();
+                cf.Close();
+            }
 
             sw.Stop();
             Console.WriteLine(sw.ElapsedMilliseconds);

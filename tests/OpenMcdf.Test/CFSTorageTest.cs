@@ -299,23 +299,26 @@ namespace OpenMcdf.Test
         [Test]
         public void Test_LAZY_LOAD_CHILDREN_()
         {
-            CompoundFile cf = new CompoundFile();
-            cf.RootStorage.AddStorage("Level_1")
-                .AddStorage("Level_2")
-                .AddStream("Level2Stream")
-                .SetData(Helpers.GetBuffer(100));
+            using (var cf = new CompoundFile())
+            {
+                cf.RootStorage.AddStorage("Level_1")
+                    .AddStorage("Level_2")
+                    .AddStream("Level2Stream")
+                    .SetData(Helpers.GetBuffer(100));
 
-            cf.Save("$Hel1");
+                cf.Save("$Hel1");
+                cf.Close();
+            }
 
-            cf.Close();
-
-            cf = new CompoundFile("$Hel1");
-            IList<CFItem> i = cf.GetAllNamedEntries("Level2Stream");
-            Assert.IsNotNull(i[0]);
-            Assert.IsTrue(i[0] is CFStream);
-            Assert.IsTrue((i[0] as CFStream).GetData().Length == 100);
-            cf.Save("$Hel2");
-            cf.Close();
+            using (var cf = new CompoundFile("$Hel1"))
+            {
+                IList<CFItem> i = cf.GetAllNamedEntries("Level2Stream");
+                Assert.IsNotNull(i[0]);
+                Assert.IsTrue(i[0] is CFStream);
+                Assert.IsTrue((i[0] as CFStream).GetData().Length == 100);
+                cf.Save("$Hel2");
+                cf.Close();
+            }
 
             if (File.Exists("$Hel1"))
             {
