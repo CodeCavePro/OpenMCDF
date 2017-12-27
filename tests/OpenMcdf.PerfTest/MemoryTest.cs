@@ -138,43 +138,45 @@ namespace OpenMcdf.PerfTest
         [CounterMeasurement("TestCounter")]
         [CounterTotalAssertion("TestCounter", MustBe.LessThanOrEqualTo, 5500.0d)] // max 5.5 sec
         [MemoryAssertion(MemoryMetric.TotalBytesAllocated, MustBe.LessThanOrEqualTo,
-            3 * 1024 * 1024)] // max 3 Mb in RAM
+            8 * 1024 * 1024)] // max 8 Mb in RAM
         public void PerfMem_MultipleStreamCommit()
         {
             File.Copy("report.xls", "reportOverwriteMultiple.xls", true);
 
-            CompoundFile cf = new CompoundFile("reportOverwriteMultiple.xls", CFSUpdateMode.Update,
-                CFSConfiguration.SectorRecycle);
-
-            Random r = new Random();
-
             Stopwatch sw = new Stopwatch();
-            sw.Start();
 
-            for (int i = 0; i < 1000; i++)
+            using (var cf = new CompoundFile("reportOverwriteMultiple.xls", CFSUpdateMode.Update,
+                CFSConfiguration.SectorRecycle))
             {
-                byte[] buffer = HelpersFromTests.GetBuffer(r.Next(100, 3500), 0x0A);
+                sw.Start();
 
-                if (i > 0)
+                Random r = new Random();
+
+                for (int i = 0; i < 1000; i++)
                 {
-                    if (r.Next(0, 100) > 50)
+                    byte[] buffer = HelpersFromTests.GetBuffer(r.Next(100, 3500), 0x0A);
+
+                    if (i > 0)
                     {
-                        cf.RootStorage.Delete("MyNewStream" + (i - 1).ToString());
+                        if (r.Next(0, 100) > 50)
+                        {
+                            cf.RootStorage.Delete("MyNewStream" + (i - 1).ToString());
+                        }
                     }
+
+                    CFStream addedStream = cf.RootStorage.AddStream("MyNewStream" + i.ToString());
+
+                    addedStream.SetData(buffer);
+
+                    // Random commit, not on single addition
+                    if (r.Next(0, 100) > 50)
+                        cf.Commit();
                 }
 
-                CFStream addedStream = cf.RootStorage.AddStream("MyNewStream" + i.ToString());
-
-                addedStream.SetData(buffer);
-
-                // Random commit, not on single addition
-                if (r.Next(0, 100) > 50)
-                    cf.Commit();
+                cf.Close();
+                sw.Stop();
             }
 
-            cf.Close();
-
-            sw.Stop();
             Console.WriteLine(sw.ElapsedMilliseconds);
 
             for (int i = 0; i < sw.ElapsedMilliseconds; i++)
