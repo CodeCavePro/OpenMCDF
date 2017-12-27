@@ -2,10 +2,13 @@ OpenMCDF
 ===========================
 **for .NET Framework and .NET Standard (including .NET Core)**
 
-[![NuGet](https://img.shields.io/nuget/dt/OpenMcdf-2.svg?label=.NET%20Framework%20downloads)](https://www.nuget.org/packages/OpenMcdf-2/)
-[![NuGet](https://img.shields.io/nuget/dt/OpenMcdf-2.NetStandard.svg?label=.NET%20Standard%20downloads)](https://www.nuget.org/packages/OpenMcdf-2.NetStandard/)
+[![NuGet downloads](https://img.shields.io/nuget/dt/OpenMcdf-2.svg?label=nuget%20downloads)](https://www.nuget.org/packages/OpenMcdf-2/)
+[![NuGet version](https://img.shields.io/nuget/v/OpenMcdf-2.svg)](https://www.nuget.org/packages/OpenMcdf-2/)
+[![Github All Releases](https://img.shields.io/github/downloads/CodeCavePro/OpenMCDF/total.svg?label=GitHub%20downloads)]()
 [![License](https://img.shields.io/github/license/CodeCavePro/OpenMCDF.svg)](https://github.com/CodeCavePro/OpenMCDF/blob/master/LICENSE.md)
-[![GitHub tag](https://img.shields.io/github/tag/CodeCavePro/OpenMCDF.svg)](https://github.com/CodeCavePro/OpenMCDF/tags)
+
+[![AppVeyor build](https://img.shields.io/appveyor/ci/salaros/openmcdf/master.svg?logo=appveyor)](https://ci.appveyor.com/project/salaros/openmcdf)
+[![AppVeyor test](https://img.shields.io/appveyor/tests/salaros/openmcdf.svg?logo=appveyor)](https://ci.appveyor.com/project/salaros/openmcdf)
 
 # Description
 
