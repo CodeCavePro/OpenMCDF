@@ -21,7 +21,7 @@ cache:
   - '%LocalAppData%\NuGet\v3-cache' # NuGet v3
 
 # Version format
-version: 2.1.1.{build}
+version: 2.1.1
 
 environment:
   VERSION_SIMPLE: '{version}'
@@ -32,21 +32,17 @@ environment:
 init:
 - ps: |
     $env:VERSION_SIMPLE = $env:APPVEYOR_BUILD_VERSION
-    $env:VERSION_INFORMATIONAL = $env:APPVEYOR_BUILD_VERSION.TrimEnd(".$env:APPVEYOR_BUILD_NUMBER")
+    $env:VERSION_INFORMATIONAL = $env:APPVEYOR_BUILD_VERSION
+    Write-Host "Starting with $env:APPVEYOR_BUILD_VERSION as base version and $env:VERSION_INFORMATIONAL as informational version";
 
     if ($env:APPVEYOR_REPO_TAG -eq "true" -and $env:APPVEYOR_REPO_TAG_NAME)
     {
         $env:VERSION_SUFFIX = $env:VERSION_SUFFIX_TAG
         $tag_version = $env:APPVEYOR_REPO_TAG_NAME.TrimStart("v")
         Write-Host "Building a tag: $tag_version";
-
-        if ($tag_version -match '([0-9]+[\.-][0-9]+[\.-][0-9]+([-A-Za-z0-9]+)?)')
+        if ($tag_version -match '^([0-9]+\.[0-9]+\.[0-9]+)$' -Or $tag_version -match '([0-9]+[\.-][0-9]+[\.-][0-9]+-[-A-Za-z0-9]+)') 
         {
-            $env:VERSION_INFORMATIONAL = $tag_version
-        }
-        if ($tag_version -match '^([0-9]+\.[0-9]+\.[0-9]+)$')
-        {
-            $env:VERSION_INFORMATIONAL = "$tag_version$env:VERSION_SUFFIX"
+            $env:VERSION_INFORMATIONAL = "$tag_version"
         }
     } 
     else
@@ -56,6 +52,8 @@ init:
 
     Update-AppveyorBuild -Version $env:VERSION_INFORMATIONAL
     Write-Host "Using build version: $env:APPVEYOR_BUILD_VERSION";
+
+configuration: Debug
 
 dotnet_csproj:
   patch: true
@@ -80,7 +78,7 @@ before_build:
 
 # To run your custom scripts instead of automatic MSBuild
 build_script:
-  - cmd: msbuild /t:Rebuild /p:Configuration=Debug
+  - cmd: msbuild /t:Rebuild /p:Configuration=%configuration%
 
 # NuGet files qualified as artifacts
 artifacts:
@@ -133,4 +131,6 @@ deploy:
 skip_non_tags: false
 
 # Turn off tests
-test: off
+test:
+  assemblies:
+    - 'bin\%configuration%\tests\*.dll'
