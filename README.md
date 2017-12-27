@@ -8,7 +8,7 @@ OpenMCDF
 [![License](https://img.shields.io/github/license/CodeCavePro/OpenMCDF.svg)](https://github.com/CodeCavePro/OpenMCDF/blob/master/LICENSE.md)
 
 [![AppVeyor build](https://img.shields.io/appveyor/ci/salaros/openmcdf/master.svg?logo=appveyor)](https://ci.appveyor.com/project/salaros/openmcdf)
-[![AppVeyor test](https://img.shields.io/appveyor/tests/salaros/openmcdf.svg?logo=appveyor)](https://ci.appveyor.com/project/salaros/openmcdf)
+[![AppVeyor test](https://img.shields.io/appveyor/tests/salaros/openmcdf.svg?logo=appveyor)](https://ci.appveyor.com/project/salaros/openmcdf/build/tests)
 
 # Description
 
